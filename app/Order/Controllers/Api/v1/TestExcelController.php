@@ -2,6 +2,7 @@
 
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Lib\Excel;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
@@ -156,6 +157,9 @@ class TestExcelController extends Controller
     }
 
     public function overdueDetail(){
+        LogApi::alert("test-email","错误数据",[
+            "limin@huishoubao.com.cn"
+        ]);die;
         $obj = new CronOverdue();
         $obj->detail();
         echo "success";

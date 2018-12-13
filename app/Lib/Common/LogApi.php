@@ -129,7 +129,12 @@ class LogApi {
 	 */
 	public static function alert( string $msg, $data=[], array $mail_list )
 	{
-		return self::log('Alert', $msg, $data, $mail_list);
+        if (config('app.env')   == 'production') {
+            return self::log('Alert', $msg, $data, $mail_list);
+        } else {
+            return self::log('Error', $msg, $data);
+        }
+
 	}
 	
 	/**
@@ -195,7 +200,7 @@ class LogApi {
 				'type'	=> $type,						// 数据类型
 				'key'	=> $key,						// 程序标记
 				'level' => $level,						// 级别
-				'level' => $mail_list,					// 邮件地址列表
+				'mail_list' => $mail_list,					// 邮件地址列表
 				'session_id' => session_id(),			// 回话
 				'user_id' => '',						// 用户ID
 				'serial_no' => self::_autoincrement(),	// 序号
@@ -216,7 +221,7 @@ class LogApi {
 			// 请求失败
 			if( Curl::getErrno() !=0 ){
 				$err_flag = true;
-				dispatch(new \App\Jobs\LogJob( '日志Api请求Curl状态错误 '.Curl::getError().' '.json_encode($_data) ));
+				//dispatch(new \App\Jobs\LogJob( '日志Api请求Curl状态错误 '.Curl::getError().' '.json_encode($_data) ));
 				$__data['message'] = '日志Api请求Curl错误';
 				$file = substr( $traces[1]['file'], strlen( __FILE__ ) );
 				$__data['data']['trace'] = $file.'('.__LINE__.'):'.__FUNCTION__;
@@ -245,7 +250,7 @@ class LogApi {
 			}
 			// 请求错误
 			if( $err_flag ){
-				dispatch(new \App\Jobs\LogJob( '日志错误 '.$__data['message'] ));
+				//dispatch(new \App\Jobs\LogJob( '日志错误 '.$__data['message'] ));
 				$__data['data']['id'] = 'LogApi';
 				$__data['data']['type'] = 'api-error';
 				$__data['data']['level'] = 'Error';
@@ -253,7 +258,7 @@ class LogApi {
 				\Illuminate\Support\Facades\Redis::PUBLISH('zuji.log.publish', json_encode( $__data ) );
 			}
 		} catch (\Exception $exc) {
-			dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_data) ));
+			//dispatch(new \App\Jobs\LogJob( '日志错误 '.$exc->getMessage().' '.json_encode($_data) ));
 		}
 
 		

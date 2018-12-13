@@ -38,6 +38,7 @@ class OrderBlock {
      */
     public static function orderPushBlock( string $order_no, string $orderBlockNode ): int{
 
+        return 0;
         // 订单编号
         $data = [];
 
@@ -204,7 +205,7 @@ class OrderBlock {
         $accountId = 'DCODMVCN';
 
         $notaryApp = new \App\Lib\Alipay\Notary\NotaryApp($accountId);
-
+        try{
         // 开启存证事务
         if( !$notaryApp->startTransactionByBusiness($order_no, '') ){
             // 用户实名身份信息
@@ -217,9 +218,6 @@ class OrderBlock {
                 return 100;
             }
         }
-
-
-        try{
 
             // 创建 文本存证
             $notary = $notaryApp->createTextNotary( $notary_content, $orderBlockNode );

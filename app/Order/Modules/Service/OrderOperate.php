@@ -1003,7 +1003,7 @@ class OrderOperate
         $jianmian = ($orderInfo['goods_yajin']-$orderInfo['order_yajin'])*100;
         //请求押金接口
         try{
-            $yajin = Yajin::MianyajinReduce(['user_id'=>$userId,'jianmian'=>$jianmian,'order_no'=>$orderNo]);
+            $yajin = Yajin::MianyajinReduce(['user_id'=>$userId,'jianmian'=>$jianmian,'order_no'=>$orderNo,'appid'=>$orderInfo['appid']]);
         }catch (\Exception $e){
             LogApi::error(config('app.env')."[orderYajinReduce] Yajin-interface-error-".$orderNo.":".$e->getMessage());
             return  ApiStatus::CODE_31006;
@@ -1045,7 +1045,7 @@ class OrderOperate
      * 取消订单
      * Author: heaven
      * @param $orderNo 订单编号
-     * @param string $userId 用户id
+     * @param string $userInfo 数组
      * @return bool|string
      */
     public static function cancelOrder($orderNo,$userInfo='',$reasonId = '', $resonText='')
@@ -1173,7 +1173,7 @@ class OrderOperate
 
             if ($orderCouponData) {
                 $coupon_id = array_column($orderCouponData, 'coupon_id');
-                $success =  Coupon::setCoupon(['user_id'=>$userId ,'coupon_id'=>$coupon_id]);
+                $success =  Coupon::setCoupon(['user_id'=>$userId ,'coupon_id'=>$coupon_id],$orderInfoData['appid']);
 
                 if ($success) {
                     LogApi::alert("CancelOrder:恢复优惠券失败",$orderCouponData,[config('web.order_warning_user')]);
@@ -1883,10 +1883,7 @@ class OrderOperate
 
                //处于租期中，获取剩余未支付租金
                if($values['goods_status']>=Inc\OrderGoodStatus::RENTING_MACHINE) {
-                   $where = array();
-                   $where[] = ['status','=', \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID];
-                   $where[] = ['goods_no','=',$values['goods_no']];
-                   $instaulment = OrderGoodsInstalmentRepository::getSumAmount($where);
+                   $instaulment = OrderGoodsInstalmentRepository::getSumAmount($values['goods_no']);
                    if ($instaulment){
 
                        $goodsList[$keys]['left_zujin'] = $instaulment['amount'];
@@ -2063,6 +2060,10 @@ class OrderOperate
                 //是否已经操作过保险
 
                 if ($orderListArray['data'][$values['order_no']]['order_status']==Inc\OrderStatus::OrderInService) {
+                    if ($orderListArray['data'][$values['order_no']]['pay_type'] == Inc\PayInc::FlowerFundauth)
+                    {
+                        $goodsList[$keys]['goods_yajin'];
+                    }
 
                     $insuranceData = self::getInsuranceInfo(['order_no'  => $values['order_no'] , 'goods_no'=>$values['goods_no']],array('type'));
                     if ($insuranceData){
