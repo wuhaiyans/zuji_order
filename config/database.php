@@ -249,7 +249,7 @@ return [
             'password' => env('REDIS_PASSWORD', null),
             'port' => env('REDIS_PORT', 6379),
             'database' => 0,
-            'prefix' => menv('REDIS_PREFIX', ''),
+            'prefix' => env('REDIS_PREFIX', ''),
             'timeout'=>8*3600,
             'read_timeout'=>8*3600,
             'read_write_timeout'=>8*3600,
