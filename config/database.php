@@ -221,15 +221,39 @@ return [
     |
     */
 
+//    'redis' => [
+//
+//        'client' => 'predis',
+//
+//        'default' => [
+//            'host' => env('REDIS_HOST', '127.0.0.1'),
+//            'password' => env('REDIS_PASSWORD', null),
+//            'port' => env('REDIS_PORT', 6379),
+//            'database' => 0,
+//        ],
+//
+//    ],
+
+
     'redis' => [
 
-        'client' => 'predis',
-
+        'client' => 'phpredis',
+        'options'=>[
+            'timeout'=>8*3600,
+            'read_timeout'=>8*3600,
+            'read_write_timeout'=>8*3600,
+            'persistent'=>true
+        ],
         'default' => [
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'password' => env('REDIS_PASSWORD', null),
             'port' => env('REDIS_PORT', 6379),
             'database' => 0,
+            'prefix' => menv('REDIS_PREFIX', ''),
+            'timeout'=>8*3600,
+            'read_timeout'=>8*3600,
+            'read_write_timeout'=>8*3600,
+            'persistent'=>true
         ],
 
     ],
