@@ -596,7 +596,8 @@ class PayController extends Controller
 		$params = json_decode($input,true);
 
 
-
+		LogApi::info('[fundauthToPayNotify]分期转支付回调接口回调参数:'.$params);
+		
 		$rule = [
 			"status"=>'required',          //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
 			"trade_no"=>'required',        //类型：String  必有字段  备注：支付平台交易码
