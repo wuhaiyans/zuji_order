@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Order\Controllers\Api\v1;
+use App\Console\Commands\ImportOtherUser;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\Excel;
@@ -157,11 +158,12 @@ class TestExcelController extends Controller
     }
 
     public function overdueDetail(){
-        LogApi::alert("test-email","错误数据",[
-            "limin@huishoubao.com.cn"
-        ]);die;
+
+        ImportOtherUser::getDefaultName();
+
         $obj = new CronOverdue();
         $obj->detail();
         echo "success";
     }
+
 }
