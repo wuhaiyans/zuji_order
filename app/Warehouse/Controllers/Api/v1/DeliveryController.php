@@ -655,7 +655,7 @@ class DeliveryController extends Controller
         }
 
         $request = request()->input();
-        $user = json_decode($request['userinfo'], true);
+        $user = $request['userinfo'];
 
         try {
             DB::beginTransaction();
