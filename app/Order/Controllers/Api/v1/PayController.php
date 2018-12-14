@@ -593,29 +593,32 @@ class PayController extends Controller
 	 */
 	public function fundauthToPayNotify(){
 		$input = file_get_contents("php://input");
-		LogApi::info('[fundauthToPayNotify]分期转支付回调接口回调参数:'.$input);
+		LogApi::info('[fundauthToPayNotify]预授权转支付回调接口回调参数:'.$input);
 
 		$params = json_decode($input,true);
 
 
-		LogApi::info('[fundauthToPayNotify]分期转支付回调接口回调参数:'.$params);
+		LogApi::info('[fundauthToPayNotify]预授权转支付回调接口回调参数:'.$params);
 
-		$rule = [
-			"status"=>'required',          //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
-			"trade_no"=>'required',        //类型：String  必有字段  备注：支付平台交易码
-			"out_trade_no"=>'required',    //类型：String  必有字段  备注：业务系统交易码
-		];
-
-		$validateParams = $this->validateParams($rule,$params);
-		if ($validateParams['code'] != 0) $this->innerErrMsg($validateParams['msg']);
-		if ($params['status'] != 'success'){
-			LogApi::error(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'预授权转支付失败');
+		if( is_null($params) ){
+			LogApi::info('[fundauthToPayNotify]预授权转支付回调逻辑参数为空', $params);
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is null',
+			]);exit;
+		}
+		if( !is_array($params) ){
+			LogApi::info('[fundauthToPayNotify]预授权转支付回调逻辑参数不是数组', $params);
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is array',
+			]);exit;
 		}
 
 		try{
 			// 开启事务
 			DB::beginTransaction();
-			LogApi::info('[fundauthToPayNotify]分期转支付回调接口回调参数:'.$params);
+			LogApi::info('[fundauthToPayNotify]预授权转支付回调接口回调参数:'.$params);
 			$b = \App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
 
 			LogApi::info('[fundauthToPayNotify]进入分期预授权转支付回调逻辑：分期更新支付状态和支付时间，返回的结果', $b);
