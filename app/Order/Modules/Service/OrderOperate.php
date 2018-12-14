@@ -1959,7 +1959,7 @@ class OrderOperate
 
                    //无分期或者分期已全部还完不出现提前还款按钮
                    $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
-                   if (empty($orderInstalmentData)){
+                   if (empty($orderInstalmentData) || $payType==Inc\PayInc::FlowerFundauth){
                        $goodsList[$keys]['act_goods_state']['prePay_btn'] = false;
                    }
 
