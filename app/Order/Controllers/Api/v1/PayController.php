@@ -613,7 +613,7 @@ class PayController extends Controller
 			// 开启事务
 			DB::beginTransaction();
 			LogApi::info('[fundauthToPayNotify]分期转支付回调接口回调参数:'.$params);
-			$b = true;//\App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
+			$b = \App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
 
 			LogApi::info('[fundauthToPayNotify]进入分期预授权转支付回调逻辑：分期更新支付状态和支付时间，返回的结果', $b);
 			if( $b ){
