@@ -120,7 +120,7 @@ class ActivityComponnet implements OrderCreater
             $destine = ExperienceDestine::getByNo($this->destineNo);
             $isStudent = isset($data['risk']['is_chsi'])&&$data['risk']['is_chsi']?1:0;  //判断是否是学生
             //更新 预约单状态
-            $b = $destine->updateDestineForOrder(strtotime($data['sku'][0]['end_time']),$isStudent);
+            $b = $destine->updateDestineForOrder(strtotime($data['sku'][0]['end_time'])+24*3600-1,$isStudent);
             if(!$b){
                 LogApi::error(config('app.env')."OrderCreate-UpdateDestine-error-".$this->destineNo);
                 $this->getOrderCreater()->setError("OrderCreate-UpdateDestine-error");
