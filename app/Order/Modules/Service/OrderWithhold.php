@@ -25,13 +25,17 @@ class OrderWithhold
             return false;
         }
 
-        $remark         = "还机代扣剩余分期";
-
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
         if( !is_array($instalmentInfo)){
             return false;
         }
+
+        if($instalmentInfo['status'] != OrderInstalmentStatus::UNPAID || $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
+            LogApi::error("[giveBackWihthold]分期 不允许扣款");
+            return false;
+        }
+
         // 生成交易码
         $business_no = createNo();
         // 扣款交易码
@@ -63,6 +67,19 @@ class OrderWithhold
         $amount = $instalmentInfo['amount'] * 100;
         if( $amount<0 ){
             LogApi::error("[giveBackWihthold]扣款金额不能小于1分");
+            return false;
+        }
+
+        $remark         = "还机代扣剩余分期";
+
+        // 保存 备注，更新状态
+        $data = [
+            'remark'        => $remark,
+            'status'        => OrderInstalmentStatus::PAYING,// 扣款中
+        ];
+        $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
+        if(!$result){
+            LogApi::error("[giveBackWihthold]扣款备注保存失败");
             return false;
         }
 
@@ -154,16 +171,6 @@ class OrderWithhold
                 }
 
         }else {
-            // 保存 备注，更新状态
-            $data = [
-                'remark'        => $remark,
-                'status'        => OrderInstalmentStatus::PAYING,// 扣款中
-            ];
-            $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
-            if(!$result){
-                LogApi::error("[giveBackWihthold]扣款备注保存失败");
-                return false;
-            }
 
             // 代扣协议编号
             $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
