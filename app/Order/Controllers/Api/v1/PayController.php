@@ -593,13 +593,14 @@ class PayController extends Controller
 	 */
 	public function fundauthToPayNotify(){
 		$input = file_get_contents("php://input");
-		LogApi::info(__method__.'[cleanAccount回调预授权转支付]分期转支付回调接口回调参数:'.$input);
 		$params = json_decode($input,true);
+
+
+
 		$rule = [
 			"status"=>'required',          //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
 			"trade_no"=>'required',        //类型：String  必有字段  备注：支付平台交易码
 			"out_trade_no"=>'required',    //类型：String  必有字段  备注：业务系统交易码
-			"fundauth_no"=>'required',     //类型：String  必有字段  备注：支付平台授权
 		];
 
 		$validateParams = $this->validateParams($rule,$params);
@@ -611,8 +612,8 @@ class PayController extends Controller
 		try{
 			// 开启事务
 			DB::beginTransaction();
-
-			$b = \App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
+			LogApi::info('[fundauthToPayNotify]分期转支付回调接口回调参数:'.$params);
+			$b = true;//\App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
 
 			LogApi::info('[fundauthToPayNotify]进入分期预授权转支付回调逻辑：分期更新支付状态和支付时间，返回的结果', $b);
 			if( $b ){
