@@ -585,6 +585,63 @@ class PayController extends Controller
 		
 	}
 
+	/**
+	 * 资金预授权转支付通知
+	 * Author: heaven
+	 * @param Request $request
+	 * @return \Illuminate\Http\JsonResponse
+	 */
+	public function fundauthToPayNotify(){
+		$input = file_get_contents("php://input");
+		LogApi::info(__method__.'[cleanAccount回调预授权转支付]分期转支付回调接口回调参数:'.$input);
+		$params = json_decode($input,true);
+		$rule = [
+			"status"=>'required',          //类型：String  必有字段  备注：init：初始化；success：成功；failed：失败；finished：完成；closed：关闭； processing：处理中；
+			"trade_no"=>'required',        //类型：String  必有字段  备注：支付平台交易码
+			"out_trade_no"=>'required',    //类型：String  必有字段  备注：业务系统交易码
+			"fundauth_no"=>'required',     //类型：String  必有字段  备注：支付平台授权
+		];
+
+		$validateParams = $this->validateParams($rule,$params);
+		if ($validateParams['code'] != 0) $this->innerErrMsg($validateParams['msg']);
+		if ($params['status'] != 'success'){
+			LogApi::error(__METHOD__.'() '.microtime(true).'返回结果:'.$input.'预授权转支付失败');
+		}
+
+		try{
+			// 开启事务
+			DB::beginTransaction();
+
+			$b = \App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
+
+			LogApi::info('[fundauthToPayNotify]进入分期预授权转支付回调逻辑：分期更新支付状态和支付时间，返回的结果', $b);
+			if( $b ){
+				// 提交事务
+				DB::commit();
+				echo json_encode([
+					'status' => 'ok',
+					'msg' => "预授权转支付扣款通知处理成功",
+				]);exit;
+
+			}else{
+				// 提交事务
+				DB::rollback();
+				echo json_encode([
+					'status' => 'error',
+					'msg' => "异步回调处理错误",
+				]);exit;
+			}
+
+
+		} catch (\Exception $e) {
+			DB::rollBack();
+			LogApi::error(__method__.'[fundauthToPayNotify回调预授权转支付]回调接口异常 ', [$e,$params]);
+			$this->innerErrMsg(__METHOD__ . "()预授权转支付回调接口异常 " .$e->getMessage());
+
+		}
+
+	}
+
    /**
      * 订单清算退款回调地址
      * Author: heaven

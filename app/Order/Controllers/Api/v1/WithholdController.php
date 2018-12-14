@@ -279,6 +279,7 @@ class WithholdController extends Controller
             // 花呗支付方式 扣除押金 - 扣除预授权 金额
             if($orderInfo['zuqi_type'] != OrderStatus::ZUQI_TYPE_DAY){
                 LogApi::error('[fundauth_createpay]花呗分期代扣押金 只支持短租：'.$subject);
+                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 return apiResponse([], ApiStatus::CODE_71006, '扣款失败');
             }
 
@@ -296,7 +297,7 @@ class WithholdController extends Controller
                     'out_trade_no'	=> $business_no,            //业务系统授权码
                     'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount'		=> $amount,                 //交易金额；单位：分
-                    'back_url'		=> $backUrl,                //后台通知地址
+                    'back_url'		=> config('app.url') . "/order/pay/fundauthToPayNotify",//后台通知地址
                     'user_id'		=> $orderInfo['user_id'],   //用户id
                     'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
                 ];
@@ -547,7 +548,7 @@ class WithholdController extends Controller
                         'out_trade_no'	=> $business_no,            //业务系统授权码
                         'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
                         'amount'		=> $amount,                 //交易金额；单位：分
-                        'back_url'		=> $backUrl,                //后台通知地址
+                        'back_url'		=> config('app.url') . "/order/pay/fundauthToPayNotify",//后台通知地址
                         'user_id'		=> $orderInfo['user_id'],   //用户id
                         'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
                     ];
@@ -892,7 +893,7 @@ class WithholdController extends Controller
                         'out_trade_no'	=> $business_no,            //业务系统授权码
                         'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
                         'amount'		=> $amount,                 //交易金额；单位：分
-                        'back_url'		=> $backUrl,                //后台通知地址
+                        'back_url'		=> config('app.url') . "/order/pay/fundauthToPayNotify",//后台通知地址
                         'user_id'		=> $orderInfo['user_id'],   //用户id
                         'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
                     ];
