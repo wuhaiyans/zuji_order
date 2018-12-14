@@ -593,12 +593,9 @@ class PayController extends Controller
 	 */
 	public function fundauthToPayNotify(){
 		$input = file_get_contents("php://input");
-		LogApi::info('[fundauthToPayNotify]预授权转支付回调接口回调参数:'.$input);
+		LogApi::info('[fundauthToPayNotify]分期转支付回调接口回调参数:'.$input);
 
 		$params = json_decode($input,true);
-
-
-		LogApi::info('[fundauthToPayNotify]预授权转支付回调接口回调参数:'.$params);
 
 		if( is_null($params) ){
 			LogApi::info('[fundauthToPayNotify]预授权转支付回调逻辑参数为空', $params);
@@ -618,7 +615,7 @@ class PayController extends Controller
 		try{
 			// 开启事务
 			DB::beginTransaction();
-			LogApi::info('[fundauthToPayNotify]预授权转支付回调接口回调参数:'.$params);
+
 			$b = \App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
 
 			LogApi::info('[fundauthToPayNotify]进入分期预授权转支付回调逻辑：分期更新支付状态和支付时间，返回的结果', $b);
