@@ -66,6 +66,17 @@ class OrderWithhold
             return false;
         }
 
+        // 保存 备注，更新状态
+        $data = [
+            'remark'        => $remark,
+            'status'        => OrderInstalmentStatus::PAYING,// 扣款中
+        ];
+        $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
+        if(!$result){
+            LogApi::error("[giveBackWihthold]扣款备注保存失败");
+            return false;
+        }
+
         $backUrl = config('app.url') . "/order/pay/withholdCreatePayNotify";
 
         //判断支付方式
@@ -154,16 +165,6 @@ class OrderWithhold
                 }
 
         }else {
-            // 保存 备注，更新状态
-            $data = [
-                'remark'        => $remark,
-                'status'        => OrderInstalmentStatus::PAYING,// 扣款中
-            ];
-            $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
-            if(!$result){
-                LogApi::error("[giveBackWihthold]扣款备注保存失败");
-                return false;
-            }
 
             // 代扣协议编号
             $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
