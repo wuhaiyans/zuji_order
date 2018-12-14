@@ -25,13 +25,17 @@ class OrderWithhold
             return false;
         }
 
-        $remark         = "还机代扣剩余分期";
-
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
         if( !is_array($instalmentInfo)){
             return false;
         }
+
+        if($instalmentInfo['status'] != OrderInstalmentStatus::UNPAID || $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
+            LogApi::error("[giveBackWihthold]分期 不允许扣款");
+            return false;
+        }
+
         // 生成交易码
         $business_no = createNo();
         // 扣款交易码
@@ -65,6 +69,8 @@ class OrderWithhold
             LogApi::error("[giveBackWihthold]扣款金额不能小于1分");
             return false;
         }
+
+        $remark         = "还机代扣剩余分期";
 
         // 保存 备注，更新状态
         $data = [
