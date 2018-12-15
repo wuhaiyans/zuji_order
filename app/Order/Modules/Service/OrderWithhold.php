@@ -31,10 +31,11 @@ class OrderWithhold
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
         if( !is_array($instalmentInfo)){
+            LogApi::error("[giveBackWihthold]订单不存在".$instalmentId);
             return false;
         }
 
-        if($instalmentInfo['status'] != OrderInstalmentStatus::UNPAID || $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
+        if($instalmentInfo['status'] != OrderInstalmentStatus::UNPAID && $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
             LogApi::error("[giveBackWihthold]分期 不允许扣款");
             return false;
         }
