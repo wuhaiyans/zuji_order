@@ -126,7 +126,7 @@ class OrderGoodsInstalmentRepository
         }
 
         $result =  OrderGoodsInstalment::query()
-            ->select('order_goods_instalment.*','order_info.mobile')
+            ->select('order_goods_instalment.*','order_info.mobile','order_info.pay_type as order_pay_type')
             ->where($whereArray)
             ->whereIn('order_goods_instalment.status',$statusArr)
             ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
@@ -138,7 +138,14 @@ class OrderGoodsInstalmentRepository
 			->orderBy('order_goods_instalment.times','ASC')
             ->get();
         if (!$result) return false;
-        return $result->toArray();
+        $instalmentList =  $result->toArray();
+
+        // 订单支付方式
+        foreach($instalmentList as &$item){
+            $item['order_pay_type'] = \App\Order\Modules\Inc\PayInc::getPayName($item['order_pay_type']);
+        }
+
+        return $instalmentList;
     }
 
 

@@ -162,8 +162,8 @@ class OrderBuyout implements UnderLine {
             'username'=>$orderInfo['realname'],
             'type'=>\App\Lib\PublicInc::Type_System,
             'order_no'=>$orderInfo['order_no'],
-            'title'=>"买断支付成功",
-            'msg'=>"支付完成",
+            'title'=>"线下买断支付成功",
+            'msg'=>"线下支付完成",
         ];
         $goodsLog = [
             'order_no'=>$buyout['order_no'],
@@ -171,7 +171,7 @@ class OrderBuyout implements UnderLine {
             'business_key'=> OrderStatus::BUSINESS_BUYOUT,//此处用常量
             'business_no'=>$buyout['buyout_no'],
             'goods_no'=>$buyout['goods_no'],
-            'msg'=>'买断支付成功',
+            'msg'=>'线下买断支付成功',
         ];
         self::log($orderLog,$goodsLog);
 
@@ -225,16 +225,16 @@ class OrderBuyout implements UnderLine {
                 'username'=>$orderInfo['realname'],
                 'type'=>\App\Lib\PublicInc::Type_System,
                 'order_no'=>$orderInfo['order_no'],
-                'title'=>"买断完成",
+                'title'=>"线下买断完成",
                 'msg'=>"无押金直接买断完成",
             ];
             $goodsLog = [
                 'order_no'=>$buyout['order_no'],
-                'action'=>'用户买断完成',
+                'action'=>'线下用户买断完成',
                 'business_key'=> OrderStatus::BUSINESS_BUYOUT,//此处用常量
                 'business_no'=>$buyout['buyout_no'],
                 'goods_no'=>$buyout['goods_no'],
-                'msg'=>'买断完成',
+                'msg'=>'线下买断完成',
             ];
             self::log($orderLog,$goodsLog);
         }
@@ -258,7 +258,6 @@ class OrderBuyout implements UnderLine {
             LogApi::info("offline-buyout","更新商品失败");
             throw new \Exception("更新商品失败");
         }
-        LogApi::info("offline-buyout","成功");
         return true;
     }
     static function log($orderLog,$goodsLog){

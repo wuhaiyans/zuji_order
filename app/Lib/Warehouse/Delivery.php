@@ -343,7 +343,11 @@ class Delivery
     {
 
       $response =\App\Lib\Order\Delivery::delivery($orderDetail, $goods_info,$operatorInfo);
-
+      LogApi::info("OrderDelivery-request:".$orderDetail['order_no'],[
+          'order_info'=>$orderDetail,
+          'goods_info'=>$goods_info,
+          'operator_info'=>$operatorInfo,
+      ]);
       $response =json_decode($response,true);
       if($response['code']!=ApiStatus::CODE_0){
           LogApi::error("OrderDelivery-Request:",[
@@ -355,6 +359,7 @@ class Delivery
           LogApi::error("OrderDelivery-Response:",$response);
           return false;
       }
+      LogApi::info("OrderDelivery-request:".$orderDetail['order_no'],$response);
       return true;
     }
 

@@ -332,7 +332,11 @@ class OrderCreater
             $totalAmount =normalizeNum($amount+$insurance);
 
             $schemaData['sku'][$key]['instalment_total_amount'] = $totalAmount;
-            
+
+            //固定优惠券 每期金额
+            $month = intval($amount/$zuqi);
+            //除不尽的放到首月
+            $first = $amount-$month*$zuqi+$month;
             //代扣+预授权 ，小程序发的分期信息
             if ($payType == PayInc::WithhodingPay || $payType == PayInc::MiniAlipay || $payType == PayInc::FlowerFundauth) {
                 if ($schemaData['order']['zuqi_type'] == 1) {
@@ -360,14 +364,26 @@ class OrderCreater
                     $schemaData['sku'][$key]['first_amount'] = normalizeNum(($amount+$insurance)/$zuqi); //首期支付金额
                 }
             }
-            //其他支付方式
-            else {
+            //支付宝小程序支付
+            elseif ($payType == PayInc::MiniAlipay){
+
                 if ($schemaData['order']['zuqi_type'] == 1) {
                     $schemaData['sku'][$key]['month_amount'] = $totalAmount;
                     $schemaData['sku'][$key]['first_amount'] = $totalAmount;
                 } else {
                     $schemaData['sku'][$key]['month_amount'] = normalizeNum(($amount+$insurance)/$zuqi); //每期支付金额
                     $schemaData['sku'][$key]['first_amount'] = normalizeNum(($amount+$insurance)/$zuqi); //首期支付金额
+                }
+
+            }
+            //其他支付方式
+            else {
+                if ($schemaData['order']['zuqi_type'] == 1) {
+                    $schemaData['sku'][$key]['month_amount'] = $totalAmount;
+                    $schemaData['sku'][$key]['first_amount'] = $totalAmount;
+                } else {
+                    $schemaData['sku'][$key]['month_amount'] = normalizeNum($month); //每期支付金额
+                    $schemaData['sku'][$key]['first_amount'] = normalizeNum($first+$insurance);; //首期支付金额+碎屏险
                 }
             }
         }

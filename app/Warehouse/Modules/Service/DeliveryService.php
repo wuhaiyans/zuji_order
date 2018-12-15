@@ -1,6 +1,6 @@
 <?php
 /**
- * User: wansq
+ * User: wangjinlin
  * Date: 2018/5/9
  * Time: 14:36
  */
@@ -12,10 +12,13 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Warehouse\Config;
 use App\Warehouse\Models\Delivery;
 use App\Warehouse\Models\DeliveryGoods;
+use App\Warehouse\Models\DeliveryGoodsImei;
 use App\Warehouse\Models\Imei;
+use App\Warehouse\Models\ImeiLog;
 use App\Warehouse\Modules\Func\WarehouseHelper;
 use App\Warehouse\Modules\Repository\DeliveryRepository;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 class DeliveryService
 {
@@ -365,8 +368,21 @@ class DeliveryService
                 $it['buttons']['confirm_receive'] = false;
             }
 
-            $it['buttons']['match'] = $item->status == Delivery::STATUS_INIT ? true : false;//配货
-            $it['buttons']['delivery'] = $item->status == Delivery::STATUS_WAIT_SEND ? true : false; //发货
+            if($params['channel_id']){
+                $it['buttons']['match'] = false;//配货
+                $it['buttons']['delivery'] = false; //发货
+                $it['buttons']['already_match'] = false;//已配货
+                if($item->status == Delivery::STATUS_INIT || $item->status == Delivery::STATUS_WAIT_SEND){
+                    $it['buttons']['channel'] = true;//渠道自己的发货
+                }else{
+                    $it['buttons']['channel'] = false;//渠道自己的发货
+                }
+            }else{
+                $it['buttons']['match'] = $item->status == Delivery::STATUS_INIT ? true : false;//配货
+                $it['buttons']['delivery'] = $item->status == Delivery::STATUS_WAIT_SEND ? true : false; //发货
+                $it['buttons']['already_match'] = $item->status == Delivery::STATUS_WAIT_SEND ? true : false;//已配货
+                $it['buttons']['channel'] = false;//渠道自己的发货
+            }
 
             //取消发货(一期不做先注释)
             //if($item->status == Delivery::STATUS_INIT || Delivery::STATUS_WAIT_SEND){
@@ -375,8 +391,6 @@ class DeliveryService
             //    $it['buttons']['cancel_delivery'] = false;
             //}
             $it['buttons']['cancel_delivery'] = false;
-
-            $it['buttons']['already_match'] = $item->status == Delivery::STATUS_WAIT_SEND ? true : false;//已配货
 
             array_push($result, $it);
         }
@@ -530,6 +544,79 @@ class DeliveryService
     public static function statistics($status = Delivery::STATUS_WAIT_SEND)
     {
         return Delivery::where(['status'=>$status])->count();
+    }
+
+    /**
+     * 渠道商发货
+     */
+    public static function channelSend($params)
+    {
+        $goods_model = DeliveryGoods::where([
+            'delivery_no'=>$params['delivery_no'],
+            'goods_no'=>$params['goods_no']
+        ])->first();
+        if (!$goods_model) {
+            throw new NotFoundResourceException('发货商品清单不存在');
+        }
+
+        //插入IMEI
+        $imei_id = Imei::insertGetId([
+            'imei'=>$params['imei'],
+            'apple_serial'=>isset($params['apple_serial'])??'',
+            'price'=>isset($params['price'])??0,
+            'status'=>'2',
+            'create_time'=>time(),
+            'update_time'=>time()
+        ]);
+
+        if (!$imei_id) {
+            throw new NotFoundResourceException('插入IMEI失败');
+        }
+
+        $delivery_model = Delivery::where(['delivery_no'=>$params['delivery_no']])->first();
+        //插入imei日志
+        ImeiLog::insert([
+            'imei'=>$params['imei'],
+            'type'=>ImeiLog::STATUS_OUT,
+            'create_time'=>time(),
+            'order_no'=>$delivery_model->order_no,
+            'imei_id'=>$imei_id,
+            'zuqi'=>$goods_model->zuqi,
+            'zuqi_type'=>$goods_model->zuqi_type,
+        ]);
+
+        //更新发货单状态
+        $delivery_model->logistics_id = $params['logistics_id']??0;
+        $delivery_model->logistics_no = $params['logistics_no']??0;
+        $delivery_model->status = Delivery::STATUS_SEND;
+        $delivery_model->delivery_time = time();
+        $delivery_model->logistics_note = '渠道商发货';
+        $delivery_model->status_time = time();
+        if(!$delivery_model->save()){
+            throw new NotFoundResourceException('更新发货单状态失败');
+        }
+
+        $imei_data = [
+            'delivery_no'   => $params['delivery_no'],
+            'goods_no'      => $params['goods_no'],
+            'status'        => DeliveryGoodsImei::STATUS_YES,
+            'imei'          => $params['imei'],
+            'apple_serial'  => $params['apple_serial'],
+            'price'         => $params['price'],
+            'create_time'   => time()
+        ];
+        #goods_imei表添加
+        if(!DeliveryGoodsImei::insert($imei_data)){
+            throw new NotFoundResourceException('goods_imei添加失败');
+        }
+
+        //修改发货商品清单
+        $goods_model->status = DeliveryGoods::STATUS_ALL;
+        $goods_model->status_time = time();
+        if(!$goods_model->save()){
+            throw new NotFoundResourceException('修改发货商品清单失败');
+        }
+
     }
 
 }
