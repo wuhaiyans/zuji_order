@@ -677,12 +677,11 @@ class DeliveryController extends Controller
             //通知订单接口
             $result['goods_info'][$params['goods_no']]['imei1']=$params['imei'];
             $result['goods_info'][$params['goods_no']]['serial_number']=$params['apple_serial']??'';
+            //修改发货信息
+            DeliveryService::channelSend($params);
             LogApi::info('delivery_send_order_info_channelSend',[$orderDetail,$result['goods_info'],$user_info]);
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
-            if($a){
-                //修改发货信息
-                DeliveryService::channelSend($params);
-            }else{
+            if(!$a){
                 DB::rollBack();
                 return \apiResponse([$params['delivery_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
             }
