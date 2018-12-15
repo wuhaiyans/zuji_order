@@ -21,6 +21,9 @@ class OrderWithhold
      * @return bool
      */
     public static function instalment_withhold($instalmentId ){
+
+        LogApi::error("[giveBackWihthold]还机扣款_".$instalmentId);
+
         if ( $instalmentId == "") {
             return false;
         }
