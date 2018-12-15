@@ -645,14 +645,17 @@ class DeliveryController extends Controller
             'imei' => 'required',//IMEI必填
             'order_no' => 'required',//订单编号必填
             'goods_no' => 'required', //商品编号
+            'logistics_id' => 'required', //物流ID
+            'logistics_no' => 'required', //物流编号
             'apple_serial' => 'required',//设备序列号选填
             'price' => 'required',//采购价选填
         ];
         $params = $this->_dealParams($rules);
 
-        if (count($params)<4) {
+        if (count($params)<6) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
+        LogApi::info('delivery_send_info_channelSend',$params);
 
         $request = request()->input();
         $user = $request['userinfo'];
@@ -662,9 +665,9 @@ class DeliveryController extends Controller
             $result = $this->_info($params['delivery_no']);
             $orderDetail = [
                 'order_no' => $result['order_no'],
-                'logistics_id' => $result['delivery_info']['logistics_id']??1,
-                'logistics_no' => $result['delivery_info']['logistics_no']??'0',
-                'logistics_note'=>$result['delivery_info']['logistics_note']??'0'
+                'logistics_id' => $params['logistics_id']??1,
+                'logistics_no' => $params['logistics_no']??'0',
+                'logistics_note'=>'0'
             ];
 
             //操作员信息,用户或管理员操作有
@@ -724,7 +727,7 @@ class DeliveryController extends Controller
             }
         }
 
-        return ['order_no'=>$model->order_no, 'goods_info'=>$result, 'delivery_info'=>$model->toArray()];
+        return ['order_no'=>$model->order_no, 'goods_info'=>$result];
     }
 
 
