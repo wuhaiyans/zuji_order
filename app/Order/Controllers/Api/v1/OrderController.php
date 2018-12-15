@@ -23,8 +23,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 
-
-
 class OrderController extends Controller
 {
     protected $OrderCreate;
