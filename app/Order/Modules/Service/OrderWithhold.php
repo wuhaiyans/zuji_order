@@ -21,6 +21,9 @@ class OrderWithhold
      * @return bool
      */
     public static function instalment_withhold($instalmentId ){
+
+        LogApi::error("[giveBackWihthold]还机扣款_".$instalmentId);
+
         if ( $instalmentId == "") {
             return false;
         }
@@ -152,7 +155,7 @@ class OrderWithhold
                         'out_trade_no'	=> $business_no,            //业务系统授权码
                         'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
                         'amount'		=> $amount,                 //交易金额；单位：分
-                        'back_url'		=> $backUrl,                //后台通知地址
+                        'back_url'		=> config('app.url') . "/order/pay/fundauthToPayNotify",//后台通知地址
                         'user_id'		=> $orderInfo['user_id'],   //用户id
                         'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
                     ];
