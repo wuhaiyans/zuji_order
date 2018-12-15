@@ -672,8 +672,8 @@ class DeliveryController extends Controller
             $user_info['user_name'] = $user['username'];
             $user_info['type'] = $user['type'];
             //通知订单接口
-            $result['goods_info']['imei1']=$params['imei'];
-            $result['goods_info']['serial_number']=$params['apple_serial']??'';
+            $result['goods_info'][$params['goods_no']]['imei1']=$params['imei'];
+            $result['goods_info'][$params['goods_no']]['serial_number']=$params['apple_serial']??'';
             LogApi::info('delivery_send_order_info_channelSend',[$orderDetail,$result['goods_info'],$user_info]);
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
             if($a){
