@@ -662,9 +662,9 @@ class DeliveryController extends Controller
             $result = $this->_info($params['delivery_no']);
             $orderDetail = [
                 'order_no' => $result['order_no'],
-                'logistics_id' => $result['delivery_info']['logistics_id'],
-                'logistics_no' => $result['delivery_info']['logistics_no'],
-                'logistics_note'=>$result['delivery_info']['logistics_note']
+                'logistics_id' => $result['delivery_info']['logistics_id']??1,
+                'logistics_no' => $result['delivery_info']['logistics_no']??'',
+                'logistics_note'=>$result['delivery_info']['logistics_note']??''
             ];
 
             //操作员信息,用户或管理员操作有
@@ -672,6 +672,8 @@ class DeliveryController extends Controller
             $user_info['user_name'] = $user['username'];
             $user_info['type'] = $user['type'];
             //通知订单接口
+            $result['goods_info'][$params['goods_no']]['imei1']=$params['imei'];
+            $result['goods_info'][$params['goods_no']]['serial_number']=$params['apple_serial']??'';
             LogApi::info('delivery_send_order_info_channelSend',[$orderDetail,$result['goods_info'],$user_info]);
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
             if($a){
