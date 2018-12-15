@@ -672,6 +672,7 @@ class DeliveryController extends Controller
             $user_info['user_name'] = $user['username'];
             $user_info['type'] = $user['type'];
             //通知订单接口
+            LogApi::info('delivery_send_order_info_channelSend',[$orderDetail,$result['goods_info'],$user_info]);
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
             if($a){
                 //修改发货信息
