@@ -664,7 +664,7 @@ class DeliveryController extends Controller
                 'order_no' => $result['order_no'],
                 'logistics_id' => $result['delivery_info']['logistics_id']??1,
                 'logistics_no' => $result['delivery_info']['logistics_no']??'0',
-                'logistics_note'=>$result['delivery_info']['logistics_note']??''
+                'logistics_note'=>$result['delivery_info']['logistics_note']??'0'
             ];
 
             //操作员信息,用户或管理员操作有
