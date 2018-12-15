@@ -1621,7 +1621,7 @@ class OrderOperate
                 $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'actState');
 
 
-                $goodsData =  self::getGoodsListActState($values['order_no'], $actArray);
+                $goodsData =  self::getGoodsListActState($values['order_no'], $actArray, array(), $values['pay_type']);
 
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
@@ -1929,6 +1929,13 @@ class OrderOperate
                     *
                     */
                   $isCustomer = ($values['goods_status']>=Inc\OrderGoodStatus::REFUNDS && $values['goods_status']<=Inc\OrderGoodStatus::EXCHANGE_REFUND) ?? false;
+
+                   //无分期或者分期已全部还完不出现提前还款按钮
+                   $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
+                   if (empty($orderInstalmentData) || $payType==Inc\PayInc::FlowerFundauth){
+                       $goodsList[$keys]['act_goods_state']['prePay_btn'] = false;
+                   }
+
                    if ($values['zuqi_type']== Inc\OrderStatus::ZUQI_TYPE1) {
 
                        //申请售后没有
@@ -1957,11 +1964,7 @@ class OrderOperate
                        }
                    }
 
-                   //无分期或者分期已全部还完不出现提前还款按钮
-                   $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
-                   if (empty($orderInstalmentData) || $payType==Inc\PayInc::FlowerFundauth){
-                       $goodsList[$keys]['act_goods_state']['prePay_btn'] = false;
-                   }
+
 
                    //查询是否有提前还款操作
                    $aheadInfo = OrderBuyout::getAheadInfo($orderNo, $values['goods_no']);
