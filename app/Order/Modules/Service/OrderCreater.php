@@ -519,6 +519,7 @@ class OrderCreater
                 'sku_id'=>$schemaData['sku'][0]['sku_id'],
                 'spu_name'=>$schemaData['sku'][0]['spu_name'],
                 'thumb'=>$schemaData['sku'][0]['thumb'],
+                'total_zujin'=>$schemaData['sku'][0]['total_zujin'],
                 'category_id'=>$schemaData['sku'][0]['category_id'],
                 'zuqi_type'=>$schemaData['sku'][0]['zuqi_type'],
                 'pay_type'=>$schemaData['sku'][0]['pay_type'],
