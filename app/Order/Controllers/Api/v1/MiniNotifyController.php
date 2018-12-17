@@ -429,7 +429,7 @@ class MiniNotifyController extends Controller
     public function curl_retran(  $post = [], $timeout = 60 ){
         //入库 确认订单 回调信息
 
-        if($this->data['notify_type'] == $this->CANCEL){
+        if($post['notify_type'] == $this->CANCEL){
             $arr_log = [
                 'notify_type'=>$post['notify_type'],
                 'zm_order_no'=>$post['zm_order_no'],
@@ -439,7 +439,7 @@ class MiniNotifyController extends Controller
                 'request_time'=>time(),
                 'data_text'=>json_encode($post),
             ];
-        } if($this->data['notify_type'] == $this->FINISH){
+        } if($post['notify_type'] == $this->FINISH){
             $arr_log = [
                 'notify_type'=>$post['notify_type'],
                 'zm_order_no'=>$post['zm_order_no'],
@@ -449,7 +449,7 @@ class MiniNotifyController extends Controller
                 'request_time'=>time(),
                 'data_text'=>json_encode($post),
             ];
-        }else if($this->data['notify_type'] == $this->CREATE){
+        }else if($post['notify_type'] == $this->CREATE){
             //入库 确认订单 回调信息
             $arr_log = [
                 'notify_type'=>$post['notify_type'],
