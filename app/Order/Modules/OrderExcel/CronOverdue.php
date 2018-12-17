@@ -37,8 +37,9 @@ class CronOverdue
         if(isset($_GET['begin']) && isset($_GET['end'])){
             $someday = strtotime($_GET['begin']." -30 day");
             $overdueTime = strtotime($_GET['end']." -30 day");
-            $backBegin = strtotime($_GET['begin']);
-            $backEnd = strtotime($_GET['end']);
+            $backBegin = strtotime($_GET['begin']." 00:00:00");
+            $backEnd = strtotime($_GET['end']." 23:59:59");
+            $deadline = $_GET['begin']."|".$_GET['end'];
         }
         else{
             $deadline = "2018-08-24";
@@ -51,9 +52,8 @@ class CronOverdue
                 $someday = strtotime($lastDay." -30 day");
                 $backBegin = strtotime($lastDay);
             }
-            $deadline.= "|".date("Y-m-d");
-
-            $overdueTime = strtotime(date("Y-m-d")." -30 day");
+            $deadline.= "|".date("Y-m-d",strtotime($lastDay." -1 day"));
+            $overdueTime = strtotime(date("Y-m-d"." 23:59:59",strtotime(date("Y-m-d")." -31 day")));
             $backEnd = time();
         }
         //未还时间条件
@@ -67,13 +67,16 @@ class CronOverdue
         //订单状态
         $where[] = ['order_info.order_status','=',Inc\OrderStatus::OrderInService,];
 
+        var_dump($whereBack);
+        var_dump($where);
         //渠道条件设置所有小程序
         $channelId = [10,14,15,16];
-        $limit = 500;
+
         //未还订单数
         $backCount = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($whereBack)
             ->whereIn("order_info.channel_id",$channelId)->count();
+        echo $backCount."<br/>";
         $backGoodsYajin = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($whereBack)
             ->whereIn("order_info.channel_id",$channelId)->sum("order_info.goods_yajin");
@@ -85,9 +88,12 @@ class CronOverdue
         $count = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
             ->whereIn("order_info.channel_id",$channelId)->count();
+        echo $backCount."<br/>";die;
         $data = [];
         $single = 0;
         $mianyajinSum = 0;
+
+        $limit = $count<=500?$count:500;
         //分批获取订单信息
         for($i=0;$i<ceil($count/$limit);$i++){
             $offset = $i*$limit;

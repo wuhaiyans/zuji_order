@@ -159,8 +159,6 @@ class TestExcelController extends Controller
 
     public function overdueDetail(){
 
-        ImportOtherUser::getDefaultName();
-
         $obj = new CronOverdue();
         $obj->detail();
         echo "success";
