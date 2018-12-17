@@ -466,6 +466,7 @@ class MiniNotifyController extends Controller
                 'data_text'=>json_encode($post),
             ];
         }
+        sql_profiler();
         print_r($arr_log);
         //记录入库
         $result = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::add($arr_log);
