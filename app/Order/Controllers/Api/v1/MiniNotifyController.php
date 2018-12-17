@@ -51,7 +51,7 @@ class MiniNotifyController extends Controller
             echo '芝麻小程序回调参数错误';exit;
         }
         $appid = $_POST['notify_app_id'];
-        //当appid = 123进行转发
+        //当appid = 2018010601545959进行转发
         if( $appid == config('miniappid.'.'mini_return') ){
             $this->curl_retran( $_POST );die;
         }
