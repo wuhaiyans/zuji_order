@@ -437,6 +437,7 @@ class MiniNotifyController extends Controller
                 'channel'=>$post['channel'],
                 'notify_app_id'=>$post['notify_app_id'],
                 'request_time'=>time(),
+                'url'=>env('APPID_ZUJI_URL'),
                 'data_text'=>json_encode($post),
             ];
         } if($post['notify_type'] == $this->FINISH){
@@ -447,6 +448,7 @@ class MiniNotifyController extends Controller
                 'channel'=>$post['channel'],
                 'notify_app_id'=>$post['notify_app_id'],
                 'request_time'=>time(),
+                'url'=>env('APPID_ZUJI_URL'),
                 'data_text'=>json_encode($post),
             ];
         }else if($post['notify_type'] == $this->CREATE){
@@ -460,6 +462,7 @@ class MiniNotifyController extends Controller
                 'order_create_time'=>$post['order_create_time'],
                 'notify_app_id'=>$post['notify_app_id'],
                 'request_time'=>time(),
+                'url'=>env('APPID_ZUJI_URL'),
                 'data_text'=>json_encode($post),
             ];
         }
@@ -478,7 +481,7 @@ class MiniNotifyController extends Controller
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('application/x-www-form-urlencoded'));
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         $result_info = curl_exec($ch);
-        \App\Lib\Common\LogApi::notify('芝麻小程序回调转发处理结果APPID'.env('APPID_ZUJI_URL'),$arr_log);
+        \App\Lib\Common\LogApi::notify('芝麻小程序回调转发处理结果',$arr_log);
         curl_close($ch);
         //回调记录修改
         $OrderMiniNotifyLogReturnInfo = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::getInfo([
