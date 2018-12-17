@@ -478,7 +478,7 @@ class MiniNotifyController extends Controller
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('application/x-www-form-urlencoded'));
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         $result_info = curl_exec($ch);
-        Debug::error(Location::L_AlipayMini,'芝麻小程序回调转发处理结果APPID'.env('APPID_ZUJI_URL'),$arr_log);
+        \App\Lib\Common\LogApi::notify('芝麻小程序回调转发处理结果APPID'.env('APPID_ZUJI_URL'),$arr_log);
         curl_close($ch);
         //回调记录修改
         $OrderMiniNotifyLogReturnInfo = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::getInfo([
