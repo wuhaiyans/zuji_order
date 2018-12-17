@@ -436,7 +436,7 @@ class MiniNotifyController extends Controller
                 'channel'=>$post['channel'],
                 'notify_app_id'=>$post['notify_app_id'],
                 'request_time'=>time(),
-                'url'=>env('APPID_ZUJI_URL'),
+                'url'=>''.env('APPID_ZUJI_URL'),
                 'data_text'=>json_encode($post),
             ];
         } if($post['notify_type'] == $this->FINISH){
@@ -447,7 +447,7 @@ class MiniNotifyController extends Controller
                 'channel'=>$post['channel'],
                 'notify_app_id'=>$post['notify_app_id'],
                 'request_time'=>time(),
-                'url'=>env('APPID_ZUJI_URL'),
+                'url'=>''.env('APPID_ZUJI_URL'),
                 'data_text'=>json_encode($post),
             ];
         }else if($post['notify_type'] == $this->CREATE){
@@ -462,7 +462,7 @@ class MiniNotifyController extends Controller
                 'fund_type'=>$post['fund_type'],
                 'notify_app_id'=>$post['notify_app_id'],
                 'request_time'=>time(),
-                'url'=>env('APPID_ZUJI_URL'),
+                'url'=>''.env('APPID_ZUJI_URL'),
                 'data_text'=>json_encode($post),
             ];
         }
