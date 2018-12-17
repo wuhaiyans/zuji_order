@@ -20,7 +20,6 @@ class OrderMiniNotifyLogReturnRepository
      * @return $last_id
      */
     public static function add($data){
-        print_r($data);
         $info =OrderMiniNotifyLogReturn::create($data);
         return $info->getQueueableId();
     }
