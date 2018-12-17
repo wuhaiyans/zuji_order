@@ -21,7 +21,6 @@ class OrderMiniNotifyLogReturnRepository
      */
     public static function add($data){
         $info =OrderMiniNotifyLogReturn::create($data);
-        echo sql_profiler();die;
         return $info->getQueueableId();
     }
 
