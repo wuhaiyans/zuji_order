@@ -459,6 +459,7 @@ class MiniNotifyController extends Controller
                 'credit_privilege_amount'=>$post['credit_privilege_amount'],
                 'channel'=>$post['channel'],
                 'order_create_time'=>$post['order_create_time'],
+                'fund_type'=>$post['fund_type'],
                 'notify_app_id'=>$post['notify_app_id'],
                 'request_time'=>time(),
                 'url'=>env('APPID_ZUJI_URL'),
