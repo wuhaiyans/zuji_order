@@ -38,7 +38,6 @@ class OrderBlock {
      */
     public static function orderPushBlock( string $order_no, string $orderBlockNode ): int{
 
-        return 0;
         // 订单编号
         $data = [];
 
