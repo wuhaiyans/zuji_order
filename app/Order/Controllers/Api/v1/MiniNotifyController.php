@@ -480,7 +480,8 @@ class MiniNotifyController extends Controller
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('application/x-www-form-urlencoded'));
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         $result_info = curl_exec($ch);
-        \App\Lib\Common\LogApi::notify('芝麻小程序回调转发处理结果',array_merge($result_info,$arr_log));
+        $arr_log['result_info'] = $result_info;
+        \App\Lib\Common\LogApi::notify('芝麻小程序回调转发处理结果',$arr_log);
         curl_close($ch);
         //回调记录修改
         $OrderMiniNotifyLogReturnInfo = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::getInfo([
