@@ -85,7 +85,7 @@ class InstalmentComponnet implements OrderCreater
             if($sku['order_coupon_amount'] >0){
                 $couponType =$schema['coupon'][0]['coupon_type'];
                 if($couponType == CouponStatus::CouponTypeDecline){
-                    $couponStatus =CouponStatus::CouponTypeSerialize;
+                    $couponStatus =CouponStatus::CouponTypeAvg;
                 }
             }
 

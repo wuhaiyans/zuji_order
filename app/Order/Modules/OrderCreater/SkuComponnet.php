@@ -332,6 +332,7 @@ class SkuComponnet implements OrderCreater
                     'discount_amount' => 0,//$skuInfo['buyout_price'], //商品优惠金额 （商品系统为buyout_price字段）
                     'amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
                     'all_amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
+                    'total_zujin'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])),
                     'yajin_limit'=>normalizeNum($spuInfo['yajin_limit']), //最小押金值
                     'first_coupon_amount' => $first_coupon_amount,
                     'order_coupon_amount' => $order_coupon_amount,

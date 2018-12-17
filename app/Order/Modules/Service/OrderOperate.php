@@ -1621,7 +1621,7 @@ class OrderOperate
                 $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'actState');
 
 
-                $goodsData =  self::getGoodsListActState($values['order_no'], $actArray);
+                $goodsData =  self::getGoodsListActState($values['order_no'], $actArray, array(), $values['pay_type']);
 
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
