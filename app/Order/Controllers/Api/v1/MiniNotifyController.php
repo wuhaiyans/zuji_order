@@ -468,6 +468,7 @@ class MiniNotifyController extends Controller
         }
         //记录入库
         $result = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::add($arr_log);
+        echo sql_profiler();
         if( !$result ){
             \App\Lib\Common\LogApi::debug('小程序回调记录失败',$arr_log);
         }
