@@ -44,7 +44,8 @@ class SimpleDiscounter implements Discounter {
 		// 分期数
 		$n = count( $params );
 		// 余数
-		$remainder_discount = $this->discount_amount%$n;
+		$remainder_discount = ($this->discount_amount * 100) % ($n * 100);
+		$remainder_discount = $remainder_discount / 100;
 		// 平均优惠
 		$avg_discount = ($this->discount_amount-$remainder_discount)/$n;
 		
