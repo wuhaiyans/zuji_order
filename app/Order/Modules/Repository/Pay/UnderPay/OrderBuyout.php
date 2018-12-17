@@ -6,10 +6,12 @@ use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\GoodsLogRepository;
 use App\Order\Modules\Repository\Order\Goods;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
@@ -109,6 +111,13 @@ class OrderBuyout implements UnderLine {
             'order_no'=>$this->order_no,
             'goods_no'=>$goodsInfo['goods_no'],
         ];
+        if($orderInfo['pay_type'] == PayInc::FlowerFundauth){
+            $ret = OrderGoodsInstalmentRepository::UnFinishWithhold($buyout['order_no']);
+            if(!$ret){
+                LogApi::alert("buyout-callback:扣除分期租金失败",$data,self::$email);
+                return false;
+            }
+        }
         $ret = Instalment::close($data);
         if(!$ret){
             LogApi::info("offline-buyout","关闭分期失败");
@@ -162,8 +171,8 @@ class OrderBuyout implements UnderLine {
             'username'=>$orderInfo['realname'],
             'type'=>\App\Lib\PublicInc::Type_System,
             'order_no'=>$orderInfo['order_no'],
-            'title'=>"买断支付成功",
-            'msg'=>"支付完成",
+            'title'=>"线下买断支付成功",
+            'msg'=>"线下支付完成",
         ];
         $goodsLog = [
             'order_no'=>$buyout['order_no'],
@@ -171,7 +180,7 @@ class OrderBuyout implements UnderLine {
             'business_key'=> OrderStatus::BUSINESS_BUYOUT,//此处用常量
             'business_no'=>$buyout['buyout_no'],
             'goods_no'=>$buyout['goods_no'],
-            'msg'=>'买断支付成功',
+            'msg'=>'线下买断支付成功',
         ];
         self::log($orderLog,$goodsLog);
 
@@ -225,16 +234,16 @@ class OrderBuyout implements UnderLine {
                 'username'=>$orderInfo['realname'],
                 'type'=>\App\Lib\PublicInc::Type_System,
                 'order_no'=>$orderInfo['order_no'],
-                'title'=>"买断完成",
+                'title'=>"线下买断完成",
                 'msg'=>"无押金直接买断完成",
             ];
             $goodsLog = [
                 'order_no'=>$buyout['order_no'],
-                'action'=>'用户买断完成',
+                'action'=>'线下用户买断完成',
                 'business_key'=> OrderStatus::BUSINESS_BUYOUT,//此处用常量
                 'business_no'=>$buyout['buyout_no'],
                 'goods_no'=>$buyout['goods_no'],
-                'msg'=>'买断完成',
+                'msg'=>'线下买断完成',
             ];
             self::log($orderLog,$goodsLog);
         }
@@ -258,7 +267,6 @@ class OrderBuyout implements UnderLine {
             LogApi::info("offline-buyout","更新商品失败");
             throw new \Exception("更新商品失败");
         }
-        LogApi::info("offline-buyout","成功");
         return true;
     }
     static function log($orderLog,$goodsLog){

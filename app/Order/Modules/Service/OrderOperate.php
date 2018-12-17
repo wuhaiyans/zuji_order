@@ -1621,7 +1621,7 @@ class OrderOperate
                 $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'actState');
 
 
-                $goodsData =  self::getGoodsListActState($values['order_no'], $actArray);
+                $goodsData =  self::getGoodsListActState($values['order_no'], $actArray, array(), $values['pay_type']);
 
                 $orderListArray['data'][$keys]['goodsInfo'] = $goodsData;
 
@@ -1883,10 +1883,7 @@ class OrderOperate
 
                //处于租期中，获取剩余未支付租金
                if($values['goods_status']>=Inc\OrderGoodStatus::RENTING_MACHINE) {
-                   $where = array();
-                   $where[] = ['status','=', \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID];
-                   $where[] = ['goods_no','=',$values['goods_no']];
-                   $instaulment = OrderGoodsInstalmentRepository::getSumAmount($where);
+                   $instaulment = OrderGoodsInstalmentRepository::getSumAmount($values['goods_no']);
                    if ($instaulment){
 
                        $goodsList[$keys]['left_zujin'] = $instaulment['amount'];
@@ -1932,6 +1929,13 @@ class OrderOperate
                     *
                     */
                   $isCustomer = ($values['goods_status']>=Inc\OrderGoodStatus::REFUNDS && $values['goods_status']<=Inc\OrderGoodStatus::EXCHANGE_REFUND) ?? false;
+
+                   //无分期或者分期已全部还完不出现提前还款按钮
+                   $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
+                   if (empty($orderInstalmentData) || $payType==Inc\PayInc::FlowerFundauth){
+                       $goodsList[$keys]['act_goods_state']['prePay_btn'] = false;
+                   }
+
                    if ($values['zuqi_type']== Inc\OrderStatus::ZUQI_TYPE1) {
 
                        //申请售后没有
@@ -1960,11 +1964,7 @@ class OrderOperate
                        }
                    }
 
-                   //无分期或者分期已全部还完不出现提前还款按钮
-                   $orderInstalmentData = OrderGoodsInstalment::queryList(array('order_no'=>$orderNo,'goods_no'=>$values['goods_no'],  'status'=>Inc\OrderInstalmentStatus::UNPAID));
-                   if (empty($orderInstalmentData)){
-                       $goodsList[$keys]['act_goods_state']['prePay_btn'] = false;
-                   }
+
 
                    //查询是否有提前还款操作
                    $aheadInfo = OrderBuyout::getAheadInfo($orderNo, $values['goods_no']);
@@ -2063,6 +2063,13 @@ class OrderOperate
                 //是否已经操作过保险
 
                 if ($orderListArray['data'][$values['order_no']]['order_status']==Inc\OrderStatus::OrderInService) {
+                    if ($orderListArray['data'][$values['order_no']]['pay_type'] == Inc\PayInc::FlowerFundauth)
+                    {
+                        if ($goodsList[$keys]['yajin']==Inc\OrderStatus::ZUQI_TYPE1) {
+                            $goodsList[$keys]['yajin'] = normalizeNum($goodsList[$keys]['yajin']+$goodsList[$keys]['amount_after_discount']);
+                        }
+
+                    }
 
                     $insuranceData = self::getInsuranceInfo(['order_no'  => $values['order_no'] , 'goods_no'=>$values['goods_no']],array('type'));
                     if ($insuranceData){

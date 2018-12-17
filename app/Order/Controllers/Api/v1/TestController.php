@@ -2,8 +2,7 @@
 namespace App\Order\Controllers\Api\v1;
 
 use App\Order\Modules\Repository\Pay\UnderPay\OrderBuyout;
-use App\Order\Modules\Service\OrderNotice;
-use App\Order\Modules\Repository\ShortMessage\SceneConfig;
+use App\Order\Modules\OrderCreater\InstalmentComponnet;
 
 class TestController extends Controller
 {
@@ -20,31 +19,34 @@ class TestController extends Controller
 
 	public function sendSms() {
 
-		$data = [
 
-			'name'			=> "订金索赔扣押金",
-			'out_trade_no' 	=> '20A80191759992478', //业务系统授权码
-			'fundauth_no' 	=> '20A80191759992478', //支付系统授权码
-			'amount' 		=> bcmul(1,100), //交易金额；单位：分
-			'back_url' 		=> config('app.url') . "/order/pay/withholdCreatePayNotify",
-			'user_id' 		=> 3209, //用户id
-
+		$_data = [
+			'zujin'		    => '159.00',	//【必选】price 每期租金
+			'zuqi'		    => 12,	    //【必选】int 租期（必选保证大于0）
+			'insurance'    	=> '199.00',	//【必选】price 保险金额
 		];
 
-		$succss = \App\Lib\Payment\CommonFundAuthApi::unfreezeAndPay($data);
-
-		v($succss);
-
-//
-//		// 发送短信
-//		$notice = new \App\Order\Modules\Service\OrderNotice(
-//			\App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET,
-//			"XAB3048073127160",
-//			"ReletSuccess");
-//		$notice->notify();
+		$sku = [
+				[
+					'discount_amount' => '1717.20',
+					'zuqi_policy' => 'avg',// 分期类型根据优惠券类型来进行分期 serialize 分期顺序优惠 （递减）
+				]
+		];
 
 
+		$computer = new \App\Order\Modules\Repository\Instalment\MonthComputer( $_data );
 
+		// 优惠策略
+		foreach( $sku as $dis_info ){
+			// 分期策略：平均优惠
+			if( $dis_info['zuqi_policy'] == 'avg' ){
+				$discounter_simple = new \App\Order\Modules\Repository\Instalment\Discounter\SimpleDiscounter( $dis_info['discount_amount'] );
+				$computer->addDiscounter( $discounter_simple );
+			}
+
+		}
+		$a =  $computer->compute();
+		p($a);
 	}
 }
 ?>

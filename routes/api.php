@@ -63,6 +63,9 @@ $api->version('v1', [
         $api->post('unfreezeAndPayClean', 'PayController@unfreezeAndPayClean');
 
         //订单清算退款回调接口
+        $api->post('fundauthToPayNotify', 'PayController@fundauthToPayNotify');
+
+        //订单清算退款回调接口
         $api->post('refundClean', 'PayController@refundClean');
 
         //订单清算退押金回调接口

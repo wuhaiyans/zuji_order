@@ -636,6 +636,66 @@ class DeliveryController extends Controller
         ]);
     }
 
+    /**
+     * 渠道商发货
+     */
+    public function channelSend(){
+        $rules = [
+            'delivery_no' => 'required',//发货单号必填
+            'imei' => 'required',//IMEI必填
+            'order_no' => 'required',//订单编号必填
+            'goods_no' => 'required', //商品编号
+            'logistics_id' => 'required', //物流ID
+            'logistics_no' => 'required', //物流编号
+            'apple_serial' => 'required',//设备序列号选填
+            'price' => 'required',//采购价选填
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (count($params)<6) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+        LogApi::info('delivery_send_info_channelSend',$params);
+
+        $request = request()->input();
+        $user = $request['userinfo'];
+
+        try {
+            DB::beginTransaction();
+            $result = $this->_info($params['delivery_no']);
+            $orderDetail = [
+                'order_no' => $result['order_no'],
+                'logistics_id' => $params['logistics_id']??1,
+                'logistics_no' => $params['logistics_no']??'0',
+                'logistics_note'=>'0'
+            ];
+
+            //操作员信息,用户或管理员操作有
+            $user_info['user_id'] = $user['uid'];
+            $user_info['user_name'] = $user['username'];
+            $user_info['type'] = $user['type'];
+            //通知订单接口
+            $result['goods_info'][$params['goods_no']]['imei1']=$params['imei'];
+            $result['goods_info'][$params['goods_no']]['serial_number']=$params['apple_serial']??'';
+            //修改发货信息
+            DeliveryService::channelSend($params);
+            LogApi::info('delivery_send_order_info_channelSend',[$orderDetail,$result['goods_info'],$user_info]);
+            $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+            if(!$a){
+                DB::rollBack();
+                return \apiResponse([$params['delivery_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            WarehouseWarning::warningWarehouse('[渠道商发货]失败',[$params,$e]);
+            return \apiResponse([$params['delivery_no'].'_'.$a], ApiStatus::CODE_50000, $e->getMessage());
+        }
+
+        return \apiResponse([]);
+    }
+
 
     protected function _info($delivery_no)
     {
@@ -668,9 +728,6 @@ class DeliveryController extends Controller
 
         return ['order_no'=>$model->order_no, 'goods_info'=>$result];
     }
-
-
-
 
 
 }
