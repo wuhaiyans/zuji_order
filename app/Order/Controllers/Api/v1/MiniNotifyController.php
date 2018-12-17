@@ -466,9 +466,10 @@ class MiniNotifyController extends Controller
                 'data_text'=>json_encode($post),
             ];
         }
+        print_r($arr_log);
         //记录入库
         $result = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::add($arr_log);
-        echo sql_profiler();die;
+        var_dump($result);
         if( !$result ){
             \App\Lib\Common\LogApi::debug('小程序回调记录失败',$arr_log);
         }
@@ -515,7 +516,7 @@ class MiniNotifyController extends Controller
             echo $result_info;die;
         }
         echo 'fail';
-
+        echo sql_profiler();
     }
 
 
