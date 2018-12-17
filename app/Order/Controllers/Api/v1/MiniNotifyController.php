@@ -53,7 +53,8 @@ class MiniNotifyController extends Controller
         $appid = $_POST['notify_app_id'];
         //当appid = 123进行转发
         if( $appid == config('miniappid.'.'mini_return') ){
-            $this->curl_retran( $_POST );
+            echo '转发';
+            $this->curl_retran( $_POST );die;
         }
         $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi( $appid );
         $b = $CommonMiniApi->verify( $_POST );
