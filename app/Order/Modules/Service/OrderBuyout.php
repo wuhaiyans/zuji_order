@@ -6,9 +6,11 @@ use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderGoodStatus;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
 use App\Order\Modules\Inc\OrderBuyoutStatus;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
@@ -214,11 +216,6 @@ class OrderBuyout
 				'order_no'=>$buyout['order_no'],
 				'goods_no'=>$buyout['goods_no'],
 		];
-		$ret = Instalment::close($data);
-		if(!$ret){
-			LogApi::alert("buyout-callback:关闭分期失败",$data,self::$email);
-			return false;
-		}
 		//更新买断单
 		$ret = OrderBuyoutRepository::setOrderPaid($buyout['id']);
 		if(!$ret){
@@ -226,6 +223,20 @@ class OrderBuyout
 		}
 		//获取订单信息
 		$orderInfo = OrderRepository::getOrderInfo(array('order_no'=>$buyout['order_no']));
+
+		if($orderInfo['pay_type'] == PayInc::FlowerFundauth){
+			$ret = OrderGoodsInstalmentRepository::UnFinishWithhold($buyout['order_no']);
+			if(!$ret){
+				LogApi::alert("buyout-callback:扣除分期租金失败",$data,self::$email);
+				return false;
+			}
+		}
+		$ret = Instalment::close($data);
+		if(!$ret){
+			LogApi::alert("buyout-callback:关闭分期失败",$data,self::$email);
+			return false;
+		}
+
 		//获取订单商品信息
 		$OrderGoodsRepository = new OrderGoodsRepository;
 		$goodsInfo = $OrderGoodsRepository->getGoodsInfo($buyout['goods_no']);

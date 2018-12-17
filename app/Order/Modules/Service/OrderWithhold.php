@@ -21,17 +21,25 @@ class OrderWithhold
      * @return bool
      */
     public static function instalment_withhold($instalmentId ){
+
+        LogApi::error("[giveBackWihthold]还机扣款_".$instalmentId);
+
         if ( $instalmentId == "") {
             return false;
         }
 
-        $remark         = "还机代扣剩余分期";
-
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
         if( !is_array($instalmentInfo)){
+            LogApi::error("[giveBackWihthold]订单不存在".$instalmentId);
             return false;
         }
+
+        if($instalmentInfo['status'] != OrderInstalmentStatus::UNPAID && $instalmentInfo['status'] != OrderInstalmentStatus::FAIL){
+            LogApi::error("[giveBackWihthold]分期 不允许扣款");
+            return false;
+        }
+
         // 生成交易码
         $business_no = createNo();
         // 扣款交易码
@@ -63,6 +71,19 @@ class OrderWithhold
         $amount = $instalmentInfo['amount'] * 100;
         if( $amount<0 ){
             LogApi::error("[giveBackWihthold]扣款金额不能小于1分");
+            return false;
+        }
+
+        $remark         = "还机代扣剩余分期";
+
+        // 保存 备注，更新状态
+        $data = [
+            'remark'        => $remark,
+            'status'        => OrderInstalmentStatus::PAYING,// 扣款中
+        ];
+        $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
+        if(!$result){
+            LogApi::error("[giveBackWihthold]扣款备注保存失败");
             return false;
         }
 
@@ -135,7 +156,7 @@ class OrderWithhold
                         'out_trade_no'	=> $business_no,            //业务系统授权码
                         'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
                         'amount'		=> $amount,                 //交易金额；单位：分
-                        'back_url'		=> $backUrl,                //后台通知地址
+                        'back_url'		=> config('app.url') . "/order/pay/fundauthToPayNotify",//后台通知地址
                         'user_id'		=> $orderInfo['user_id'],   //用户id
                         'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
                     ];
@@ -154,16 +175,6 @@ class OrderWithhold
                 }
 
         }else {
-            // 保存 备注，更新状态
-            $data = [
-                'remark'        => $remark,
-                'status'        => OrderInstalmentStatus::PAYING,// 扣款中
-            ];
-            $result = OrderGoodsInstalment::save(['id'=>$instalmentId],$data);
-            if(!$result){
-                LogApi::error("[giveBackWihthold]扣款备注保存失败");
-                return false;
-            }
 
             // 代扣协议编号
             $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留

@@ -102,8 +102,9 @@ class ReletRepository
         //查询
         $result =  OrderRelet::query()
             ->where($whereArray)
-            ->select('order_relet.*')
+            ->select('order_relet.*','order_goods.goods_name')
             ->leftJoin('order_info', 'order_info.order_no', '=', 'order_relet.order_no')
+            ->leftJoin('order_goods', 'order_goods.order_no', '=', 'order_relet.order_no')
             ->offset($offset)
             ->limit($pagesize)
             ->get();
