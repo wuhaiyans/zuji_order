@@ -175,7 +175,7 @@ class MiniOrderController extends Controller
      * 订单确认（查询订单信息 获取免押金额）
      */
     public function confirmationQuery(Request $request){
-        echo 111;
+        echo 111;die;
         $params     = $request->all();
         print_r($params);die;
         // 验证参数
