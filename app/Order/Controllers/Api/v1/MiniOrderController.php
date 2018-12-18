@@ -176,7 +176,6 @@ class MiniOrderController extends Controller
      */
     public function confirmationQuery(Request $request){
         $params     = $request->all();
-        \App\Lib\Common\LogApi::error('开发环境请求',$params);
         // 验证参数
         $rules = [
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
