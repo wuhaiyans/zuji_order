@@ -127,49 +127,51 @@ class User extends \App\Lib\BaseApi{
 
     }
 
-    /**
-     * 小程序获取用户id生成用户
-     * @author zhanhgjinhui
-     * @param $params
-     * @return false or array
-     */
-    public static function getUserId($params, $token = '',$appid){
-        $data = config('tripartite.Interior_Goods_Request_data');
-        $data['method'] ='zuji.mini.user.id.get';
-        $data['auth_token'] = $token;
-        $data['appid'] = $appid;
-        if($params['zm_face'] == 'Y'){
-            $zm_face = 1;
-        }else{
-            $zm_face = 0;
-        }
-        if($params['zm_risk'] == 'Y'){
-            $zm_risk = 1;
-        }else{
-            $zm_risk = 0;
-        }
-        $data['params'] = [
-            'mobile'=>$params['mobile'],
-            'realname'=>$params['name'],
-            'zm_face'=>$zm_face,
-            'zm_risk'=>$zm_risk,
-            'cert_no'=>$params['cert_no'],
-        ];
-        $result = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        $info = json_decode($result,true);
-		LogApi::debug('芝麻小程序读取token的用户信息',[
-			'url' => config('tripartite.Interior_Goods_Url'),
-			'params' => json_encode($data),
-			'result' => $result,
-		]);
-        if(!is_array($info)){
-            return false;
-        }
-        if($info['code']!=0){
-            return false;
-        }
-        return $info['data'];
-    }
+//    /**
+//     * 小程序获取用户id生成用户
+//     * @author zhanhgjinhui
+//     * @param $params
+//     * @return false or array
+//     */
+//    public static function getUserId($params, $token = '',$appid){
+//        $data = config('tripartite.Interior_Goods_Request_data');
+//        $data['method'] ='zuji.mini.user.id.get';
+//        $data['auth_token'] = $token;
+//        $data['appid'] = $appid;
+//        if($params['zm_face'] == 'Y'){
+//            $zm_face = 1;
+//        }else{
+//            $zm_face = 0;
+//        }
+//        if($params['zm_risk'] == 'Y'){
+//            $zm_risk = 1;
+//        }else{
+//            $zm_risk = 0;
+//        }
+//        $data['params'] = [
+//            'mobile'=>$params['mobile'],
+//            'realname'=>$params['name'],
+//            'zm_face'=>$zm_face,
+//            'zm_risk'=>$zm_risk,
+//            'cert_no'=>$params['cert_no'],
+//        ];
+//        $result = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
+//        $info = json_decode($result,true);
+//		LogApi::debug('芝麻小程序读取token的用户信息',[
+//			'url' => config('tripartite.Interior_Goods_Url'),
+//			'params' => json_encode($data),
+//			'result' => $result,
+//		]);
+//        if(!is_array($info)){
+//            return false;
+//        }
+//        if($info['code']!=0){
+//            return false;
+//        }
+//        return $info['data'];
+//    }
+
+
     /**
      * 获取用户地址信息
      *  @param $data
