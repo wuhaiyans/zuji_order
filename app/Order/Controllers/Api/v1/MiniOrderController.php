@@ -183,6 +183,7 @@ class MiniOrderController extends Controller
             'out_order_no' => 'required', //【必须】string；业务订单号
             'pay_type' => 'required', //【必须】string；支付方式id
         ];
+        $_user = $params['userinfo'];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code'],$validateParams['msg']);
@@ -199,7 +200,7 @@ class MiniOrderController extends Controller
         }
 		
         $param = $params['params'];
-        $_user = $params['userinfo'];
+
         //开启事务
         DB::beginTransaction();
         try{
