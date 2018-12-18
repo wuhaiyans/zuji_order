@@ -176,12 +176,14 @@ class MiniOrderController extends Controller
      */
     public function confirmationQuery(Request $request){
         $params     = $request->all();
+        \App\Lib\Common\LogApi::error('开发环境请求',$params);
         // 验证参数
         $rules = [
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
             'pay_type' => 'required', //【必须】string；支付方式id
         ];
+        $_user = $params['userinfo'];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code'],$validateParams['msg']);
@@ -198,6 +200,7 @@ class MiniOrderController extends Controller
         }
 		
         $param = $params['params'];
+
         //开启事务
         DB::beginTransaction();
         try{
@@ -243,15 +246,15 @@ class MiniOrderController extends Controller
             }
             $miniData = $miniApi->getResult();
 			\App\Lib\Common\LogApi::info('芝麻订单认证结果-'.$param['zm_order_no'],$miniData);
-            //用户处理
-            $_user = \App\Lib\User\User::getUserId($miniData, $params['auth_token'],$params['appid']);
-			if( !$_user ){
-                \App\Lib\Common\LogApi::error('芝麻确认订单，获取用户失败',$miniData);
-				return apiResponse([],ApiStatus::CODE_50000,'芝麻确认订单，获取用户失败');
-			}
+//            //用户处理
+//            $_user = \App\Lib\User\User::getUserId($miniData, $params['auth_token'],$params['appid']);
+//			if( !$_user ){
+//                \App\Lib\Common\LogApi::error('芝麻确认订单，获取用户失败',$miniData);
+//				return apiResponse([],ApiStatus::CODE_50000,'芝麻确认订单，获取用户失败');
+//			}
 			\App\Lib\Common\LogApi::info('当前登录用户信息',$_user);
-            $data['user_id'] = $_user['user_id'];
-            $miniData['member_id'] = $_user['user_id'];
+            $data['user_id'] = $_user['uid'];
+            $miniData['member_id'] = $_user['uid'];
 
             $couponList['coupon_list']=[];
             //自动调用接口查询优惠券
@@ -272,11 +275,7 @@ class MiniOrderController extends Controller
             $data['coupon'] = $coupon;
 
             //风控系统处理
-            if($params['auth_token']){
-                $auth_token = $params['auth_token'];
-            }else{
-                $auth_token = $_user['auth_token'];
-            }
+            $auth_token = $params['auth_token'];
             $b = \App\Lib\Risk\Risk::setMiniRisk($miniData,$auth_token,$params['appid']);
             if($b != true){
 //				return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
@@ -285,7 +284,7 @@ class MiniOrderController extends Controller
             //处理用户收货地址
             $address = \App\Lib\User\User::getAddressId([
                 'house'=>$miniData['house'],
-                'user_id'=>$_user['user_id'],
+                'user_id'=>$_user['uid'],
                 'name'=>$miniData['name'],
                 'mobile'=>$miniData['mobile'],
             ]);
