@@ -330,10 +330,7 @@ class OrderCreater
             $zuqi =$schemaData['sku'][$key]['zuqi']; //租期
             $insurance =normalizeNum($value['insurance']); //意外险
 
-            foreach ($value['instalment'] as $k=>$v){
-                $totalAmount +=$v['amount'];
-            }
-            $totalAmount =normalizeNum($totalAmount);
+            $totalAmount =normalizeNum($amount+$insurance);
             $schemaData['sku'][$key]['instalment_total_amount'] = $totalAmount;
 
             //固定优惠券 每期金额
