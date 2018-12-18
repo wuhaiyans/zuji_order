@@ -333,6 +333,7 @@ class OrderCreater
             foreach ($value['instalment'] as $k=>$v){
                 $totalAmount +=$v['amount'];
             }
+            $totalAmount =normalizeNum($totalAmount);
             $schemaData['sku'][$key]['instalment_total_amount'] = $totalAmount;
 
             //固定优惠券 每期金额
