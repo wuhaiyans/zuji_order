@@ -766,8 +766,8 @@ class OrderOperate
             'txn_amount'	=> $totalAmount,	// 总金额；单位：分
             'txn_terms'		=> $txnTerms,	// 总分期数
             'rent_amount'	=> $rentAmount,	// 总租金；单位：分
-            'month_amount'	=> normalizeNum($orderInfo['order_amount']/$txnTerms),	// 每月租金；单位：分
-            'remainder_amount' => normalizeNum($txnTerms%$txnTerms),	// 每月租金取整后,总租金余数；单位：分
+            'month_amount'	=> normalizeNum(floor($orderInfo['order_amount']*100/$txnTerms)/100),	// 每月租金；单位：分
+            'remainder_amount' => normalizeNum($orderInfo['order_amount']*100%$txnTerms/100),	// 每月租金取整后,总租金余数；单位：分
             'sum_amount'	=> 0.00,	// 已还总金额；单位：分
             'sum_terms'		=> 0,	// 已还总期数
             'remain_amount' =>  $rentAmount,	// 剩余总金额；单位：分
@@ -923,33 +923,20 @@ class OrderOperate
     public static function orderRiskSave($orderNo,$userId)
     {
 
-        //查询订单信息
-        $order = Order::getByNo($orderNo);
-        if(!$order){
-            LogApi::error(config('app.env')."[orderRiskSave] Order-non-existent:".$orderNo);
-            return ApiStatus::CODE_31006;
-        }
-        $orderInfo = $order->getData();
-
-        //查询订单商品信息
-        $goods = OrderGoodsRepository::getGoodsByOrderNo($orderNo);
-        $goodsInfo =objectToArray($goods);
-        $marketPrice=0;
-        //读取市场价
-        foreach ($goodsInfo as $k=>$v){
-            $marketPrice +=$v['market_price'];
-        }
-        //市场价与押金的差额
-        $surplusAmount =($marketPrice - $orderInfo['order_yajin'])*100>0?($marketPrice - $orderInfo['order_yajin'])*100:0;
         //获取风控信息信息
         try{
-            $knight =Risk::getAllKnight(['user_id'=>$userId,'surplus_amount'=>$surplusAmount]);
+            $knight =Risk::getAllKnight(['user_id'=>$userId]);
         }catch (\Exception $e){
             LogApi::error(config('app.env')."[orderRiskSave] GetAllKnight-error:".$userId);
             return  ApiStatus::CODE_31006;
         }
 
-
+        //查询订单信息
+        $order = $order = Order::getByNo($orderNo);
+        if(!$order){
+            LogApi::error(config('app.env')."[orderRiskSave] Order-non-existent:".$orderNo);
+            return ApiStatus::CODE_31006;
+        }
         $orderInfo = $order->getData();
         $riskStatus = Inc\OrderRiskCheckStatus::SystemPass;
 
@@ -2080,6 +2067,7 @@ class OrderOperate
                     {
 
                         if ($goodsList[$keys]['zuqi_type']==Inc\OrderStatus::ZUQI_TYPE1) {
+
                             $goodsList[$keys]['yajin'] = normalizeNum($goodsList[$keys]['yajin']+$goodsList[$keys]['amount_after_discount']);
                         }
 
