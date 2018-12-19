@@ -322,6 +322,7 @@ class OrderCreater
 
         $first_amount =0;
         $total_amount =0;
+        $totalAmount =0;
         $payType =$schemaData['order']['pay_type'];
         foreach ($schemaData['sku'] as $key=>$value) {
 
@@ -330,7 +331,6 @@ class OrderCreater
             $insurance =normalizeNum($value['insurance']); //意外险
 
             $totalAmount =normalizeNum($amount+$insurance);
-
             $schemaData['sku'][$key]['instalment_total_amount'] = $totalAmount;
 
             //固定优惠券 每期金额
@@ -519,6 +519,7 @@ class OrderCreater
                 'sku_id'=>$schemaData['sku'][0]['sku_id'],
                 'spu_name'=>$schemaData['sku'][0]['spu_name'],
                 'thumb'=>$schemaData['sku'][0]['thumb'],
+                'total_zujin'=>$schemaData['sku'][0]['total_zujin'],
                 'category_id'=>$schemaData['sku'][0]['category_id'],
                 'zuqi_type'=>$schemaData['sku'][0]['zuqi_type'],
                 'pay_type'=>$schemaData['sku'][0]['pay_type'],

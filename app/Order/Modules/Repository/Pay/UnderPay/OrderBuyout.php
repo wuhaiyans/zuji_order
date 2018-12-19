@@ -6,10 +6,12 @@ use App\Order\Modules\Inc\OrderBuyoutStatus;
 use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\GoodsLogRepository;
 use App\Order\Modules\Repository\Order\Goods;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderBuyoutRepository;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
@@ -109,6 +111,13 @@ class OrderBuyout implements UnderLine {
             'order_no'=>$this->order_no,
             'goods_no'=>$goodsInfo['goods_no'],
         ];
+        if($orderInfo['pay_type'] == PayInc::FlowerFundauth){
+            $ret = OrderGoodsInstalmentRepository::UnFinishWithhold($buyout['order_no']);
+            if(!$ret){
+                LogApi::alert("buyout-callback:扣除分期租金失败",$data,self::$email);
+                return false;
+            }
+        }
         $ret = Instalment::close($data);
         if(!$ret){
             LogApi::info("offline-buyout","关闭分期失败");

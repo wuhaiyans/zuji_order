@@ -923,20 +923,33 @@ class OrderOperate
     public static function orderRiskSave($orderNo,$userId)
     {
 
+        //查询订单信息
+        $order = Order::getByNo($orderNo);
+        if(!$order){
+            LogApi::error(config('app.env')."[orderRiskSave] Order-non-existent:".$orderNo);
+            return ApiStatus::CODE_31006;
+        }
+        $orderInfo = $order->getData();
+
+        //查询订单商品信息
+        $goods = OrderGoodsRepository::getGoodsByOrderNo($orderNo);
+        $goodsInfo =objectToArray($goods);
+        $marketPrice=0;
+        //读取市场价
+        foreach ($goodsInfo as $k=>$v){
+            $marketPrice +=$v['market_price'];
+        }
+        //市场价与押金的差额
+        $surplusAmount =($marketPrice - $orderInfo['order_yajin'])*100>0?($marketPrice - $orderInfo['order_yajin'])*100:0;
         //获取风控信息信息
         try{
-            $knight =Risk::getAllKnight(['user_id'=>$userId]);
+            $knight =Risk::getAllKnight(['user_id'=>$userId,'surplus_amount'=>$surplusAmount]);
         }catch (\Exception $e){
             LogApi::error(config('app.env')."[orderRiskSave] GetAllKnight-error:".$userId);
             return  ApiStatus::CODE_31006;
         }
 
-        //查询订单信息
-        $order = $order = Order::getByNo($orderNo);
-        if(!$order){
-            LogApi::error(config('app.env')."[orderRiskSave] Order-non-existent:".$orderNo);
-            return ApiStatus::CODE_31006;
-        }
+
         $orderInfo = $order->getData();
         $riskStatus = Inc\OrderRiskCheckStatus::SystemPass;
 
@@ -2065,7 +2078,8 @@ class OrderOperate
                 if ($orderListArray['data'][$values['order_no']]['order_status']==Inc\OrderStatus::OrderInService) {
                     if ($orderListArray['data'][$values['order_no']]['pay_type'] == Inc\PayInc::FlowerFundauth)
                     {
-                        if ($goodsList[$keys]['yajin']==Inc\OrderStatus::ZUQI_TYPE1) {
+
+                        if ($goodsList[$keys]['zuqi_type']==Inc\OrderStatus::ZUQI_TYPE1) {
                             $goodsList[$keys]['yajin'] = normalizeNum($goodsList[$keys]['yajin']+$goodsList[$keys]['amount_after_discount']);
                         }
 
