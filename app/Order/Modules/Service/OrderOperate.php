@@ -196,8 +196,7 @@ class OrderOperate
                 //推送到区块链
                 $b =OrderBlock::orderPushBlock($orderDetail['order_no'],OrderBlock::OrderShipped);
                 LogApi::info("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b);
-                if($b){
-                    LogApi::error("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b);
+                if($b==100){
                     LogApi::alert("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b,[],[config('web.order_warning_user')]);
                 }
                 return true;
@@ -686,8 +685,7 @@ class OrderOperate
             //推送到区块链
             $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderTakeDeliver);
             LogApi::info("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b);
-            if($b){
-                LogApi::error("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b);
+            if($b==100){
                 LogApi::alert("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
             }
             return true;
@@ -900,8 +898,7 @@ class OrderOperate
             //推送到区块链
             $b =OrderBlock::orderPushBlock($data['order_no'],OrderBlock::OrderConfirmed);
             LogApi::info("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b);
-            if($b){
-                LogApi::error("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b);
+            if($b==100){
                 LogApi::alert("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b,[],[config('web.order_warning_user')]);
             }
             return true;
