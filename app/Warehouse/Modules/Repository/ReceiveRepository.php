@@ -503,6 +503,7 @@ class ReceiveRepository
         $params['check_result'] = isset($params['check_result']) ? $params['check_result'] : CheckItems::RESULT_FALSE;
         $params['check_description'] = isset($params['check_description']) ? $params['check_description'] : '无';
         $params['compensate_amount'] = isset($params['compensate_amount']) ? $params['compensate_amount'] : 0;
+        $params['imgs'] = isset($params['imgs']) ? $params['imgs'] : 0;
 
         $model = new CheckItems();
         return $model->create($params);

@@ -69,5 +69,6 @@ return [
     'warehouse.receive.imeiIn'=> 'ReceiveController@imeiIn', //确认入库
     'warehouse.receive.orderImeiIn'=> 'ReceiveController@orderImeiIn', //确认入库(订单工具)
 
+    'warehouse.checkitem.getDetails'=> 'CheckItemController@getDetails', //查看检测详情
 
 ];
