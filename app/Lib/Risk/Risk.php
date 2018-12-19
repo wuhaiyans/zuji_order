@@ -100,6 +100,7 @@ class Risk extends \App\Lib\BaseApi{
      * @param $arr
      * [
      *      'user_id'=>'',//用户ID
+     *      ‘surplus_amount’=>'',//市场价与实际押金的差额 如小于0 传0 单位：分
      * ]
      * @return array
      */
