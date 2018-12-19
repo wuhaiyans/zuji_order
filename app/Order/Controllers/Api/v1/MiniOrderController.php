@@ -175,15 +175,14 @@ class MiniOrderController extends Controller
      * 订单确认（查询订单信息 获取免押金额）
      */
     public function confirmationQuery(Request $request){
-        echo 111;die;
         $params     = $request->all();
-        print_r($params);die;
         // 验证参数
         $rules = [
             'zm_order_no' => 'required', //【必须】string；芝麻订单号
             'out_order_no' => 'required', //【必须】string；业务订单号
             'pay_type' => 'required', //【必须】string；支付方式id
         ];
+        $_user = $params['userinfo'];
         $validateParams = $this->validateParams($rules,$params['params']);
         if ($validateParams['code'] != 0) {
             return apiResponse([],$validateParams['code'],$validateParams['msg']);
@@ -200,7 +199,7 @@ class MiniOrderController extends Controller
         }
 		
         $param = $params['params'];
-        $_user = $params['userinfo'];
+
         //开启事务
         DB::beginTransaction();
         try{
