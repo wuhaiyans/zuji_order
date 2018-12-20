@@ -363,8 +363,6 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false;
                     }
-                    //插入操作日志
-                    OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_info['order_no'],"退款","退款成功");
                     DB::commit();
                     if( $userinfo['type'] == PublicInc::Type_Admin){
                         //根据订单风控审核状态 申请发送短信
@@ -398,8 +396,6 @@ class OrderReturnCreater
                 //调用出账
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
                 if ($accountRes['code']==0){
-                    //插入操作日志
-                    OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_info['order_no'],"退款","退款成功");
                     DB::commit();
                     if( $userinfo['type'] == PublicInc::Type_Admin){
                         //根据订单风控审核状态 申请发送短信
@@ -474,7 +470,8 @@ class OrderReturnCreater
             }
 
             $no_list['refund_no'] = $data['refund_no'];
-
+            //操作日志
+            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","申请退款");
             $return_info['refund_no'] = $data['refund_no'];
             if($data['status'] == ReturnStatus::ReturnAgreed){
                 //-+------------------------------------------------------------
@@ -490,8 +487,6 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false;
                     }
-                    //操作日志
-                    OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","退款成功");
                     DB::commit();
                     return true;
                 }
@@ -515,8 +510,6 @@ class OrderReturnCreater
                     return false;//取消发货失败
                 }
             }
-            //操作日志
-            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","申请退款");
             //事务提交
             DB::commit();
 
@@ -3327,7 +3320,7 @@ class OrderReturnCreater
             // 创建退换货单参数
             $data = [
                 'goods_no'      => $goods_info['goods_no'],
-                'order_no'      => $params['order_no'] ,
+                'order_no'      => $params['order_no'],
                 'business_type'  => ReturnStatus::UnderLineBusiness,
                 'business_key'  => OrderStatus::BUSINESS_RETURN,
                 'reason_id'     => ReturnStatus::ReturnUserQuestion,
@@ -3356,7 +3349,7 @@ class OrderReturnCreater
             }
 
              //修改冻结状态为退货中
-            $orderStatus = $order->returnOpen();
+             $orderStatus = $order->returnOpen();
             if( !$orderStatus ){
                 LogApi::debug("【advanceReturn】修改冻结状态为退货中失败");
                 //事务回滚
