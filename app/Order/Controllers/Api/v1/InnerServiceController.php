@@ -209,7 +209,7 @@ class InnerServiceController extends Controller
 
         $userinfo =[
             'uid'=>$validateParams['data']['user_id'],
-            'username'=>'系統',
+            'username'=>'system',
             'type'=>1,
             'system'=>'cron',
         ];
