@@ -944,6 +944,7 @@ class OrderOperate
         //获取风控信息信息
         try{
             $knight =Risk::getAllKnight(['user_id'=>$userId,'amount'=>$amount*100]);
+            LogApi::info(config('app.env')."[orderRiskSave] GetAllKnight-info:".$userId,['user_id'=>$userId,'amount'=>$amount*100]);
         }catch (\Exception $e){
             LogApi::error(config('app.env')."[orderRiskSave] GetAllKnight-error:".$userId,['user_id'=>$userId,'amount'=>$amount*100]);
             return  ApiStatus::CODE_31006;
