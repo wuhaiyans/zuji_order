@@ -919,15 +919,6 @@ class OrderOperate
      */
     public static function orderRiskSave($orderNo,$userId)
     {
-
-        //获取风控信息信息
-        try{
-            $knight =Risk::getAllKnight(['user_id'=>$userId]);
-        }catch (\Exception $e){
-            LogApi::error(config('app.env')."[orderRiskSave] GetAllKnight-error:".$userId);
-            return  ApiStatus::CODE_31006;
-        }
-
         //查询订单信息
         $order = $order = Order::getByNo($orderNo);
         if(!$order){
@@ -935,6 +926,30 @@ class OrderOperate
             return ApiStatus::CODE_31006;
         }
         $orderInfo = $order->getData();
+
+        //查询商品信息
+        $marketPrice = 0;
+
+        $goodsInfo = OrderGoodsRepository::getGoodsByOrderNo($orderNo);
+        if($goodsInfo){
+            $goodsInfo =objectToArray($goodsInfo);
+            foreach ($goodsInfo as $k=>$v){
+                $marketPrice +=$v['market_price'];
+            }
+        }
+        //市场价与 订单押金的差额
+        $cha = $marketPrice-$orderInfo['order_yajin'];
+        $amount = $cha >0?$cha:0;
+
+        //获取风控信息信息
+        try{
+            $knight =Risk::getAllKnight(['user_id'=>$userId,'amount'=>$amount*100]);
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."[orderRiskSave] GetAllKnight-error:".$userId,['user_id'=>$userId,'amount'=>$amount*100]);
+            return  ApiStatus::CODE_31006;
+        }
+
+
         $riskStatus = Inc\OrderRiskCheckStatus::SystemPass;
 
         if($orderInfo['order_type'] == Inc\OrderStatus::orderMiniService && $knight['risk_grade'] == 'REJECT'){
