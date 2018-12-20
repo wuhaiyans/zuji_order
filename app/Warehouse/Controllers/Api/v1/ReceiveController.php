@@ -312,8 +312,7 @@ class ReceiveController extends Controller
             'check_description' => 'required',
             'check_result' => 'required',
             'compensate_amount' => 'required',
-            'goods_no' => 'required',
-            'imgs' => 'required',
+            'goods_no' => 'required'
         ];
 
         $params = $this->_dealParams($rules);
