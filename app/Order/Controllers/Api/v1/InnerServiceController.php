@@ -113,8 +113,7 @@ class InnerServiceController extends Controller
 
         $userinfo =[
             'uid'=>$validateParams['data']['user_id'],
-            'username'=>'系統',
-            'system'=>'cron',
+            'username'=>'system',
         ];
 
         $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($validateParams['data']['order_no'],$userinfo);
