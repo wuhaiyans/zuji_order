@@ -100,11 +100,12 @@ class Risk extends \App\Lib\BaseApi{
      * @param $arr
      * [
      *      'user_id'=>'',//用户ID
+     *      ‘amount’=>'',//市场价与实际押金的差额 如小于0 传0 单位：分
      * ]
      * @return array
      */
     public static function getAllKnight($arr){
-        return self::request(\config('app.APPID'), \config('risksystem.FENGKONG_API'),'system.risk.info', '1.0', ['user_id'=>$arr['user_id']]);
+        return self::request(\config('app.APPID'), \config('risksystem.FENGKONG_API'),'system.risk.info', '1.0', ['user_id'=>$arr['user_id'],'amount'=>$arr['amount']]);
     }
     /**
      * 获取风控用户信息

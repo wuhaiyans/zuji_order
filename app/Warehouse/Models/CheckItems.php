@@ -16,13 +16,15 @@ class CheckItems extends Warehouse
 
     protected $fillable = [
         'receive_no',       //收货单号
-        'goods_no',
+        'serial_no',
         'check_item',       //检查项
         'check_name',       //检查名
         'check_description',//检查描述
         'check_result',
         'create_time',
-        'compensate_amount'
+        'compensate_amount',
+        'goods_no',
+        'imgs'
     ];
 
     //检测结果

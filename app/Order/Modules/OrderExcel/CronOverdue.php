@@ -67,16 +67,15 @@ class CronOverdue
         //订单状态
         $where[] = ['order_info.order_status','=',Inc\OrderStatus::OrderInService,];
 
-        var_dump($whereBack);
-        var_dump($where);
         //渠道条件设置所有小程序
         $channelId = [10,14,15,16];
 
         //未还订单数
+
         $backCount = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($whereBack)
             ->whereIn("order_info.channel_id",$channelId)->count();
-        echo $backCount."<br/>";
+
         $backGoodsYajin = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($whereBack)
             ->whereIn("order_info.channel_id",$channelId)->sum("order_info.goods_yajin");
@@ -85,10 +84,11 @@ class CronOverdue
             ->whereIn("order_info.channel_id",$channelId)->sum("order_info.order_yajin");
         $backMianyajin = $backGoodsYajin-$backOrderYajin;
         //坏账订单数
+
         $count = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
             ->whereIn("order_info.channel_id",$channelId)->count();
-        echo $backCount."<br/>";die;
+
         $data = [];
         $single = 0;
         $mianyajinSum = 0;
@@ -174,7 +174,7 @@ class CronOverdue
             $num,
             $data
         ];
-        Excel::xlsxExport($body,$headers,$title,date("Y-m-d"),"overdue");
+        Excel::xlsxExport($body,$headers,$title,date("Y-m-d H.i"),"overdue");
         Redis::set(self::$redisKey,date("Y-m-d"));
         echo "订单总数:".$single."<br/><br/>";
         return;
