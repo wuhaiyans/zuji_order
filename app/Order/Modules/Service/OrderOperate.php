@@ -1069,7 +1069,7 @@ class OrderOperate
         $orderInfoData =  OrderRepository::getInfoById($orderNo,$userId);
 
         //如果订单为已支付 取消订单走申请退款方法
-        if($orderInfoData['order_status'] == Inc\OrderStatus::OrderPayed && $userInfo['username'] !="系统"){
+        if($orderInfoData['order_status'] == Inc\OrderStatus::OrderPayed && !isset($userInfo['system']) && $userInfo['system'] !='cron'){
             $params=[
                 'order_no'=>$orderNo,
                 'user_id'=>$userId,
