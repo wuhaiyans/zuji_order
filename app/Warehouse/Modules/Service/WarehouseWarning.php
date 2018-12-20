@@ -20,7 +20,7 @@ class WarehouseWarning
      * @param $msg  警报标题
      * @param array $data  警报内容
      */
-    public static function warningWarehouse2($msg='',  $data= array())
+    public static function warningWarehouse($msg='',  $data= array())
     {
         $msg = '[warningWarehouse]'.$msg;
         LogApi::alert($msg, $data,self::$toEmail);

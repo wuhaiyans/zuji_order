@@ -521,7 +521,7 @@ class DeliveryController extends Controller
         $request = request()->input();
         $params['channel_id'] = json_decode($request['userinfo']['channel_id'], true);
         $list = $this->delivery->lists($params);
-        WarehouseWarning::warningWarehouse2('[订单发货]失败',[$list]);
+        WarehouseWarning::warningWarehouse('[订单发货]失败',[$list]);
         return \apiResponse($list);
     }
 
