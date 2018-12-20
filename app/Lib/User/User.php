@@ -188,7 +188,7 @@ class User extends \App\Lib\BaseApi{
             'user_id'=>$params['user_id'],
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
-        \App\Lib\Common\LogApi::debug('本地小程序查询用户地址信息',array_merge($data,$info));
+        \App\Lib\Common\LogApi::debug('本地小程序查询用户地址信息',[$data,$info]);
         $info =json_decode($info,true);
         if(!is_array($info)){
             return false;
