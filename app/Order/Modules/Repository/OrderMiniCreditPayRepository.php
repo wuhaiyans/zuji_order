@@ -58,8 +58,16 @@ class OrderMiniCreditPayRepository
         }else{
             $MiniCreditPay->out_trans_no = '';
         }
-        $MiniCreditPay->remark = $arr['remark'];
-        $MiniCreditPay->pay_amount = $arr['pay_amount'];
+        if( isset($arr['remark']) ){
+            $MiniCreditPay->remark = $arr['remark'];
+        }else{
+            $MiniCreditPay->remark = '';
+        }
+        if( isset($arr['pay_amount']) ){
+            $MiniCreditPay->pay_amount = $arr['pay_amount'];
+        }else{
+            $MiniCreditPay->pay_amount = 0.00;
+        }
         $b = $MiniCreditPay->update();
         return $b;
     }
