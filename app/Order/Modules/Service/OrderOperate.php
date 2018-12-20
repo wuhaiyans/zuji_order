@@ -196,8 +196,7 @@ class OrderOperate
                 //推送到区块链
                 $b =OrderBlock::orderPushBlock($orderDetail['order_no'],OrderBlock::OrderShipped);
                 LogApi::info("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b);
-                if($b){
-                    LogApi::error("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b);
+                if($b==100){
                     LogApi::alert("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b,[],[config('web.order_warning_user')]);
                 }
                 return true;
@@ -686,8 +685,7 @@ class OrderOperate
             //推送到区块链
             $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderTakeDeliver);
             LogApi::info("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b);
-            if($b){
-                LogApi::error("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b);
+            if($b==100){
                 LogApi::alert("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
             }
             return true;
@@ -766,8 +764,8 @@ class OrderOperate
             'txn_amount'	=> $totalAmount,	// 总金额；单位：分
             'txn_terms'		=> $txnTerms,	// 总分期数
             'rent_amount'	=> $rentAmount,	// 总租金；单位：分
-            'month_amount'	=> normalizeNum($orderInfo['order_amount']/$txnTerms),	// 每月租金；单位：分
-            'remainder_amount' => normalizeNum($txnTerms%$txnTerms),	// 每月租金取整后,总租金余数；单位：分
+            'month_amount'	=> normalizeNum(floor($orderInfo['order_amount']*100/$txnTerms)/100),	// 每月租金；单位：分
+            'remainder_amount' => normalizeNum($orderInfo['order_amount']*100%$txnTerms/100),	// 每月租金取整后,总租金余数；单位：分
             'sum_amount'	=> 0.00,	// 已还总金额；单位：分
             'sum_terms'		=> 0,	// 已还总期数
             'remain_amount' =>  $rentAmount,	// 剩余总金额；单位：分
@@ -900,8 +898,7 @@ class OrderOperate
             //推送到区块链
             $b =OrderBlock::orderPushBlock($data['order_no'],OrderBlock::OrderConfirmed);
             LogApi::info("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b);
-            if($b){
-                LogApi::error("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b);
+            if($b==100){
                 LogApi::alert("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b,[],[config('web.order_warning_user')]);
             }
             return true;
@@ -922,15 +919,6 @@ class OrderOperate
      */
     public static function orderRiskSave($orderNo,$userId)
     {
-
-        //获取风控信息信息
-        try{
-            $knight =Risk::getAllKnight(['user_id'=>$userId]);
-        }catch (\Exception $e){
-            LogApi::error(config('app.env')."[orderRiskSave] GetAllKnight-error:".$userId);
-            return  ApiStatus::CODE_31006;
-        }
-
         //查询订单信息
         $order = $order = Order::getByNo($orderNo);
         if(!$order){
@@ -938,6 +926,31 @@ class OrderOperate
             return ApiStatus::CODE_31006;
         }
         $orderInfo = $order->getData();
+
+        //查询商品信息
+        $marketPrice = 0;
+
+        $goodsInfo = OrderGoodsRepository::getGoodsByOrderNo($orderNo);
+        if($goodsInfo){
+            $goodsInfo =objectToArray($goodsInfo);
+            foreach ($goodsInfo as $k=>$v){
+                $marketPrice +=$v['market_price'];
+            }
+        }
+        //市场价与 订单押金的差额
+        $cha = $marketPrice-$orderInfo['order_yajin'];
+        $amount = $cha >0?$cha:0;
+
+        //获取风控信息信息
+        try{
+            $knight =Risk::getAllKnight(['user_id'=>$userId,'amount'=>$amount*100]);
+            LogApi::info(config('app.env')."[orderRiskSave] GetAllKnight-info:".$userId,['user_id'=>$userId,'amount'=>$amount*100]);
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."[orderRiskSave] GetAllKnight-error:".$userId,['user_id'=>$userId,'amount'=>$amount*100]);
+            return  ApiStatus::CODE_31006;
+        }
+
+
         $riskStatus = Inc\OrderRiskCheckStatus::SystemPass;
 
         if($orderInfo['order_type'] == Inc\OrderStatus::orderMiniService && $knight['risk_grade'] == 'REJECT'){
@@ -1072,7 +1085,7 @@ class OrderOperate
         $orderInfoData =  OrderRepository::getInfoById($orderNo,$userId);
 
         //如果订单为已支付 取消订单走申请退款方法
-        if($orderInfoData['order_status'] == Inc\OrderStatus::OrderPayed){
+        if($orderInfoData['order_status'] == Inc\OrderStatus::OrderPayed && !isset($userInfo['system']) && $userInfo['system'] !='cron'){
             $params=[
                 'order_no'=>$orderNo,
                 'user_id'=>$userId,
@@ -2065,7 +2078,9 @@ class OrderOperate
                 if ($orderListArray['data'][$values['order_no']]['order_status']==Inc\OrderStatus::OrderInService) {
                     if ($orderListArray['data'][$values['order_no']]['pay_type'] == Inc\PayInc::FlowerFundauth)
                     {
-                        if ($goodsList[$keys]['yajin']==Inc\OrderStatus::ZUQI_TYPE1) {
+
+                        if ($goodsList[$keys]['zuqi_type']==Inc\OrderStatus::ZUQI_TYPE1) {
+
                             $goodsList[$keys]['yajin'] = normalizeNum($goodsList[$keys]['yajin']+$goodsList[$keys]['amount_after_discount']);
                         }
 
