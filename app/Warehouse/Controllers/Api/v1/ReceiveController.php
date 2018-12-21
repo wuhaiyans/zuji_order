@@ -324,11 +324,11 @@ class ReceiveController extends Controller
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
 
-
+        return apiResponse([$_FILES]);
         $update_obj = new TencentUpload();
         $upload_imgs = $update_obj->file_upload_all();
         LogApi::info('checkItemsFinish_info_Receive2',$upload_imgs);
-        return apiResponse(['items'=>$upload_imgs]);
+
 
 
         try {
