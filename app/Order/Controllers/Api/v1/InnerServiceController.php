@@ -9,6 +9,7 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
+use App\Lib\PublicInc;
 use App\Order\Modules\Service\OrderBuyout;
 use App\Order\Modules\Service\OrderOperate;
 use Illuminate\Http\Request;
@@ -114,6 +115,7 @@ class InnerServiceController extends Controller
         $userinfo =[
             'uid'=>$validateParams['data']['user_id'],
             'username'=>'system',
+            'type'=>PublicInc::Type_System,
         ];
 
         $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($validateParams['data']['order_no'],$userinfo);
@@ -210,7 +212,7 @@ class InnerServiceController extends Controller
         $userinfo =[
             'uid'=>$validateParams['data']['user_id'],
             'username'=>'system',
-            'type'=>1,
+            'type'=>PublicInc::Type_System,
             'system'=>'cron',
         ];
         $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $userinfo);
