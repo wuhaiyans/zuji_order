@@ -71,11 +71,11 @@ class CronOverdue
         $channelId = [10,14,15,16];
 
         //未还订单数
-        echo sql_profiler();
+
         $backCount = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($whereBack)
             ->whereIn("order_info.channel_id",$channelId)->count();
-        echo $backCount;die;
+
         $backGoodsYajin = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($whereBack)
             ->whereIn("order_info.channel_id",$channelId)->sum("order_info.goods_yajin");
