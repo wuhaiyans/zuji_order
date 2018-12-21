@@ -281,11 +281,14 @@ class OrderReturnCreater
             //获取订单信息
             $order = \App\Order\Modules\Repository\Order\Order::getByNo($params['order_no'], true);
             if ( !$order ){
-                LogApi::debug("[createRefund]获取订单信息失败".$order);
+
                 return false;
             }
             $order_info = $order->getData();
-
+            LogApi::debug("[createRefund]获取订单信息失败",[
+                'order_info'=> $order_info,
+                'userinfo'  => $userinfo
+            ]);
             //订单必须是已支付，未收货
             if( $order_info['order_status'] != OrderStatus::OrderPayed  && $order_info['order_status'] != OrderStatus::OrderPaying && $order_info['order_status'] != OrderStatus::OrderInStock){
                 LogApi::debug("[createRefund]订单状态不符合取消订单：".$order_info['order_status']);
@@ -363,6 +366,8 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false;
                     }
+                    //插入操作日志
+                    $orderLog = OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_info['order_no'],"退款","退款成功");
                     DB::commit();
                     if( $userinfo['type'] == PublicInc::Type_Admin){
                         //根据订单风控审核状态 申请发送短信
@@ -396,6 +401,7 @@ class OrderReturnCreater
                 //调用出账
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
                 if ($accountRes['code']==0){
+                    OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_info['order_no'],"退款","退款成功");
                     DB::commit();
                     if( $userinfo['type'] == PublicInc::Type_Admin){
                         //根据订单风控审核状态 申请发送短信
@@ -3746,25 +3752,7 @@ class OrderReturnCreater
      * @return bool
      */
     public static function refundSuccessCallback($order_info,$userinfo,$return_info){
-        //如果是小程序的订单
-        if($order_info['order_type'] == OrderStatus::orderMiniService){
-            //查询芝麻订单
-            $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($order_info['order_no']);
-            LogApi::info("[refundSuccessCallback]查询芝麻订单",$miniOrderInfo);
-            $data1 = [
-                'out_order_no' => $order_info['order_no'],//商户端订单号
-                'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
-                'remark' => $return_info['reason_text'],//订单操作说明
-                'app_id' => $miniOrderInfo['app_id'],//小程序appid
-            ];
-            LogApi::info("[refundSuccessCallback]通知芝麻取消请求参数",$data1);
-            //通知芝麻取消请求
-            $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data1);
-            if( !$canceRequest){
-                LogApi::info("[refundSuccessCallback]通知芝麻取消请求失败",$canceRequest);
-                return false;
-            }
-        }
+
         //通知收发货取消发货
         if($order_info['order_status'] == OrderStatus::OrderInStock ){
             $cancel = Delivery::cancel($order_info['order_no']);
@@ -3785,8 +3773,31 @@ class OrderReturnCreater
             'auth_unfreeze_amount' => $return_info['auth_unfreeze_amount'],
             'order_status' => $return_info['order_status']
         ], $userinfo);
+        if(!$b){
+            return false;
+
+        }
+        //如果是小程序的订单
+        if($order_info['order_type'] == OrderStatus::orderMiniService){
+            //查询芝麻订单
+            $miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($order_info['order_no']);
+            LogApi::info("[refundSuccessCallback]查询芝麻订单",$miniOrderInfo);
+            $data1 = [
+                'out_order_no' => $order_info['order_no'],//商户端订单号
+                'zm_order_no' => $miniOrderInfo['zm_order_no'],//芝麻订单号
+                'remark' => $return_info['reason_text'],//订单操作说明
+                'app_id' => $miniOrderInfo['app_id'],//小程序appid
+            ];
+            LogApi::info("[refundSuccessCallback]通知芝麻取消请求参数",$data1);
+            //通知芝麻取消请求
+            $canceRequest = \App\Lib\Payment\mini\MiniApi::OrderCancel($data1);
+            if( !$canceRequest){
+                LogApi::info("[refundSuccessCallback]通知芝麻取消请求失败",$canceRequest);
+                return false;
+            }
+        }
         LogApi::info("[refundSuccessCallback]不需要清算，直接调起退款成功结果",$b);
-        return $b;
+        return true;
     }
 
 

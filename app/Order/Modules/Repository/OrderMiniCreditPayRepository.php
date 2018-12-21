@@ -53,21 +53,9 @@ class OrderMiniCreditPayRepository
         $MiniCreditPay->order_operate_type = $arr['order_operate_type'];
         $MiniCreditPay->out_order_no = $arr['out_order_no'];
         $MiniCreditPay->zm_order_no = $arr['zm_order_no'];
-        if( isset($arr['out_trans_no']) ){
-            $MiniCreditPay->out_trans_no = $arr['out_trans_no'];
-        }else{
-            $MiniCreditPay->out_trans_no = '';
-        }
-        if( isset($arr['remark']) ){
-            $MiniCreditPay->remark = $arr['remark'];
-        }else{
-            $MiniCreditPay->remark = '';
-        }
-        if( isset($arr['pay_amount']) ){
-            $MiniCreditPay->pay_amount = $arr['pay_amount'];
-        }else{
-            $MiniCreditPay->pay_amount = 0.00;
-        }
+        $MiniCreditPay->out_trans_no = $arr['out_trans_no'];
+        $MiniCreditPay->remark = $arr['remark'];
+        $MiniCreditPay->pay_amount = $arr['pay_amount'];
         $b = $MiniCreditPay->update();
         return $b;
     }
