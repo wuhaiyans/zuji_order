@@ -313,8 +313,7 @@ class ReceiveController extends Controller
             'check_description' => 'required',
             'check_result' => 'required',
             'compensate_amount' => 'required',
-            'goods_no' => 'required',
-            'imgs' => 'required',
+            'goods_no' => 'required'
         ];
 
         $params = $this->_dealParams($rules);
@@ -325,10 +324,11 @@ class ReceiveController extends Controller
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
 
-        return apiResponse(['items'=>$_FILES]);
+        return apiResponse($_FILES['params']);
         $update_obj = new TencentUpload();
         $upload_imgs = $update_obj->file_upload_all();
         LogApi::info('checkItemsFinish_info_Receive2',$upload_imgs);
+
 
 
         try {
