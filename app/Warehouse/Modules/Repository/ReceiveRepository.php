@@ -509,7 +509,7 @@ class ReceiveRepository
         $upload_imgs = $update_obj->file_upload_all();
         $imgs = [];
         foreach ($upload_imgs as $key=>$item) {
-            if($item['img']['ret']){
+            if($item['ret']){
                 return false;
             }
             $imgs[] = $item['img']['url'];
