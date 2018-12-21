@@ -166,7 +166,7 @@ class OrderCreater
             //推送到区块链
             $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderUnPay);
             LogApi::info("OrderCreate-addOrderBlock:".$orderNo."-".$b);
-            if($b){
+            if($b==100){
                 LogApi::alert("OrderCreate-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
             }
 
