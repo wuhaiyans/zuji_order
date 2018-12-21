@@ -9,6 +9,7 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
+use App\Lib\PublicInc;
 use App\Order\Modules\Service\OrderBuyout;
 use App\Order\Modules\Service\OrderOperate;
 use Illuminate\Http\Request;
@@ -114,6 +115,7 @@ class InnerServiceController extends Controller
         $userinfo =[
             'uid'=>$validateParams['data']['user_id'],
             'username'=>'system',
+            'type'=>PublicInc::Type_System,
         ];
 
         $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($validateParams['data']['order_no'],$userinfo);
@@ -189,9 +191,9 @@ class InnerServiceController extends Controller
         }
         //调用小程序取消订单接口
         //查询芝麻订单
-        $result = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($validateParams['data']['order_no']);
+        $result = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($params['order_no']);
         if( empty($result) ){
-            \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败',$validateParams['data']['order_no']);
+            \App\Lib\Common\LogApi::info('本地小程序查询芝麻订单信息表失败',$params['order_no']);
             return apiResponse([],ApiStatus::CODE_35003,'本地小程序查询芝麻订单信息表失败');
         }
         //发送取消请求
@@ -210,8 +212,7 @@ class InnerServiceController extends Controller
         $userinfo =[
             'uid'=>$validateParams['data']['user_id'],
             'username'=>'system',
-            'type'=>1,
-            'system'=>'cron',
+            'type'=>PublicInc::Type_System,
         ];
         $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $userinfo);
         if ($success) {

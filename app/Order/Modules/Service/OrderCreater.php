@@ -166,7 +166,7 @@ class OrderCreater
             //推送到区块链
             $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderUnPay);
             LogApi::info("OrderCreate-addOrderBlock:".$orderNo."-".$b);
-            if($b==100){
+            if($b){
                 LogApi::alert("OrderCreate-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
             }
 
@@ -336,7 +336,6 @@ class OrderCreater
             $month = intval($amount/$zuqi);
             //除不尽的放到首月
             $first = $amount-$month*$zuqi+$month;
-
             //代扣+预授权 ，小程序发的分期信息
             if ($payType == PayInc::WithhodingPay || $payType == PayInc::MiniAlipay || $payType == PayInc::FlowerFundauth) {
                 if ($schemaData['order']['zuqi_type'] == 1) {
@@ -351,10 +350,8 @@ class OrderCreater
 
             } //乐百分支付的分期信息
             elseif ($payType == PayInc::LebaifenPay) {
-                //每期金额 单位分
-                $m =$amount*100/15;
-                $schemaData['sku'][$key]['month_amount'] = substr(sprintf("%.3f",$amount/15),0,-1);// 每月租金
-                $schemaData['sku'][$key]['first_amount'] = normalizeNum(substr(sprintf("%.3f",$amount/15),0,-1) + $insurance); //首期支付金额(含碎屏险)
+                $schemaData['sku'][$key]['month_amount'] = normalizeNum(floor($amount*100/15)/100);// 每月租金；单位：分(含碎屏险)
+                $schemaData['sku'][$key]['first_amount'] = normalizeNum(floor($amount*100/15)/100 + $insurance); //首期支付金额
             }
             //（花呗） 分期信息
             elseif ($payType == PayInc::PcreditPayInstallment){

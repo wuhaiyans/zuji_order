@@ -340,16 +340,16 @@ class DeliveryController extends Controller
             $user_info['user_name'] = $params['user_name'];
             $user_info['type'] = $params['type'];
 
-            //修改发货信息
-            $this->delivery->send($params);
             //通知订单接口
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
             LogApi::info('delivery_send_order_info:',$result['order_no'].'_'.$a);
-            if(!$a){
-                DB::rollBack();
-                WarehouseWarning::warningWarehouse('[订单发货]失败',[$orderDetail, $result['goods_info'], $user_info]);
-                return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
+            if($a){
+                //修改发货信息
+                $this->delivery->send($params);
 
+            }else{
+                DB::rollBack();
+                return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
             }
 
             DB::commit();

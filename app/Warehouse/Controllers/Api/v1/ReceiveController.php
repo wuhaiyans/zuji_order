@@ -3,6 +3,7 @@
 namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
+use App\Lib\TencentUpload;
 use App\Lib\Warehouse\Receive;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Models\ReceiveGoods;
@@ -312,7 +313,8 @@ class ReceiveController extends Controller
             'check_description' => 'required',
             'check_result' => 'required',
             'compensate_amount' => 'required',
-            'goods_no' => 'required'
+            'goods_no' => 'required',
+            'imgs' => 'required',
         ];
 
         $params = $this->_dealParams($rules);
@@ -322,6 +324,12 @@ class ReceiveController extends Controller
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
+
+        return apiResponse(['items'=>$_FILES]);
+        $update_obj = new TencentUpload();
+        $upload_imgs = $update_obj->file_upload_all();
+        LogApi::info('checkItemsFinish_info_Receive2',$upload_imgs);
+
 
         try {
             DB::beginTransaction();

@@ -3,7 +3,7 @@
  * 上传图片 封装
  * @access public
  * @author wangjinlin
- * 
+ *
  */
 namespace App\Lib;
 
@@ -146,5 +146,5 @@ class TencentUpload {
         $sign = strtolower( md5($sign.'key='.  $this->api_upload_key) );
         return $sign;
     }
-    
+
 }
