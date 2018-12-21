@@ -289,6 +289,10 @@ class OrderReturnCreater
                 'order_info'=> $order_info,
                 'userinfo'  => $userinfo
             ]);
+            //如果订单已关闭，已退款，直接返回true
+            if( $order_info['order_status'] == OrderStatus::OrderClosedRefunded){
+                return true;
+            }
             //订单必须是已支付，未收货
             if( $order_info['order_status'] != OrderStatus::OrderPayed  && $order_info['order_status'] != OrderStatus::OrderPaying && $order_info['order_status'] != OrderStatus::OrderInStock){
                 LogApi::debug("[createRefund]订单状态不符合取消订单：".$order_info['order_status']);
