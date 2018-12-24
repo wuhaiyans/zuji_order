@@ -31,7 +31,7 @@ class OrderOverdueDeduction extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_no','order_time','order_source','goods_name','user_name','mobile','unpaid_amount','overdue_amount','deduction_status','visit_record','create_time','update_time'];
+    protected $fillable = ['order_no','order_time','order_source','goods_name','user_name','mobile','unpaid_amount','overdue_amount','deduction_status','visit_record','deduction_time','deduction_amount','create_time','update_time'];
 
     /**
      * 获取当前时间
