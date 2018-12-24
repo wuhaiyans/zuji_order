@@ -371,7 +371,7 @@ class OrderReturnCreater
                         return false;
                     }
                     //插入操作日志
-                    $orderLog = OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_info['order_no'],"退款","退款成功".$params['reason_text']);
+                    $orderLog = OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_info['order_no'],"退款","退款成功;"."备注:".$params['reason_text']);
                     DB::commit();
                     if( $userinfo['type'] == PublicInc::Type_Admin){
                         //根据订单风控审核状态 申请发送短信
@@ -400,12 +400,12 @@ class OrderReturnCreater
                 //设置出账参数变量
                 $cleanAccount = [];
                 $cleanAccount['params']['clean_no'] = $create_clear;
-                $cleanAccount['params']['userinfo'] = $userinfo;
+                $cleanAccount['userinfo'] = $userinfo;
                 LogApi::debug("[createRefund]出账参数",$cleanAccount);
                 //调用出账
                $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
                 if ($accountRes['code']==0){
-                    OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_info['order_no'],"退款","退款成功".$params['reason_text']);
+                    OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_info['order_no'],"退款","退款成功;"."备注:".$params['reason_text']);
                     DB::commit();
                     if( $userinfo['type'] == PublicInc::Type_Admin){
                         //根据订单风控审核状态 申请发送短信
@@ -497,7 +497,7 @@ class OrderReturnCreater
                         return false;
                     }
                     //操作日志
-                    OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","退款成功".$params['reason_text']);
+                    OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","退款成功;"."备注:".$params['reason_text']);
                     DB::commit();
                     return true;
                 }
@@ -522,7 +522,7 @@ class OrderReturnCreater
                 }
             }
             //操作日志
-            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","申请退款".$params['reason_text']);
+            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","申请退款;"."备注:".$params['reason_text']);
             //事务提交
             DB::commit();
 
