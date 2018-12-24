@@ -410,4 +410,11 @@ return [
 	'api.user.getInfo'        => 'UserController@getUserInfo',          //查询手机号
 
 	'api.user.setMobile'     => 'UserController@setMobile',          //更换手机号
+
+    /*************************************************************************************************
+     * ******************************逾期扣款处理*************************************
+     ************************************************************************************************/
+    'api.overdueDeduction.overdueDeductionList'        => 'OverdueDeductionController@overdueDeductionList',          //逾期扣款列表
+    'api.overdueDeduction.overdueDeductionExport'      => 'OverdueDeductionController@overdueDeductionExport',       //逾期扣款导出
+
 ];
