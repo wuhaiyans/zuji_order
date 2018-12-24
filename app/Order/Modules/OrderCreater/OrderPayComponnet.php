@@ -117,6 +117,10 @@ class OrderPayComponnet implements OrderCreater
             }
         }
 
+        if(!$this->withholdStatus && !$this->paymentStatus && !$this->fundauthStatus){
+            $this->isPay =false;
+        }
+
         return $filter;
     }
 
@@ -165,7 +169,7 @@ class OrderPayComponnet implements OrderCreater
         }
 
         //判断是否需要支付 如果需要支付则更新订单状态
-        if(!$this->withholdStatus && !$this->paymentStatus && !$this->fundauthStatus){
+        if(!$this->isPay){
             $data['order_status']=OrderStatus::OrderPayed;
             $data['pay_time']= time();
             $b =Order::where('order_no', '=', $this->orderNo)->update($data);
