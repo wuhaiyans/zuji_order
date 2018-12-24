@@ -90,7 +90,7 @@ class ExperienceDestineRepository
         $info = ActivityExperienceDestine::query()->where([
             ['user_id', '=', $userId],
             ['activity_id', '=', $activityId],
-        ])->first();
+        ])->orderBy('id','DESC')->first();
         return $info;
     }
     /**
