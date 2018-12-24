@@ -74,14 +74,14 @@ class TencentUpload {
      **/
     public function file_upload_all(){
 
-        $file = $_FILES['imgs'];
-        $tmp_name = $file['tmp_name'];
+        $file = $_FILES['params'];
+        $tmp_name = $file['tmp_name']['imgs'];
         foreach ($tmp_name as $key=>$value){
             if(!empty($value))
             {
-                $fileName = $file[$key]['name'];
+                $fileName = $file['name']['imgs'][$key];
                 //后缀名
-                $suffix   = strrchr($file[$key]['name'],".");
+                $suffix   = strrchr($file['name']['imgs'][$key],".");
 
                 $newName = time().mt_rand(10000,99999);
 

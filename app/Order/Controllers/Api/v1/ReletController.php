@@ -235,7 +235,7 @@ class ReletController extends Controller
             $fp = fopen('php://output', 'a');
 
             // 租期，成色，颜色，容量，网络制式
-            $headers = ['订单编号','下单时间','交易流水号', '支付方式及通道','用户名','手机号','设备名称','订单金额','租期','续租设备','应支付金额','续租时长','状态'];
+            $headers = ['订单编号','下单时间','交易流水号', '支付方式及通道','用户名','手机号','设备名称','订单金额','租期','续租设备ID','应支付金额','续租时长','状态'];
 
             // 将中文标题转换编码，否则乱码
             foreach ($headers as $k => $v) {
@@ -253,18 +253,20 @@ class ReletController extends Controller
 
             foreach($list as &$item){
                 $reletType =  \App\Order\Modules\Inc\OrderStatus::getZuqiTypeName($item['zuqi_type']);
-
+                $create_time = date("Y-m-d H:i:s",$item['create_time']);
+                $goodsInfo = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow(['order_no'=>$item['order_no']]);
+                $goodsName = $goodsInfo['goods_name'] ? $goodsInfo['goods_name'] : "";
                 $data[] = [
                     $item['order_no'],          // 订单编号
-                    $item['create_time'],       // 下单时间
+                    $create_time,               // 下单时间
                     $item['trade_no'],          // 交易流水号
                     $item['pay_type'],          // 支付方式及通道
                     $item['user_name'],         // 用户名
                     $item['user_name'],         // 手机号
-                    $item['goods_id'],          // 设备名称
+                    $goodsName,                 // 续租设备
                     $item['relet_amount'],      // 订单金额
                     $item['zuqi'],              // 租期
-                    $item['goods_id'],          // 续租设备
+                    $item['goods_id'],          // 设备名称
                     $item['relet_amount'],      // 应支付金额
                     $item['zuqi'] . $reletType, // 续租时长
                     $item['status']             // 状态
