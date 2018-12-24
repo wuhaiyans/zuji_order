@@ -211,6 +211,38 @@ class OrderGoodsInstalment
         return $result;
     }
 
+    /**
+     * 逾期分期
+     * @return array [order_no]  逾期订单
+     */
+    public static function instalmentOverdue(){
+
+        $time = time() - 86400 * 60; // 当前时间戳 向前推两个月未还款
+        $whereArray = [
+            ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService],   //在服务中
+            ['order_goods_instalment.withhold_day', '<', $time],   // 连续两个月 未扣款成功
+            ['order_info.order_type', '<>', \App\Order\Modules\Inc\OrderStatus::orderMiniService],  //去除小程序订单
+        ];
+
+        $statusArr = [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL];
+
+        /**
+         * 订单在服务中 分期连续两个月 未扣款成功
+         */
+        $result =  \App\Order\Models\OrderGoodsInstalment::select(
+            DB::raw("count(*) as num,order_goods_instalment.order_no"))
+            ->where($whereArray)
+            ->whereIn('order_goods_instalment.status',$statusArr)
+            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+            ->groupBy('order_goods_instalment.order_no')
+            ->orderBy('order_info.id','DESC')
+            ->having('num', '>', 2)
+            ->get();
+        if (!$result) return false;
+        $instalmentList =  $result->toArray();
+        return $instalmentList;
+    }
+
 
 
 }
