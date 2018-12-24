@@ -217,14 +217,11 @@ class OrderGoodsInstalment
      */
     public static function instalmentOverdue(){
 
-        $time = time() - 86400 * 60; // 当前时间戳 向前推两个月未还款
         $whereArray = [
             ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService],   //在服务中
-            ['order_goods_instalment.withhold_day', '<', $time],   // 连续两个月 未扣款成功
             ['order_info.order_type', '<>', \App\Order\Modules\Inc\OrderStatus::orderMiniService],  //去除小程序订单
+            ['order_goods_instalment.status', '=', OrderInstalmentStatus::FAIL],   // 扣款失败
         ];
-
-        $statusArr = [OrderInstalmentStatus::UNPAID, OrderInstalmentStatus::FAIL];
 
         /**
          * 订单在服务中 分期连续两个月 未扣款成功
@@ -232,14 +229,37 @@ class OrderGoodsInstalment
         $result =  \App\Order\Models\OrderGoodsInstalment::select(
             DB::raw("count(*) as num,order_goods_instalment.order_no"))
             ->where($whereArray)
-            ->whereIn('order_goods_instalment.status',$statusArr)
+            ->whereNull('order_overdue_deduction.order_no')
             ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+            ->leftJoin('order_overdue_deduction', 'order_overdue_deduction.order_no', '=', 'order_goods_instalment.order_no')
             ->groupBy('order_goods_instalment.order_no')
             ->orderBy('order_info.id','DESC')
-            ->having('num', '>', 2)
+            ->having('num', '>=', 2)
             ->get();
         if (!$result) return false;
         $instalmentList =  $result->toArray();
+        if(!$instalmentList){
+            return [];
+        }
+
+        // 循环查询
+        foreach($instalmentList as $key => &$item){
+            $instalmentInfo = \App\Order\Models\OrderGoodsInstalment::query()
+                ->select('times')
+                ->where([
+                    'order_no'  => $item['order_no'],
+                    'status'  => OrderInstalmentStatus::FAIL
+                ])
+                ->get()
+                ->toArray();
+            // 如果总数小于两期 且不是连续的两期 则去除 此条数据
+            if(count($instalmentInfo) < 3){
+                if(abs($instalmentInfo[0]['times'] - $instalmentInfo[1]['times']) > 1){
+                    array_splice($instalmentList,$key,1);
+                }
+            }
+        }
+
         return $instalmentList;
     }
 
