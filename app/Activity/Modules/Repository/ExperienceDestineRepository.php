@@ -120,7 +120,12 @@ class ExperienceDestineRepository
     public static function getUserExperience($userId,$experienceId){
         if (empty($userId)) return false;
         if (empty($experienceId)) return false;
-        $info = ActivityExperienceDestine::query()->where(['user_id'=>$userId,'activity_id'=>$experienceId])->first();
+        $where = [
+            ['user_id','=',$userId],
+            ['activity_id','=',$experienceId],
+            ['destine_status','>',DestineStatus::DestineCreated]
+        ];
+        $info = ActivityExperienceDestine::query()->where($where)->first();
         if($info){
             $info = $info->toArray();
             $experience = ActivityExperience::query()->where(['id'=>$info['experience_id']])->first()->toArray();;
