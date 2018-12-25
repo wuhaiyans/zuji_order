@@ -91,8 +91,8 @@ class ReletRepository
             $page = 1;
         }
         // 每页显示条数
-        if (isset($params['pagesize']) && $params['pagesize']>0) {
-            $pagesize = $params['pagesize'];
+        if (isset($params['size']) && $params['size']>0) {
+            $pagesize = $params['size'];
         } else {
             $pagesize = 20;
         }

@@ -3,7 +3,11 @@
  * 上传图片 封装
  * @access public
  * @author wangjinlin
+<<<<<<< HEAD
  * 
+=======
+ *
+>>>>>>> c2039200633cd4469f07b9a51112c30cca2c491b
  */
 namespace App\Lib;
 
@@ -70,14 +74,14 @@ class TencentUpload {
      **/
     public function file_upload_all(){
 
-        $file = $_FILES['imgs'];
-        $tmp_name = $file['tmp_name'];
+        $file = $_FILES['params'];
+        $tmp_name = $file['tmp_name']['imgs'];
         foreach ($tmp_name as $key=>$value){
             if(!empty($value))
             {
-                $fileName = $file[$key]['name'];
+                $fileName = $file['name']['imgs'][$key];
                 //后缀名
-                $suffix   = strrchr($file[$key]['name'],".");
+                $suffix   = strrchr($file['name']['imgs'][$key],".");
 
                 $newName = time().mt_rand(10000,99999);
 
@@ -146,5 +150,4 @@ class TencentUpload {
         $sign = strtolower( md5($sign.'key='.  $this->api_upload_key) );
         return $sign;
     }
-    
 }

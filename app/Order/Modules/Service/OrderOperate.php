@@ -764,7 +764,7 @@ class OrderOperate
             'txn_amount'	=> $totalAmount,	// 总金额；单位：分
             'txn_terms'		=> $txnTerms,	// 总分期数
             'rent_amount'	=> $rentAmount,	// 总租金；单位：分
-            'month_amount'	=> normalizeNum(substr(sprintf("%.3f",$orderInfo['order_amount']/15),0,-1)),	// 每月租金；单位：分
+            'month_amount'	=> normalizeNum(floor($orderInfo['order_amount']*100/$txnTerms)/100),	// 每月租金；单位：分
             'remainder_amount' => normalizeNum($orderInfo['order_amount']*100%$txnTerms/100),	// 每月租金取整后,总租金余数；单位：分
             'sum_amount'	=> 0.00,	// 已还总金额；单位：分
             'sum_terms'		=> 0,	// 已还总期数

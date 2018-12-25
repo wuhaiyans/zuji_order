@@ -125,34 +125,32 @@ class ExperienceDestineOperate
                     return false;
                 }
 
-                //如果记录存在 则更新记录
-                $destineData = [
-                    'destine_no'    =>$destineNo,                       //【必须】 string 活动编号
-                    'mobile'        =>$data['mobile'],                  //【必须】 string 用户手机号
-                    'experience_id' =>$data['experience_id'],           //【必须】 int    体验活动ID
-                    'zuqi'          =>$activityInfo['zuqi'],            //【必须】 int    租期
-                    'destine_amount'=>$activityInfo['destine_amount'],  //【必须】 string 支付金额
-                    'pay_channel'   =>$data['pay_channel_id'],          //【必须】 int    支付渠道
-                    'app_id'        =>$data['appid'],                   //【必须】 int    appid
-                    'pay_type'      =>$data['pay_type'],                //【必须】 int    支付方式
-                    'channel_id'    =>$channelId,                       //【必须】 int    渠道ID
-                    'open_id'       =>$openid,                          //【必须】 int    oppen_id
-                    'goods_name'    =>$activityInfo['goods_name']           //【必须】 int    商品名称
-                ];
-
-                $activityDestine = ExperienceDestine::getByNo($destine['destine_no']);
-                $b = $activityDestine->upDate($destineData);
-                if (!$b) {
-                    DB::rollBack();
-                    LogApi::error("ActivitDestine-upERRO",$destineData);
-                    set_msg("更新预定记录错误");
-                    return false;
-                }
+                //如果记录存在 则更新记录  不做更新 要重新生成2018/12/24
+//                $destineData = [
+//                    'destine_no'    =>$destineNo,                       //【必须】 string 活动编号
+//                    'mobile'        =>$data['mobile'],                  //【必须】 string 用户手机号
+//                    'experience_id' =>$data['experience_id'],           //【必须】 int    体验活动ID
+//                    'zuqi'          =>$activityInfo['zuqi'],            //【必须】 int    租期
+//                    'destine_amount'=>$activityInfo['destine_amount'],  //【必须】 string 支付金额
+//                    'pay_channel'   =>$data['pay_channel_id'],          //【必须】 int    支付渠道
+//                    'app_id'        =>$data['appid'],                   //【必须】 int    appid
+//                    'pay_type'      =>$data['pay_type'],                //【必须】 int    支付方式
+//                    'channel_id'    =>$channelId,                       //【必须】 int    渠道ID
+//                    'open_id'       =>$openid,                          //【必须】 int    oppen_id
+//                    'goods_name'    =>$activityInfo['goods_name']           //【必须】 int    商品名称
+//                ];
+//
+//                $activityDestine = ExperienceDestine::getByNo($destine['destine_no']);
+//                $b = $activityDestine->upDate($destineData);
+//                if (!$b) {
+//                    DB::rollBack();
+//                    LogApi::error("ActivitDestine-upERRO",$destineData);
+//                    set_msg("更新预定记录错误");
+//                    return false;
+//                }
 
             }
-            //记录不存在 则 新增记录
-            else{
-
+            //新增记录
                 $destineData =[
                     'destine_no'    => $destineNo,                      //【必须】 string 预定编号
                     'activity_id'   => $activityInfo['activity_id'],    //【必须】 int   总活动ID
@@ -177,10 +175,6 @@ class ExperienceDestineOperate
                     set_msg("活动添加失败");
                     return false;
                 }
-
-            }
-
-
 
 
             //生成支付单

@@ -213,7 +213,6 @@ class InnerServiceController extends Controller
             'uid'=>$validateParams['data']['user_id'],
             'username'=>'system',
             'type'=>PublicInc::Type_System,
-            'system'=>'cron',
         ];
         $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($validateParams['data']['order_no'], $userinfo);
         if ($success) {

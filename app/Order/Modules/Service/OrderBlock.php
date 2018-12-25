@@ -195,7 +195,7 @@ class OrderBlock {
 
 
         $notary_content = json_encode($data);
-        file_put_contents(__DIR__.'/abc.txt', $notary_content."\n", FILE_APPEND);
+//        file_put_contents(__DIR__.'/abc.txt', $notary_content."\n", FILE_APPEND);
 
         //-+--------------------------------------------------------------------
         // | 开始存证
@@ -222,14 +222,14 @@ class OrderBlock {
             $notary = $notaryApp->createTextNotary( $notary_content, $orderBlockNode );
 //			var_dump( $notary );
 //			// 上传 文本存证
-//			$b = $notaryApp->uploadNotary( $notary );
+			$b = $notaryApp->uploadNotary( $notary );
 //			var_dump( '文本存证：'.$notary->getTxHash(), $b );
             if( isset($data['contract_info']['hash']) ){
                 // 创建 电子合同文本存证
                 $notary = $notaryApp->createTextNotary( $data['contract_info']['hash'], 'electronic-contract' );
 //				var_dump( $notary );
 //				// 上传 文本存证
-//				$b = $notaryApp->uploadNotary( $notary );
+				$b = $notaryApp->uploadNotary( $notary );
 //				var_dump( '电子合同文本存证：'.$notary->getTxHash(), $b );
             }
 

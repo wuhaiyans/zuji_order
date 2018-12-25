@@ -3,6 +3,7 @@
 namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
+use App\Lib\TencentUpload;
 use App\Lib\Warehouse\Receive;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Models\ReceiveGoods;
