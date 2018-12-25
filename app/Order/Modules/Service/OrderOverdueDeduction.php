@@ -100,12 +100,23 @@ class OrderOverdueDeduction
                 'overdue_amount'    => $OverdueDeductionInfo['overdue_amount'] - $OverdueDeductionInfo['deduction_amount'], // 剩余押金金额
                 'deduction_time'    => time(),
                 'update_time'   	=> time(),
-                'deduction_status'  => 2,
-
+                'deduction_status'  => \App\Order\Modules\Inc\OrderOverdueStatus::SUCCESS,
             ];
             $b = OrderOverdueDeductionRepository::save(['business_no' => $businessNo], $data);
             if(!$b){
                 \App\Lib\Common\LogApi::error('[deduDepositNotify]修改分期状态失败');
+                return false;
+            }
+
+            /**
+             * 修改逾期扣款记录表
+             */
+            $rData = [
+                'status'  => \App\Order\Modules\Inc\OrderOverdueStatus::SUCCESS,
+            ];
+            $rb = \App\Order\Modules\Repository\OrderOverdueRecordRepository::save(['overdue_id' => $OverdueDeductionInfo['id']],$rData);
+            if(!$rb){
+                \App\Lib\Common\LogApi::error('[deduDepositNotify]修改分期扣款记录失败');
                 return false;
             }
 
