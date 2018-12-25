@@ -110,6 +110,31 @@ class OverDueDeductionController extends Controller
     }
 
     /**
+     * 逾期扣款详情
+     * @Request overdue_id 逾期扣款ID
+     * @return array
+     */
+    public function overdueDepositInfo(Request $request){
+        $params             = $request->all();
+        $rules = [
+            'overdue_id'    => 'required|int',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $overdueId   = $params['params']['overdue_id'];
+
+        $info = OrderOverdueDeductionRepository::info(['id'=>$overdueId]);
+        if(!$info){
+            return apiResponse([], ApiStatus::CODE_32002, "数据异常");
+        }
+
+        return apiResponse($info,ApiStatus::CODE_0,"success");
+
+    }
+    /**
      * 逾期扣款操作
      * @Request overdue_id 逾期扣款ID
      * @Request amount 扣款金额
