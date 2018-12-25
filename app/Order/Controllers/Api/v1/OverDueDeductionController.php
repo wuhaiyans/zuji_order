@@ -106,4 +106,79 @@ class OverDueDeductionController extends Controller
 
     }
 
+    /**
+     * 逾期扣款操作
+     * @Request overdue_id 逾期扣款ID
+     * @Request amount 扣款金额
+     * @Request remark 备注
+     * @return bool ture false
+     */
+    public function overdueDeposit(Request $request){
+        $params             = $request->all();
+        $rules = [
+            'overdue_id'    => 'required|int',
+            'amount'        => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $params = $params['params'];
+        $overdueId   = $params['overdue_id'];
+
+        $overdueInfo = OrderOverdueDeductionRepository::info(['id' => $overdueId]);
+        if(!$overdueInfo){
+            // 提交事务
+            return apiResponse([], ApiStatus::CODE_32002, "数据异常");
+        }
+
+        if( $params['amount'] > $overdueInfo['overdue_amount'] ){
+            return apiResponse([], ApiStatus::CODE_32002, "剩余押金不足够扣款");
+        }
+
+
+        // 开启事务
+        DB::beginTransaction();
+
+
+        // 生成交易码
+        $business_no = createNo('YQ');
+        $data = [
+            'business_no'       => $business_no,
+            'deduction_status'  => 5,// 修改状态支付中
+        ];
+        $b = OrderOverdueDeductionRepository::save(['id'=>$overdueId],$data);
+        if( $b === false ){
+            DB::rollBack();
+            return apiResponse([], ApiStatus::CODE_32002, "修改逾期交易号数据异常");
+        }
+
+
+
+        p($business_no);
+
+
+
+        $amount = bcmul($instalmentInfo['amount'] , 100 );
+        if( $amount<0 ){
+            return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
+        }
+        p($overdueInfo);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
 }

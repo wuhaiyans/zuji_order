@@ -137,6 +137,23 @@ class OrderOverdueDeductionRepository
         }
         return $overdueListArray;
     }
+    
+    /**
+     * 逾期扣款详情
+     * array    $where
+     * return array
+     */
+    public static function info($where){
+        if ( $where == [] ) {
+            return false;
+        }
+
+        $result =  OrderOverdueDeduction::where($where)->first();
+        if (!$result) return false;
+        return $result->toArray();
+    }
+
+
     /**
      * 修改方法
      * array    $where
