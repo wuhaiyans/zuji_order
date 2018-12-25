@@ -3,11 +3,6 @@
  * 上传图片 封装
  * @access public
  * @author wangjinlin
-<<<<<<< HEAD
- * 
-=======
- *
->>>>>>> c2039200633cd4469f07b9a51112c30cca2c491b
  */
 namespace App\Lib;
 

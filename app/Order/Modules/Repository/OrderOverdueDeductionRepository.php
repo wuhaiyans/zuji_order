@@ -2,6 +2,7 @@
 namespace App\Order\Modules\Repository;
 use App\Lib\Common\LogApi;
 use Illuminate\Support\Facades\DB;
+use App\Order\Models\OrderOverdueDeduction;
 
 class OrderOverdueDeductionRepository
 {
@@ -43,14 +44,8 @@ class OrderOverdueDeductionRepository
         }
 
         //回访标识
-        if (isset($param['visit_record'])) {
-            if (empty($param['visit_record'])) {
-                $isUncontact = 1;
-            } else {
-
-                $whereArray[] = ['visit_record', '=', $param['visit_record']];
-            }
-
+        if (isset($param['visit_id'])) {
+           $whereArray[] = ['visit_id', '=', $param['visit_id']];
         }
         //长短租类型
         if (isset($param['zuqi_type'])) {
@@ -78,5 +73,26 @@ class OrderOverdueDeductionRepository
 
         }
         return $orderList;
+    }
+
+
+    /**
+     * 修改方法
+     * array    $where
+     * array    $data
+     * return bool
+     */
+    public static function save($where, $data){
+        if ( empty($where )) {
+            return false;
+        }
+        if ( empty($data )) {
+            return false;
+        }
+
+        $result =  OrderOverdueDeduction::where($where)->update($data);
+        if (!$result) return false;
+
+        return true;
     }
 }
