@@ -61,7 +61,7 @@ class ActiveInviteController extends Controller
         }
         //获预约活动信息
         $activityInfo = ExperienceDestineRepository::getUserExperience($uid,$activity_id);
-        if($activityInfo['``'] == DestineStatus::DestineReceive){
+        if($activityInfo['destine_status'] == DestineStatus::DestineReceive){
             return apiResponse([],ApiStatus::CODE_50000,"已领取活动礼品");
         }
         //检测邀请上限

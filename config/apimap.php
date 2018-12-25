@@ -416,5 +416,6 @@ return [
      ************************************************************************************************/
     'api.overdueDeduction.overdueDeductionList'        => 'OverDueDeductionController@overdueDeductionList',          //逾期扣款列表
     'api.overdueDeduction.overdueDeductionExport'      => 'OverDueDeductionController@overdueDeductionExport',       //逾期扣款导出
+	'api.overdueDeduction.overdueDeposit'      		   => 'OverDueDeductionController@overdueDeposit',       //逾期扣款操作
 
 ];

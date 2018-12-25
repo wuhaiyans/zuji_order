@@ -231,7 +231,7 @@ class ActivityExperience
         }
         try{
             //获取预定信息
-            $experienceDestineInfo = ExperienceDestine::getByNo($params['business_no']);
+            $experienceDestineInfo = ExperienceDestine::getByNo($params['destine_no']);
             if(!$experienceDestineInfo){
                 LogApi::debug("[callbackExperience]获取预定信息失败");
                 set_msg("获取预定信息失败");

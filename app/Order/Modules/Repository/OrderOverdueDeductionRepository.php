@@ -2,6 +2,7 @@
 namespace App\Order\Modules\Repository;
 use App\Lib\Common\LogApi;
 use Illuminate\Support\Facades\DB;
+use App\Order\Models\OrderOverdueDeduction;
 
 class OrderOverdueDeductionRepository
 {
@@ -32,8 +33,8 @@ class OrderOverdueDeductionRepository
         }
 
         //订单来源
-        if (isset($param['order_source']) && !empty($param['order_source'])) {
-            $whereArray[] = ['order_source', '=', $param['order_source']];
+        if (isset($param['app_id']) && !empty($param['app_id'])) {
+            $whereArray[] = ['app_id', '=', $param['app_id']];
         }
 
 
@@ -43,14 +44,8 @@ class OrderOverdueDeductionRepository
         }
 
         //回访标识
-        if (isset($param['visit_record'])) {
-            if (empty($param['visit_record'])) {
-                $isUncontact = 1;
-            } else {
-
-                $whereArray[] = ['visit_record', '=', $param['visit_record']];
-            }
-
+        if (isset($param['visit_id'])) {
+           $whereArray[] = ['visit_id', '=', $param['visit_id']];
         }
         //长短租类型
         if (isset($param['zuqi_type'])) {
@@ -73,8 +68,109 @@ class OrderOverdueDeductionRepository
             ->where($whereArray)
             ->orderBy('create_time', 'DESC')
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $page);
+        if( !$orderList ){
+            return [];
 
+        }
         return $orderList;
+    }
 
+    /**
+     *  导出获取逾期扣款列表
+     * @author qinliping
+     * @param  array $param  获取逾期扣款列表参数
+     * @param  paginate: 参数
+     */
+    public static function overdueDeductionListExport($param = array(), $pagesize=5)
+    {
+        $whereArray = array();
+        $isUncontact = 0;
+
+        //根据手机号
+        if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
+        {
+            $whereArray[] = ['mobile', '=', $param['keywords']];
+        }
+        //根据订单号
+        elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
+        {
+            $whereArray[] = ['order_no', '=', $param['keywords']];
+        }
+
+        //订单来源
+        if (isset($param['app_id']) && !empty($param['app_id'])) {
+            $whereArray[] = ['app_id', '=', $param['app_id']];
+        }
+
+
+        //扣款状态
+        if (isset($param['deduction_status']) && !empty($param['deduction_status'])) {
+            $whereArray[] = ['deduction_status', '=', $param['deduction_status']];
+        }
+
+        //回访标识
+        if (isset($param['visit_id'])) {
+            $whereArray[] = ['visit_id', '=', $param['visit_id']];
+        }
+        //长短租类型
+        if (isset($param['zuqi_type'])) {
+            $whereArray[] = ['zuqi_type', '=', $param['zuqi_type']];
+        }
+
+        if (isset($param['page'])) {
+            $page = $param['page'];
+        } else {
+
+            $page = 1;
+        }
+
+        $overdueList = DB::table('order_overdue_deduction')
+            ->select('*')
+            ->where($whereArray)
+            ->orderBy('create_time', 'DESC')
+            ->skip(($page - 1) * $pagesize)->take($pagesize)
+            ->get();
+        $overdueListArray  = array_column(objectToArray($overdueList),NULL,'order_no');
+        if( !$overdueListArray ){
+            return [];
+
+        }
+        return $overdueListArray;
+    }
+
+    /**
+     * 逾期扣款详情
+     * array    $where
+     * return array
+     */
+    public static function info($where){
+        if ( $where == [] ) {
+            return false;
+        }
+
+        $result =  OrderOverdueDeduction::where($where)->first();
+        if (!$result) return false;
+        return $result->toArray();
+    }
+
+
+    /**
+     * 修改方法
+     * array    $where
+     * array    $data
+     * return bool
+     */
+    public static function save($where, $data){
+        if ( empty($where )) {
+            return false;
+        }
+        if ( empty($data )) {
+            return false;
+        }
+
+        $result =  OrderOverdueDeduction::where($where)->update($data);
+        if (!$result) return false;
+
+        return true;
     }
 }
