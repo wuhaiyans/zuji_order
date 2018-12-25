@@ -2,6 +2,7 @@
 namespace App\Order\Modules\Repository;
 use App\Lib\Common\LogApi;
 use Illuminate\Support\Facades\DB;
+use App\Order\Models\OrderOverdueDeduction;
 
 class OrderOverdueDeductionRepository
 {
@@ -78,5 +79,26 @@ class OrderOverdueDeductionRepository
 
         }
         return $orderList;
+    }
+
+
+    /**
+     * 修改方法
+     * array    $where
+     * array    $data
+     * return bool
+     */
+    public static function save($where, $data){
+        if ( empty($where )) {
+            return false;
+        }
+        if ( empty($data )) {
+            return false;
+        }
+
+        $result =  OrderOverdueDeduction::where($where)->update($data);
+        if (!$result) return false;
+
+        return true;
     }
 }
