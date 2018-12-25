@@ -497,7 +497,7 @@ class MiniOrderController extends Controller
                 return apiResponse(['reason' => \App\Lib\Payment\mini\MiniApi::getError()], ApiStatus::CODE_35005);
             }
             //取消订单修改订单状态
-            $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($miniOrderInfo['order_no'], $userInfo);
+            $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($miniOrderInfo['order_no'], $userInfo,'',$remark);
 
             if ($code != ApiStatus::CODE_0) {
                 //回滚事务
@@ -600,7 +600,7 @@ class MiniOrderController extends Controller
                 'uid'=>$val['user_id'],
                 'username'=>'系統',
             ];
-            $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($val['order_no'],$userinfo);
+            $code = \App\Order\Modules\Service\OrderOperate::cancelOrder($val['order_no'],$userinfo,'',"未支付自动取消");
             if( $code != ApiStatus::CODE_0){
                 \App\Lib\Common\LogApi::debug('小程序定时取消商户端订单失败',$val['order_no']);
                 continue;
