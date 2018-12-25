@@ -19,7 +19,7 @@ class OverDueDeductionController extends Controller
             $params =   $allParams['params'];
             $overdueData = \App\Order\Modules\Service\OrderOverdueDeduction::getOverdueDeductionInfo($params);//获取逾期扣款信息
 
-            if ($overdueData['code']===ApiStatus::CODE_0) {
+            if ($overdueData) {
 
                 return apiResponse($overdueData['data'],ApiStatus::CODE_0);
             } else {

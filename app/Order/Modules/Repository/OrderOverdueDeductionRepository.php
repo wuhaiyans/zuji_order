@@ -73,8 +73,10 @@ class OrderOverdueDeductionRepository
             ->where($whereArray)
             ->orderBy('create_time', 'DESC')
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $page);
+        if( !$orderList ){
+            return [];
 
+        }
         return $orderList;
-
     }
 }
