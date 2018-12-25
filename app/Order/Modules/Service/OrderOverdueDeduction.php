@@ -27,7 +27,7 @@ class OrderOverdueDeduction
             foreach ($overdueInfoArray['data'] as $keys=>$values) {
 
                 //应用来源
-                $overdueInfoArray['data'][$keys]['order_source_name'] = OrderInfo::getAppidInfo($values['app_id']);
+                $overdueInfoArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
 
                 //回访标识
                 $overdueInfoArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? OrderStatus::getVisitName($values['visit_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
@@ -57,7 +57,7 @@ class OrderOverdueDeduction
             foreach ($overdueInfo['data'] as $keys=>$values) {
 
                 //应用来源
-                $overdueInfo['data'][$keys]['order_source_name'] = OrderInfo::getAppidInfo($values['app_id']);
+                $overdueInfo['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
 
                 //回访标识
                 $overdueInfo['data'][$keys]['visit_name'] = !empty($values['visit_id'])? OrderStatus::getVisitName($values['visit_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
