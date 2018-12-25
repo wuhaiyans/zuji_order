@@ -46,6 +46,36 @@ class OrderOverdueDeduction
     }
 
     /**
+     * 逾期扣款列表导出
+     * @param array $params
+     * @param int $pagesize
+     * @return mixed
+     */
+    public static function OverdueDeductionExport($params = array(),$pagesize = 5){
+        $overdueInfo = OrderOverdueDeductionRepository::overdueDeductionListExport( $params,$pagesize );//获取逾期扣款列表
+        if (!empty($overdueInfo['data'])) {
+            foreach ($overdueInfo['data'] as $keys=>$values) {
+
+                //应用来源
+                $overdueInfo['data'][$keys]['order_source_name'] = OrderInfo::getAppidInfo($values['app_id']);
+
+                //回访标识
+                $overdueInfo['data'][$keys]['visit_name'] = !empty($values['visit_id'])? OrderStatus::getVisitName($values['visit_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
+
+                //租期类型
+                $overdueInfo['data'][$keys]['zuqi_name'] =  OrderStatus::getZuqiTypeName($values['zuqi_type']);
+
+                //扣款状态
+                $overdueInfo['data'][$keys]['deduction_name'] = OrderInstalmentStatus::getStatusName($values['deduction_status']);
+
+            }
+
+        }
+
+        return $overdueInfo;
+    }
+
+    /**
      * 逾期扣除押金回调处理
      * @author maxiaoyu
      * @param array $params
