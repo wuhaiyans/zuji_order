@@ -312,7 +312,7 @@ class MiniOrderController extends Controller
             DB::rollBack();
 			\App\Lib\Common\LogApi::error('芝麻确认订单异常',$ex);
             //预警通知 参数1：问题标记  参数2：程序相关错误数据  参数3：通知人邮箱
-            \App\Lib\Common\LogApi::alert("miniConfirmationQuery:小程序确认订单失败",$ex->getMessage(),["zhangjinghui@huishoubao.com"]);
+            \App\Lib\Common\LogApi::alert("miniConfirmationQuery:小程序确认订单失败",$ex->getMessage(),["zhangjinghui@huishoubao.com.cn"]);
 //			return apiResponse([],ApiStatus::CODE_50000,'服务器超时，请稍候重试');
             return apiResponse([], ApiStatus::CODE_35000, $ex->getMessage());
         }
