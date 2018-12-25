@@ -62,7 +62,7 @@ class OverDueDeductionController extends Controller
         $headers = ['订单编号', '下单时间', '订单来源','商品名称','用户名','手机号','累计未缴纳租金','押金','扣款状态', '回访标识及记录',
             '扣款时间','扣款金额'];
 
-        $orderExcel = array();
+        $overdueExcel = array();
         while(true) {
             if ($abc>$smallPage) {
                 break;
