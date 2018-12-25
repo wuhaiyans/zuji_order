@@ -36,11 +36,6 @@ class OrderOverdueDeductionRepository
             $whereArray[] = ['order_source', '=', $param['order_source']];
         }
 
-        //第三方渠道类型
-        if (isset($param['channel_id']) && !empty($param['channel_id'])) {
-
-            $whereInArray = $param['channel_id'];
-        }
 
         //扣款状态
         if (isset($param['deduction_status']) && !empty($param['deduction_status'])) {
@@ -74,7 +69,7 @@ class OrderOverdueDeductionRepository
         }
 
         $orderList = DB::table('order_overdue_deduction')
-            ->select('order_info.*')
+            ->select('order_overdue_deduction.*')
             ->where($whereArray)
             ->orderBy('create_time', 'DESC')
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $page);
