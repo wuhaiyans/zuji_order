@@ -80,7 +80,7 @@ class OverDueDeductionController extends Controller
                         date('Y-m-d H:i:s', $item['order_time']),
                         $item['appid_name'],
                         $item['goods_name'],
-                        $item['name'],
+                        $item['user_name'],
                         $item['mobile'],
                         $item['unpaid_amount'],
                         $item['overdue_amount'],

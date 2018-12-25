@@ -53,20 +53,20 @@ class OrderOverdueDeduction
      */
     public static function OverdueDeductionExport($params = array(),$pagesize = 5){
         $overdueInfo = OrderOverdueDeductionRepository::overdueDeductionListExport( $params,$pagesize );//获取逾期扣款列表
-        if (!empty($overdueInfo['data'])) {
-            foreach ($overdueInfo['data'] as $keys=>$values) {
+        if (!empty($overdueInfo)) {
+            foreach ($overdueInfo as $keys=>$values) {
 
                 //应用来源
-                $overdueInfo['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
+                $overdueInfo[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
 
                 //回访标识
-                $overdueInfo['data'][$keys]['visit_name'] = !empty($values['visit_id'])? OrderStatus::getVisitName($values['visit_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
+                $overdueInfo[$keys]['visit_name'] = !empty($values['visit_id'])? OrderStatus::getVisitName($values['visit_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
 
                 //租期类型
-                $overdueInfo['data'][$keys]['zuqi_name'] =  OrderStatus::getZuqiTypeName($values['zuqi_type']);
+                $overdueInfo[$keys]['zuqi_name'] =  OrderStatus::getZuqiTypeName($values['zuqi_type']);
 
                 //扣款状态
-                $overdueInfo['data'][$keys]['deduction_name'] = OrderInstalmentStatus::getStatusName($values['deduction_status']);
+                $overdueInfo[$keys]['deduction_name'] = OrderInstalmentStatus::getStatusName($values['deduction_status']);
 
             }
 
