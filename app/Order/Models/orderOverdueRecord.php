@@ -2,21 +2,20 @@
 
 /**
  *
- *  订单设备列表
+ *  分期逾期扣款记录列表
  */
 namespace App\Order\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrderOverdueDeduction extends Model
+class OrderOverdueRecord extends Model
 {
 
-    protected $table = 'order_overdue_deduction';
+    protected $table = 'order_overdue_record';
 
     protected $primaryKey='id';
 
     const CREATED_AT = 'create_time';
-    const UPDATED_AT = 'update_time';
 
 
     /**
@@ -31,7 +30,7 @@ class OrderOverdueDeduction extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_no','business_no','order_time','app_id','goods_name','zuqi_type','user_id','user_name','mobile','unpaid_amount','overdue_amount','deduction_status','visit_id','deduction_time','deduction_amount','create_time','update_time'];
+    protected $fillable = ['overdue_id','deduction_amount','overdue_amount','remark','status','create_time'];
 
     /**
      * 获取当前时间

@@ -137,6 +137,38 @@ class OrderOverdueDeductionRepository
         }
         return $overdueListArray;
     }
+    
+    /**
+     * 逾期扣款详情
+     * array    $where
+     * return array
+     */
+    public static function info($where){
+        if ( $where == [] ) {
+            return false;
+        }
+
+        $result =  OrderOverdueDeduction::where($where)->first();
+        if (!$result) return false;
+        return $result->toArray();
+    }
+    /**
+     * 逾期扣款数据
+     * array    $where
+     * return array
+     */
+    public static function getOverdueInfo(){
+        $result =  DB::table('order_overdue_deduction')
+            ->select('order_no')->get();
+        if (!$result) return false;
+        $resultArray = objectToArray($result);
+        $orderInfo = [];
+        foreach($resultArray as $item){
+            $orderInfo = $item['order_no'];
+        }
+        return $orderInfo;
+    }
+
     /**
      * 修改方法
      * array    $where
@@ -155,5 +187,30 @@ class OrderOverdueDeductionRepository
         if (!$result) return false;
 
         return true;
+    }
+
+    /**
+     * 获取逾期订单信息
+     * @param  $orderNo 订单编号
+     * @return array
+     */
+    public static function getOverdueOrderDetail($orderNo){
+        if(!isset( $orderArray )){
+            return false;
+        }
+
+        $where = ['order_info.order_no','=',$orderNo];
+        $order_result[]= DB::table('order_info')
+            ->leftJoin('order_goods', ['order_info.order_no', '=', 'order_goods.order_no'])
+            ->leftJoin('order_user_certified', ['order_info.order_no', '=', 'order_user_certified.order_no'])
+            ->where($where)
+            ->select('order_info.mobile','order_info.user_id','order_info.appid','order_info.zuqi_type','order_info.create_time','order_goods.surplus_yajin','order_goods.goods_name','order_user_certified.realname')
+            ->first()->toArray();
+
+
+        if(!$order_result){
+            return [];
+        }
+        return $order_result;
     }
 }
