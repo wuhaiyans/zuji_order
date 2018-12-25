@@ -3,7 +3,7 @@
  * ALIPAY API: alipay.offline.provider.shopaction.record request
  *
  * @author auto create
- * @since 1.0, 2016-08-01 21:31:03
+ * @since 1.0, 2018-07-13 17:18:06
  */
 class AlipayOfflineProviderShopactionRecordRequest
 {

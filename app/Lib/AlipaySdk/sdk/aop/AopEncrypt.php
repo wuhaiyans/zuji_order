@@ -1,5 +1,4 @@
 <?php
-namespace App\Lib\AlipaySdk\sdk\aop;
 /**
  *   加密工具类
  *
@@ -13,7 +12,7 @@ namespace App\Lib\AlipaySdk\sdk\aop;
  * @param string $str
  * @return string
  */
- function aop_encrypt($str,$screct_key){
+ function encrypt($str,$screct_key){
 	//AES, 128 模式加密数据 CBC
 	$screct_key = base64_decode($screct_key);
 	$str = trim($str);
@@ -28,7 +27,7 @@ namespace App\Lib\AlipaySdk\sdk\aop;
  * @param string $str
  * @return string
  */
- function aop_decrypt($str,$screct_key){
+ function decrypt($str,$screct_key){
 	//AES, 128 模式加密数据 CBC
 	$str = base64_decode($str);
 	$screct_key = base64_decode($screct_key);

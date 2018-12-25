@@ -1,5 +1,4 @@
 <?php
-namespace App\Lib\AlipaySdk\sdk\aop;
 /**
  * Created by PhpStorm.
  * User: jiehua

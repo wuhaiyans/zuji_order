@@ -1,5 +1,4 @@
 <?php
-namespace App\Lib\AlipaySdk\sdk\aop;
 /**
  *  TODO 补充说明 
  *
