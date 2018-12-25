@@ -256,6 +256,7 @@ function createNo($noType=1){
         'RC' => 'RC',//退款清算编号
         'YD' => 'YD',//预定活动接口
         'TY' => 'TY',//预定活动接口
+        'YQ' => 'YQ',//分期逾期扣款接口
     );
     $year = array();
     if (!isset($npreNoType[$noType])) {
