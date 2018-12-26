@@ -19,7 +19,6 @@ class OrderOverdueDeductionRepository
     public static function getOverdueDeductionList($param = array(), $pagesize=5)
     {
         $whereArray = array();
-        $isUncontact = 0;
 
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
