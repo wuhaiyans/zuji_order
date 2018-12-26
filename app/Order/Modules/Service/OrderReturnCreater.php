@@ -285,7 +285,7 @@ class OrderReturnCreater
                 return false;
             }
             $order_info = $order->getData();
-            LogApi::debug("[createRefund]获取订单信息失败",[
+            LogApi::debug("[createRefund]获取订单信息",[
                 'order_info'=> $order_info,
                 'userinfo'  => $userinfo
             ]);
@@ -458,7 +458,7 @@ class OrderReturnCreater
             }else{
                 $returnStatus = ReturnStatus::ReturnAgreed; //退款单状态为  审核同意
             }
-          
+
 
             $data['status'] = $returnStatus;
             LogApi::debug("[createRefund]创建退款单参数",$data);
