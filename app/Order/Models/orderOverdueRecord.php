@@ -32,23 +32,5 @@ class OrderOverdueRecord extends Model
      */
     protected $fillable = ['overdue_id','deduction_amount','overdue_amount','remark','status','create_time'];
 
-    /**
-     * 获取当前时间
-     *
-     * @return int
-     */
-    public function freshTimestamp() {
-        return time();
-    }
-
-    /**
-     * 避免转换时间戳为时间字符串
-     *
-     * @param DateTime|int $value
-     * @return DateTime|int
-     */
-    public function fromDateTime($value) {
-        return $value;
-    }
-
+    
 }
