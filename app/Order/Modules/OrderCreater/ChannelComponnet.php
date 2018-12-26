@@ -61,16 +61,15 @@ class ChannelComponnet implements OrderCreater
      */
     private $channelStatus = 0;
 
-    public function __construct(OrderCreater $componnet, int $appid)
+    /**
+     * 渠道信息
+     * @var array
+     */
+    private $channelInfo=[];
+
+    public function __construct(OrderCreater $componnet, array $ChannelInfo)
     {
         $this->componnet = $componnet;
-        //获取渠道信息
-        try{
-            $ChannelInfo = Channel::getChannel($appid);
-        }catch (\Exception $e){
-            LogApi::error(config('app.env')."OrderCreate-GetChannel-Exception:".$e->getMessage());
-            throw new Exception("GetChannel：".$e->getMessage());
-        }
 
         $this->appId = intval($ChannelInfo['appid']['id']);
         $this->appName = $ChannelInfo['appid']['name'];
@@ -80,7 +79,7 @@ class ChannelComponnet implements OrderCreater
         $this->channelName = $ChannelInfo['_channel']['name'];
         $this->channelAloneGoods = intval($ChannelInfo['_channel']['alone_goods'])?1:0;
         $this->channelStatus = intval($ChannelInfo['_channel']['status'])?1:0;
-
+        $this->channelInfo =$ChannelInfo;
 
     }
     /**
@@ -132,16 +131,7 @@ class ChannelComponnet implements OrderCreater
     {
         $schema = $this->componnet->getDataSchema();
         return array_merge($schema,[
-            'channel' => [
-                'app_id' => $this->appId,
-                'app_name' => $this->appName,
-                'app_type' => $this->appType,
-                'app_status' => $this->appStatus,
-                'channel_id' => $this->channelId,
-                'channel_name' => $this->channelName,
-                'channel_status' => $this->channelAloneGoods,
-                'channel_alone_goods' => $this->channelStatus,
-            ]
+            'channel' => $this->channelInfo,
         ]);
     }
 
