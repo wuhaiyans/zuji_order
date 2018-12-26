@@ -222,7 +222,7 @@ class OrderGoodsInstalment
         $status         = OrderInstalmentStatus::FAIL;  // 扣款失败
         $fileNum        = 2;  // 连续扣款失败次数
 
-        $sql = "SELECT order_no,times FROM
+        $sql = "SELECT order_no,times,amount FROM
                 `order_goods_instalment`
                 WHERE order_no IN(
                     SELECT
@@ -294,7 +294,15 @@ class OrderGoodsInstalment
                     //array_splice($instalmentList,$key,1);
                 }
             }
-            $array[] = $key;
+            $amount = 0;
+            foreach($item as $v){
+                $amount +=$v['amount'];
+            }
+
+            $orderInfo['order_no']  = $key;
+            $orderInfo['amount']    = $amount;
+
+            $array[] = $orderInfo;
         }
 
         return $array;

@@ -417,5 +417,7 @@ return [
     'api.overdueDeduction.overdueDeductionList'        => 'OverDueDeductionController@overdueDeductionList',          //逾期扣款列表
     'api.overdueDeduction.overdueDeductionExport'      => 'OverDueDeductionController@overdueDeductionExport',       //逾期扣款导出
 	'api.overdueDeduction.overdueDeposit'      		   => 'OverDueDeductionController@overdueDeposit',       //逾期扣款操作
+	'api.overdueDeduction.overdueDepositInfo'      	   => 'OverDueDeductionController@overdueDepositInfo',       //逾期扣款详情
+	'api.overdueDeduction.overdueDepositRecord'        => 'OverDueDeductionController@overdueDepositRecord',       //逾期扣款日志
 
 ];

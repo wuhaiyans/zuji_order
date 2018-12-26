@@ -110,6 +110,32 @@ class OverDueDeductionController extends Controller
     }
 
     /**
+     * 逾期扣款详情
+     * @Request overdue_id 逾期扣款ID
+     * @return array
+     */
+    public function overdueDepositInfo(Request $request){
+        $params             = $request->all();
+        $rules = [
+            'overdue_id'    => 'required|int',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $overdueId   = $params['params']['overdue_id'];
+
+        $info = OrderOverdueDeductionRepository::info(['id'=>$overdueId]);
+        if(!$info){
+            return apiResponse([], ApiStatus::CODE_32002, "数据异常");
+        }
+
+        return apiResponse($info,ApiStatus::CODE_0,"success");
+
+    }
+
+    /**
      * 逾期扣款操作
      * @Request overdue_id 逾期扣款ID
      * @Request amount 扣款金额
@@ -146,6 +172,10 @@ class OverDueDeductionController extends Controller
             return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
         }
 
+        if($overdueInfo['deduction_status'] == \App\Order\Modules\Inc\OrderOverdueStatus::PAYING){
+            return apiResponse([], ApiStatus::CODE_81004, '逾期正在扣款中');
+        }
+
         // 开启事务
         DB::beginTransaction();
 
@@ -154,7 +184,7 @@ class OverDueDeductionController extends Controller
         $business_no = createNo('YQ');
         $data = [
             'business_no'       => $business_no,
-            'deduction_status'  => 5,// 修改状态支付中
+            'deduction_status'  => \App\Order\Modules\Inc\OrderOverdueStatus::PAYING,// 修改状态支付中
         ];
         $b = OrderOverdueDeductionRepository::save(['id'=>$overdueId],$data);
         if( $b === false ){
@@ -162,13 +192,14 @@ class OverDueDeductionController extends Controller
             return apiResponse([], ApiStatus::CODE_32002, "修改逾期交易号数据异常");
         }
 
+
         // 创建扣款记录表数据
         $recordData = [
             'overdue_id'        => $overdueId,              //逾期表ID
             'deduction_amount'  => $amount,                 //扣款金额
             'overdue_amount'    => $overdueInfo['overdue_amount'] - $amount,  //剩余金额
             'remark'            => $params['remark'],       //扣款备注
-            'status'            => 5,                       //扣除押金状态0：无效；1：未支付；2：扣款成功；3：扣款失败；4：取消；5：扣款中''
+            'status'            => \App\Order\Modules\Inc\OrderOverdueStatus::PAYING,//扣除押金状态
             'create_time'       => time(),
         ];
 
@@ -227,4 +258,37 @@ class OverDueDeductionController extends Controller
         return apiResponse([],ApiStatus::CODE_0,"success");
 
     }
+
+    /**
+     * 逾期扣款操作日志
+     * @Request overdue_id 逾期扣款ID
+     * @return bool ture false
+     */
+    public function overdueDepositRecord(Request $request){
+        $params             = $request->all();
+        $rules = [
+            'overdue_id'    => 'required|int',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+
+        // 逾期ID
+        $overdueId   = $params['params']['overdue_id'];
+
+        $where = [
+            'overdue_id' => $overdueId,
+            'status'     => \App\Order\Modules\Inc\OrderOverdueStatus::SUCCESS
+        ];
+        $recordList = \App\Order\Modules\Repository\OrderOverdueRecordRepository::getOverdueDeductionList($where);
+
+
+        return apiResponse($recordList,ApiStatus::CODE_0,"success");
+
+    }
+
+
+
+
 }
