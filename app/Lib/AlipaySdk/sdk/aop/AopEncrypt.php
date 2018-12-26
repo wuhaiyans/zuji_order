@@ -1,4 +1,5 @@
 <?php
+namespace App\Lib\AlipaySdk\sdk\aop;
 /**
  *   加密工具类
  *
