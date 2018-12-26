@@ -32,4 +32,5 @@ class OrderOverdueRecord extends Model
      */
     protected $fillable = ['overdue_id','deduction_amount','overdue_amount','remark','status','create_time'];
 
+    
 }
