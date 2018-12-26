@@ -18,6 +18,7 @@ use App\Order\Modules\Inc\OrderGivebackStatus;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
+use App\Order\Modules\Repository\OrderOverdueDeductionRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\WithholdQuery;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
@@ -615,6 +616,50 @@ class CronOperate
         }catch(\Exception $exc){
             \App\Lib\Common\LogApi::debug('[cronOverdueMessage提前还款短信]', ['msg'=>$exc->getMessage()]);
         }
+    }
+    /**
+     * 定时任务  获取连续两个月，总共三个月未缴租金的逾期数据
+     * $return bool
+     */
+    public static function cronOverdueDeductionMessage(){
+        try{
+            //获取逾期扣款表已存在的数据
+            $getOverdueDeductionInfo = OrderOverdueDeductionRepository::getOverdueInfo();
+            //获取连续两个月，总共三个月未缴租金的逾期数据
+            $orderNoArray = \App\Order\Modules\Service\OrderGoodsInstalment::instalmentOverdue();
+            p($orderNoArray);exit;
+            if( $orderNoArray ){
+
+                $orderNoList = [];
+                if( $orderNoArray ){
+                    foreach($orderNoArray as $item){
+                        $orderNoList['order_no'] = $item['order_no'];
+                       if(!in_array($orderNoList,$getOverdueDeductionInfo)){
+                           //获取订单信息
+                           $orderInfo = OrderOverdueDeductionRepository::getOverdueOrderDetail($item['order_no']);
+                           //添加数据
+                           if($orderInfo){
+                              $data = [
+                                  'order_no'=>$item['order_no'],
+                                  'order_time'=>$orderInfo['create_time'],
+                                  'app_id'=>$orderInfo['appid'],
+                                  'goods_name'=>$orderInfo['goods_name'],
+                                  'user_name'=>$orderInfo['realname'],
+                                  'mobile' =>$orderInfo['mobile'],
+
+                              ];
+                           }
+
+                       }
+                    }
+
+                }
+                //添加数据
+            }
+        }catch (\Exception $exc){
+            \App\Lib\Common\LogApi::debug('[cronOverdueDeductionMessage获取逾期数据]', ['msg'=>$exc->getMessage()]);
+        }
+
     }
 
 

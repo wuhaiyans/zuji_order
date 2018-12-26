@@ -124,8 +124,23 @@ class CronController extends Controller
         // 超时时间
         ini_set('max_execution_time', '0');
         Service\CronOperate::cronOverdueMessage($day);
-        self::addLog('[cronOverdueMessage]逾期一天 三天发送短信-start-', [$day]);
+        self::addLog('[cronOverdueMessage]逾期一天 三天发送短信-end-', [$day]);
         echo "complete";die;
     }
+
+    /**
+     * 定时任务  获取连续两个月，总共三个月未缴租金的逾期数据
+     */
+    public static function cronOverdueDeductionMessage(){
+        self::addLog('[cronOverdueDeductionMessage]获取连续两个月，总共三个月的逾期数据-start-');
+        // 超时时间
+        ini_set('max_execution_time', '0');
+        Service\CronOperate::cronOverdueDeductionMessage();
+        self::addLog('[cronOverdueDeductionMessage]获取连续两个月，总共三个月的逾期数据-end-');
+        echo "complete";die;
+    }
+    public function test(){
+        p(Service\CronOperate::cronOverdueDeductionMessage());
+   }
 
 }

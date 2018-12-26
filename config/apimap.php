@@ -420,4 +420,5 @@ return [
 	'api.overdueDeduction.overdueDepositInfo'      	   => 'OverDueDeductionController@overdueDepositInfo',       //逾期扣款详情
 	'api.overdueDeduction.overdueDepositRecord'        => 'OverDueDeductionController@overdueDepositRecord',       //逾期扣款日志
 
+
 ];
