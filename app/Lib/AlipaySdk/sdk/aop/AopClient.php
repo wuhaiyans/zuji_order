@@ -1079,7 +1079,7 @@ class AopClient {
 		$bodyIndexContent = substr($responseContent, 0, $parsetItem->startIndex);
 		$bodyEndContent = substr($responseContent, $parsetItem->endIndex, strlen($responseContent) + 1 - $parsetItem->endIndex);
 
-		$bizContent = decrypt($parsetItem->encryptContent, $this->encryptKey);
+		$bizContent = alipayDecrypt($parsetItem->encryptContent, $this->encryptKey);
 		return $bodyIndexContent . $bizContent . $bodyEndContent;
 
 	}
@@ -1143,7 +1143,7 @@ class AopClient {
 
 		$bodyIndexContent = substr($responseContent, 0, $parsetItem->startIndex);
 		$bodyEndContent = substr($responseContent, $parsetItem->endIndex, strlen($responseContent) + 1 - $parsetItem->endIndex);
-		$bizContent = decrypt($parsetItem->encryptContent, $this->encryptKey);
+		$bizContent = alipayDecrypt($parsetItem->encryptContent, $this->encryptKey);
 
 		return $bodyIndexContent . $bizContent . $bodyEndContent;
 
