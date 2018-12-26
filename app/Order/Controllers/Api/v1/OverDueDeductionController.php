@@ -3,8 +3,11 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\Excel;
+use Illuminate\Support\Facades\DB;
 use App\Order\Modules\Service\OrderOverdueDeduction;
+use App\Order\Modules\Repository\OrderOverdueDeductionRepository;
 use Illuminate\Http\Request;
+use App\Order\Modules\Repository\Pay\WithholdQuery;
 
 class OverDueDeductionController extends Controller
 {
@@ -107,6 +110,32 @@ class OverDueDeductionController extends Controller
     }
 
     /**
+     * 逾期扣款详情
+     * @Request overdue_id 逾期扣款ID
+     * @return array
+     */
+    public function overdueDepositInfo(Request $request){
+        $params             = $request->all();
+        $rules = [
+            'overdue_id'    => 'required|int',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+
+        $overdueId   = $params['params']['overdue_id'];
+
+        $info = OrderOverdueDeductionRepository::info(['id'=>$overdueId]);
+        if(!$info){
+            return apiResponse([], ApiStatus::CODE_32002, "数据异常");
+        }
+
+        return apiResponse($info,ApiStatus::CODE_0,"success");
+
+    }
+
+    /**
      * 逾期扣款操作
      * @Request overdue_id 逾期扣款ID
      * @Request amount 扣款金额
@@ -125,7 +154,9 @@ class OverDueDeductionController extends Controller
         }
 
         $params = $params['params'];
+
         $overdueId   = $params['overdue_id'];
+        $amount      = $params['amount'];
 
         $overdueInfo = OrderOverdueDeductionRepository::info(['id' => $overdueId]);
         if(!$overdueInfo){
@@ -137,6 +168,13 @@ class OverDueDeductionController extends Controller
             return apiResponse([], ApiStatus::CODE_32002, "剩余押金不足够扣款");
         }
 
+        if( $amount < 0 ){
+            return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
+        }
+
+        if($overdueInfo['deduction_status'] == \App\Order\Modules\Inc\OrderOverdueStatus::PAYING){
+            return apiResponse([], ApiStatus::CODE_81004, '逾期正在扣款中');
+        }
 
         // 开启事务
         DB::beginTransaction();
@@ -146,7 +184,7 @@ class OverDueDeductionController extends Controller
         $business_no = createNo('YQ');
         $data = [
             'business_no'       => $business_no,
-            'deduction_status'  => 5,// 修改状态支付中
+            'deduction_status'  => \App\Order\Modules\Inc\OrderOverdueStatus::PAYING,// 修改状态支付中
         ];
         $b = OrderOverdueDeductionRepository::save(['id'=>$overdueId],$data);
         if( $b === false ){
@@ -155,30 +193,102 @@ class OverDueDeductionController extends Controller
         }
 
 
+        // 创建扣款记录表数据
+        $recordData = [
+            'overdue_id'        => $overdueId,              //逾期表ID
+            'deduction_amount'  => $amount,                 //扣款金额
+            'overdue_amount'    => $overdueInfo['overdue_amount'] - $amount,  //剩余金额
+            'remark'            => $params['remark'],       //扣款备注
+            'status'            => \App\Order\Modules\Inc\OrderOverdueStatus::PAYING,//扣除押金状态
+            'create_time'       => time(),
+        ];
 
-        p($business_no);
-
-
-
-        $amount = bcmul($instalmentInfo['amount'] , 100 );
-        if( $amount<0 ){
-            return apiResponse([], ApiStatus::CODE_71003, '扣款金额不能小于1分');
+        $recordb = \App\Order\Modules\Repository\OrderOverdueRecordRepository::create($recordData);
+        if( $recordb === false ){
+            DB::rollBack();
+            return apiResponse([], ApiStatus::CODE_32002, "修改逾期扣款记录数据异常");
         }
-        p($overdueInfo);
 
+        // 代扣协议编号
+        $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
+        // 查询用户协议
+        $withhold = WithholdQuery::getByUserChannel($overdueInfo['user_id'], $channel);
 
+        $withholdInfo = $withhold->getData();
 
+        $agreementNo = $withholdInfo['out_withhold_no'];
+        if (!$agreementNo) {
+            DB::rollBack();
+            return apiResponse([], ApiStatus::CODE_81001, '用户代扣协议编号错误');
+        }
+        // 代扣接口
+        $withholding = new \App\Lib\Payment\CommonWithholdingApi;
 
+        $amount = bcmul($amount , 100 );
 
+        $subject = $overdueInfo['order_no'] . "逾期扣除押金";
 
+        $withholding_data = [
+            'agreement_no'  => $agreementNo,            //支付平台代扣协议号
+            'out_trade_no'  => $business_no,            //业务系统业务码
+            'amount'        => $amount,                 //交易金额；单位：分
+            'back_url'      => config('app.url') . "/order/pay/deduDepositNotify",//后台通知地址
+            'name'          => $subject,                //交易备注
+            'user_id'       => $overdueInfo['user_id'], //业务平台用户id
+        ];
 
+        try{
+            // 请求代扣接口
+            $withholdStatus = $withholding->deduct($withholding_data);
 
+            if( !isset($withholdStatus['status']) || $withholdStatus['status'] != 'processing'){
+                DB::rollBack();
+                return apiResponse([], ApiStatus::CODE_81004, '预授权转支付失败');
+            }
+            LogApi::error('[overdueDeposit]逾期扣款押金失败-' . $overdueInfo['order_no'] , $withholdStatus);
 
+        }catch(\App\Lib\ApiException $exc){
+            DB::rollBack();
+            return apiResponse([], ApiStatus::CODE_81004, $exc->getMessage());
+        }
 
+        // 提交事务
+        DB::commit();
 
-
-
-
+        return apiResponse([],ApiStatus::CODE_0,"success");
 
     }
+
+    /**
+     * 逾期扣款操作日志
+     * @Request overdue_id 逾期扣款ID
+     * @return bool ture false
+     */
+    public function overdueDepositRecord(Request $request){
+        $params             = $request->all();
+        $rules = [
+            'overdue_id'    => 'required|int',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+        if ($validateParams['code'] != 0) {
+            return apiResponse([],$validateParams['code']);
+        }
+
+        // 逾期ID
+        $overdueId   = $params['params']['overdue_id'];
+
+        $where = [
+            'overdue_id' => $overdueId,
+            'status'     => \App\Order\Modules\Inc\OrderOverdueStatus::SUCCESS
+        ];
+        $recordList = \App\Order\Modules\Repository\OrderOverdueRecordRepository::getOverdueDeductionList($where);
+
+
+        return apiResponse($recordList,ApiStatus::CODE_0,"success");
+
+    }
+
+
+
+
 }
