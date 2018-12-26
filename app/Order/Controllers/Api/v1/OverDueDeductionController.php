@@ -228,7 +228,7 @@ class OverDueDeductionController extends Controller
                 'out_trade_no'	=> $business_no,            //业务系统授权码
                 'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
                 'amount'		=> $amount,                 //交易金额；单位：分
-                'back_url'		=> config('app.url') . "/order/pay/deduDepositNotify",//后台通知地址
+                'back_url'		=> config('ordersystem.ORDER_API')."/deduDepositNotify",//后台通知地址
                 'user_id'		=> $overdueInfo['user_id'],   //用户id
                 'remark'		=> $params['remark'], //业务描述
             ];
