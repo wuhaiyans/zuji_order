@@ -50,7 +50,7 @@ class LtCookie
 	 * @param string $plainText 
 	 * @return string 
 	 */
-	protected function encrypt($plainText)
+	protected function alipayEncrypt($plainText)
 	{
 		$key = $this->secretKey;
 		$ivSize = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB);
@@ -123,13 +123,13 @@ class LtCookie
 		{
 			foreach($value as $k => $v)
 			{
-				$v = $this->encrypt($v);
+				$v = $this->alipayEncrypt($v);
 				setcookie($name . '[' . $k . ']', $v, $expire, $path, $domain, $secure);
 			}
 		}
 		else
 		{
-			$value = $this->encrypt($value);
+			$value = $this->alipayEncrypt($value);
 			setcookie($name, $value, $expire, $path, $domain, $secure);
 		}
 	}

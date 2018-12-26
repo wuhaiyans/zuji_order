@@ -12,7 +12,7 @@
  * @param string $str
  * @return string
  */
- function encrypt($str,$screct_key){
+ function alipayEncrypt($str,$screct_key){
 	//AES, 128 模式加密数据 CBC
 	$screct_key = base64_decode($screct_key);
 	$str = trim($str);
