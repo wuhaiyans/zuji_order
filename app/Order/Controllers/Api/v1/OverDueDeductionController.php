@@ -177,7 +177,7 @@ class OverDueDeductionController extends Controller
         }
 
         // 开启事务
-        DB::beginTransaction();
+//        DB::beginTransaction();
 
 
         // 生成交易码
@@ -188,7 +188,7 @@ class OverDueDeductionController extends Controller
         ];
         $b = OrderOverdueDeductionRepository::save(['id'=>$overdueId],$data);
         if( $b === false ){
-            DB::rollBack();
+//            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_32002, "修改逾期交易号数据异常");
         }
 
@@ -205,7 +205,7 @@ class OverDueDeductionController extends Controller
 
         $recordb = \App\Order\Modules\Repository\OrderOverdueRecordRepository::create($recordData);
         if( $recordb === false ){
-            DB::rollBack();
+//            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_32002, "修改逾期扣款记录数据异常");
         }
 
@@ -218,7 +218,7 @@ class OverDueDeductionController extends Controller
 
         $agreementNo = $withholdInfo['out_withhold_no'];
         if (!$agreementNo) {
-            DB::rollBack();
+//            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_81001, '用户代扣协议编号错误');
         }
         // 代扣接口
@@ -242,18 +242,18 @@ class OverDueDeductionController extends Controller
             $withholdStatus = $withholding->deduct($withholding_data);
 
             if( !isset($withholdStatus['status']) || $withholdStatus['status'] != 'processing'){
-                DB::rollBack();
+//                DB::rollBack();
                 return apiResponse([], ApiStatus::CODE_81004, '预授权转支付失败');
             }
             LogApi::error('[overdueDeposit]逾期扣款押金失败-' . $overdueInfo['order_no'] , $withholdStatus);
 
         }catch(\App\Lib\ApiException $exc){
-            DB::rollBack();
+//            DB::rollBack();
             return apiResponse([], ApiStatus::CODE_81004, $exc->getMessage());
         }
 
         // 提交事务
-        DB::commit();
+//        DB::commit();
 
         return apiResponse([],ApiStatus::CODE_0,"success");
 
