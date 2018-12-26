@@ -623,41 +623,53 @@ class CronOperate
      */
     public static function cronOverdueDeductionMessage(){
         try{
+            LogApi::debug('[cronOverdueDeductionMessage进入程序]');
             //获取逾期扣款表已存在的数据
             $getOverdueDeductionInfo = OrderOverdueDeductionRepository::getOverdueInfo();
+            $overdueData = [];
+            if( $getOverdueDeductionInfo ){
+                foreach ($getOverdueDeductionInfo as $item){
+                    $overdueData[] = $item['order_no'];
+                }
+            }
             //获取连续两个月，总共三个月未缴租金的逾期数据
             $orderNoArray = \App\Order\Modules\Service\OrderGoodsInstalment::instalmentOverdue();
-            p($orderNoArray);exit;
             if( $orderNoArray ){
-
-                $orderNoList = [];
-                if( $orderNoArray ){
+                LogApi::debug('[cronOverdueDeductionMessage获取逾期扣款表已存在的数据]', $getOverdueDeductionInfo);
                     foreach($orderNoArray as $item){
-                        $orderNoList['order_no'] = $item['order_no'];
-                       if(!in_array($orderNoList,$getOverdueDeductionInfo)){
-                           //获取订单信息
-                           $orderInfo = OrderOverdueDeductionRepository::getOverdueOrderDetail($item['order_no']);
-                           //添加数据
-                           if($orderInfo){
-                              $data = [
-                                  'order_no'=>$item['order_no'],
-                                  'order_time'=>$orderInfo['create_time'],
-                                  'app_id'=>$orderInfo['appid'],
-                                  'goods_name'=>$orderInfo['goods_name'],
-                                  'user_name'=>$orderInfo['realname'],
-                                  'mobile' =>$orderInfo['mobile'],
+                        if(!in_array($item['order_no'],$overdueData,true)){
+                            //获取订单信息
+                            $orderInfo = OrderOverdueDeductionRepository::getOverdueOrderDetail($item['order_no']);
+                            $data = [];
+                            //添加数据
+                            if($orderInfo){
+                                $data = [
+                                    'order_no'        =>$item['order_no'],
+                                    'order_time'     =>$orderInfo['create_time'],
+                                    'app_id'          =>$orderInfo['appid'],
+                                    'goods_name'     =>$orderInfo['goods_name'],
+                                    'zuqi_type'      =>$orderInfo['zuqi_type'],
+                                    'user_name'      =>empty($orderInfo['realname'])?'':$orderInfo['realname'],
+                                    'mobile'         =>$orderInfo['mobile'],
+                                    'unpaid_amount' =>$item['amount'],
+                                    'overdue_amount'=>empty($orderInfo['surplus_yajin'])?$orderInfo['yajin']:$orderInfo['surplus_yajin'],
+                                    'user_id'        =>$orderInfo['user_id'],
+                                    'create_time'   =>time()
 
-                              ];
-                           }
+                                ];
 
-                       }
+                                $createResult = OrderOverdueDeductionRepository::createOverdue($data);//创建符合要求的数据
+                                if( !$createResult){
+                                    LogApi::debug('[cronOverdueDeductionMessage创建符合要求的数据失败]');
+                                    return false;
+                                }
+                            }
+
+                        }
                     }
-
                 }
-                //添加数据
-            }
         }catch (\Exception $exc){
-            \App\Lib\Common\LogApi::debug('[cronOverdueDeductionMessage获取逾期数据]', ['msg'=>$exc->getMessage()]);
+            LogApi::debug('[cronOverdueDeductionMessage程序异常]', ['msg'=>$exc->getMessage()]);
         }
 
     }

@@ -676,8 +676,7 @@ class OrderRepository
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
         {
-            $orWhereArray[] = ['order_info.mobile', '=', $param['keywords'],'or'];
-            $orWhereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords'],'or'];
+            $whereArray[] = ['order_info.mobile', '=', $param['keywords']];
         }
         //根据订单号
         elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
@@ -792,9 +791,6 @@ class OrderRepository
                             ]);
                     });
                 })
-                ->when(!empty($orWhereArray),function($join) use ($orWhereArray) {
-                    return $join->where($orWhereArray);
-                })
                 ->first();
                 $count = objectToArray($count)['order_count'];
                 if (!isset($param['count'])) {
@@ -824,9 +820,6 @@ class OrderRepository
                                 ['order_info_visit.visit_id', '0']
                             ]);
                     });
-                })
-                ->when(!empty($orWhereArray),function($join) use ($orWhereArray) {
-                    return $join->where($orWhereArray);
                 })
                 ->orderBy('order_info.create_time', 'DESC')
                 ->skip(($page - 1) * $pagesize)->take($pagesize)
@@ -907,8 +900,7 @@ class OrderRepository
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
         {
-            $orWhereArray[] = ['order_info.mobile', '=', $param['keywords'],'or'];
-            $orWhereArray[] = ['d.consignee_mobile', '=', $param['keywords'],'or'];
+            $whereArray[] = ['o.mobile', '=', $param['keywords']];
         }
         //根据订单号
         elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
@@ -993,7 +985,6 @@ class OrderRepository
                 $join->on('o.order_no', '=', 'c.order_no');
             }, null,null,'left')
             ->where($whereArray)
-            ->where($orWhereArray)
             ->when(!empty($isUncontact),function($join) {
                 return $join->where(function ($join) {  //闭包返回的条件会包含在括号中
                     $join-> whereNull('v.visit_id')

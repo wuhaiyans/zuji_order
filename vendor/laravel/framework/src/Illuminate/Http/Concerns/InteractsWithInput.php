@@ -160,7 +160,15 @@ trait InteractsWithInput
      */
     public function all($keys = null)
     {
+
         $input = array_replace_recursive($this->input(), $this->allFiles());
+//        dd($input);
+        if (isset($input['params']) && $input['params']['order_no']) {
+            $input['params']['order_no'] = (string)$input['params']['order_no'];
+        }
+        if (isset($input['params']) && $input['params']['keywords']) {
+            $input['params']['keywords'] = (string)$input['params']['keywords'];
+        }
 
         if (! $keys) {
             return $input;
@@ -184,6 +192,14 @@ trait InteractsWithInput
      */
     public function input($key = null, $default = null)
     {
+
+        $paramsValues = $this->getInputSource()->all();
+        if (isset($paramsValues['params']) && $paramsValues['params']['order_no']) {
+            $paramsValues['params']['order_no'] = (string)$paramsValues['params']['order_no'];
+        }
+        if (isset($paramsValues['params']) && $paramsValues['params']['keywords']) {
+//            $paramsValues['params']['keywords'] = (string)$paramsValues['params']['keywords'];
+        }
         return data_get(
             $this->getInputSource()->all() + $this->query->all(), $key, $default
         );

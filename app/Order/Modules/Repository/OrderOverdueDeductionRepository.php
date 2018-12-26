@@ -162,11 +162,8 @@ class OrderOverdueDeductionRepository
             ->select('order_no')->get();
         if (!$result) return false;
         $resultArray = objectToArray($result);
-        $orderInfo = [];
-        foreach($resultArray as $item){
-            $orderInfo = $item['order_no'];
-        }
-        return $orderInfo;
+
+        return $resultArray;
     }
 
     /**
@@ -195,22 +192,32 @@ class OrderOverdueDeductionRepository
      * @return array
      */
     public static function getOverdueOrderDetail($orderNo){
-        if(!isset( $orderArray )){
+        if(!isset( $orderNo )){
             return false;
         }
-
-        $where = ['order_info.order_no','=',$orderNo];
-        $order_result[]= DB::table('order_info')
-            ->leftJoin('order_goods', ['order_info.order_no', '=', 'order_goods.order_no'])
-            ->leftJoin('order_user_certified', ['order_info.order_no', '=', 'order_user_certified.order_no'])
+        $where[] = ['order_info.order_no','=',$orderNo];
+        $order_result = DB::table('order_info')
+            ->leftJoin('order_goods', 'order_info.order_no', '=', 'order_goods.order_no')
+            ->leftJoin('order_user_certified', 'order_info.order_no', '=', 'order_user_certified.order_no')
             ->where($where)
-            ->select('order_info.mobile','order_info.user_id','order_info.appid','order_info.zuqi_type','order_info.create_time','order_goods.surplus_yajin','order_goods.goods_name','order_user_certified.realname')
-            ->first()->toArray();
-
+            ->select('order_info.mobile','order_info.user_id','order_info.appid','order_info.zuqi_type','order_info.create_time','order_goods.yajin','order_goods.surplus_yajin','order_goods.goods_name','order_user_certified.realname')
+            ->first();
 
         if(!$order_result){
             return [];
         }
-        return $order_result;
+        return objectToArray($order_result);
+    }
+
+    /**
+     * 创建逾期记录
+     * @param array $data
+     */
+    public static function createOverdue(array $data){
+        $createResult = OrderOverdueDeduction::query()->insert($data);
+        if( !$createResult ){
+            return false;
+        }
+        return $createResult;
     }
 }
