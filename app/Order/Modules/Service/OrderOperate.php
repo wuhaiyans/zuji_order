@@ -796,6 +796,7 @@ class OrderOperate
                 return $instalmentInfo;
 
             }catch (\Exception $e){
+                LogApi::alert("getLebaifenInstalment:获取乐百分分期 信息 接口失败",$param,[config('web.order_warning_user')]);
                 LogApi::error(config('app.env')."环境 获取乐百分分期 信息 接口失败",$e->getMessage());
                 return false;
             }
@@ -940,7 +941,6 @@ class OrderOperate
         }
         $b = $order->editOrderRiskStatus($riskStatus);
         if(!$b){
-
             LogApi::error(config('app.env')."[orderRiskSave] Order-editOrderRiskStatus:".$orderNo);
             return ApiStatus::CODE_31006;
         }
@@ -965,7 +965,6 @@ class OrderOperate
                 ];
                 $id =OrderRiskRepository::add($riskData);
                 if(!$id){
-
                     LogApi::error(config('app.env')."[orderRiskSave] save-error",$riskData);
                     return  ApiStatus::CODE_31006;
                 }
