@@ -131,7 +131,7 @@ $api->version('v1', [
         //出账记录导出
         $api->any('listReletExport', 'ReletController@listReletExport');
         //逾期扣款导出
-        $api->any('overdueDeductionExport','OverdueDeductionController@overdueDeductionExport');
+        $api->any('overdueDeductionExport','OverDueDeductionController@overdueDeductionExport');
 
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************
