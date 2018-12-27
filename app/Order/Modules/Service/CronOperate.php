@@ -644,7 +644,7 @@ class CronOperate
                             //添加数据
                             if($orderInfo){
                                 if( $orderInfo['surplus_yajin'] == 0){
-                                    $surplus_yajin = $orderInfo['yajin'];
+                                    $surplus_yajin = $orderInfo['yajin'];//
                                 }else{
                                     $surplus_yajin = $orderInfo['surplus_yajin'];
                                 }
