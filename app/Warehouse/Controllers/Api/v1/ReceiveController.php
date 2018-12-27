@@ -323,6 +323,7 @@ class ReceiveController extends Controller
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
+        LogApi::info('checkItemsFinish_info_Receive_time1',time());
 
         try {
             DB::beginTransaction();
@@ -344,6 +345,7 @@ class ReceiveController extends Controller
             LogApi::info('checkItemsFinish_info_Receive',$params);
 
             $this->receive->checkItem($params);
+            LogApi::info('checkItemsFinish_info_Receive_time2',time());
             Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
 
             DB::commit();
@@ -354,8 +356,8 @@ class ReceiveController extends Controller
             WarehouseWarning::warningWarehouse('[检测完成]失败',[$params,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
-
-        return apiResponse(['items'=>$items]);
+        LogApi::info('checkItemsFinish_info_Receive_time3',time());
+        return apiResponse();
     }
 
     /**
