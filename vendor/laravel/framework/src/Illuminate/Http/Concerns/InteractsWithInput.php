@@ -198,10 +198,10 @@ trait InteractsWithInput
             $paramsValues['params']['order_no'] = (string)$paramsValues['params']['order_no'];
         }
         if (isset($paramsValues['params']) && $paramsValues['params']['keywords']) {
-//            $paramsValues['params']['keywords'] = (string)$paramsValues['params']['keywords'];
+            $paramsValues['params']['keywords'] = (string)$paramsValues['params']['keywords'];
         }
         return data_get(
-            $this->getInputSource()->all() + $this->query->all(), $key, $default
+            $paramsValues + $this->query->all(), $key, $default
         );
     }
 
