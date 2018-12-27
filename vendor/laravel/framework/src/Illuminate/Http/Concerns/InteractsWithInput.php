@@ -163,10 +163,10 @@ trait InteractsWithInput
 
         $input = array_replace_recursive($this->input(), $this->allFiles());
 //        dd($input);
-        if (isset($input['params']) && $input['params']['order_no']) {
+        if (isset($input['params']) && isset($input['params']['order_no'])) {
             $input['params']['order_no'] = (string)$input['params']['order_no'];
         }
-        if (isset($input['params']) && $input['params']['keywords']) {
+        if (isset($input['params']) && isset($input['params']['keywords'])) {
             $input['params']['keywords'] = (string)$input['params']['keywords'];
         }
 
@@ -194,14 +194,14 @@ trait InteractsWithInput
     {
 
         $paramsValues = $this->getInputSource()->all();
-        if (isset($paramsValues['params']) && $paramsValues['params']['order_no']) {
+        if (isset($paramsValues['params']) && isset($paramsValues['params']['order_no'])) {
             $paramsValues['params']['order_no'] = (string)$paramsValues['params']['order_no'];
         }
-        if (isset($paramsValues['params']) && $paramsValues['params']['keywords']) {
-//            $paramsValues['params']['keywords'] = (string)$paramsValues['params']['keywords'];
+        if (isset($paramsValues['params']) && isset($paramsValues['params']['keywords'])) {
+            $paramsValues['params']['keywords'] = (string)$paramsValues['params']['keywords'];
         }
         return data_get(
-            $this->getInputSource()->all() + $this->query->all(), $key, $default
+            $paramsValues + $this->query->all(), $key, $default
         );
     }
 
