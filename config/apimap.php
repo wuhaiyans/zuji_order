@@ -420,8 +420,8 @@ return [
 	'api.overdueDeduction.overdueDepositInfo'      	   => 'OverDueDeductionController@overdueDepositInfo',       //逾期扣款详情
 	'api.overdueDeduction.overdueDepositRecord'        => 'OverDueDeductionController@overdueDepositRecord',       //逾期扣款日志
    // 'api.cron.test'                                         => 'CronController@test',       //定时任务逾期扣款测试
-    'api.overdueVisit.visitDetail'                        => 'OverdueVisitController@visitDetail',       //逾期回访记录
-    'api.overdueVisit.createVisit'                        => 'OverdueVisitController@createVisit',       //添加回访记录
+    'api.overdueVisit.visitDetail'                        => 'OverDueVisitController@visitDetail',       //逾期回访记录
+    'api.overdueVisit.createVisit'                        => 'OverDueVisitController@createVisit',       //添加回访记录
 
 
 ];
