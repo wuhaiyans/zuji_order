@@ -354,8 +354,7 @@ class ReceiveController extends Controller
             WarehouseWarning::warningWarehouse('[检测完成]失败',[$params,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
-
-        return apiResponse(['items'=>$items]);
+        return apiResponse();
     }
 
     /**

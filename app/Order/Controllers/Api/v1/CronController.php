@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Order\Controllers\Api\v1;
+use App\Lib\ApiStatus;
 use App\Order\Modules\Repository\OrderUserInfoRepository;
 use App\Order\Modules\Service;
 use App\Order\Models\OrderGoodExtend;
@@ -140,7 +141,8 @@ class CronController extends Controller
         echo "complete";die;
     }
     public function test(){
-        p(Service\CronOperate::cronOverdueDeductionMessage());
+        $a = Service\CronOperate::cronOverdueDeductionMessage();
+        return apiResponse($a, ApiStatus::CODE_0);
    }
 
 }

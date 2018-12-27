@@ -802,8 +802,6 @@ class OrderController extends Controller
         LogApi::info("OrderDelivery_request",$params);
         $res = OrderOperate::delivery($params['order_info'],$params['goods_info'],$params['operator_info']);
         if(!$res){
-            LogApi::alert("OrderDelivery:".get_msg(),$params,[config('web.order_warning_user')]);
-            LogApi::error("OrderDelivery:".get_msg());
             return apiResponse([],ApiStatus::CODE_30014,get_msg());
         }
         LogApi::info("OrderDelivery_response".$res);
