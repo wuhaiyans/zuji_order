@@ -4,10 +4,12 @@ use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\Excel;
 use Illuminate\Support\Facades\DB;
+use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Service\OrderOverdueDeduction;
 use App\Order\Modules\Repository\OrderOverdueDeductionRepository;
 use Illuminate\Http\Request;
-use App\Order\Modules\Repository\Pay\WithholdQuery;
+use App\Order\Modules\Repository\Pay\PayQuery;
+use App\Lib\Payment\CommonFundAuthApi;
 
 class OverDueDeductionController extends Controller
 {
@@ -209,47 +211,37 @@ class OverDueDeductionController extends Controller
             return apiResponse([], ApiStatus::CODE_32002, "修改逾期扣款记录数据异常");
         }
 
-        // 代扣协议编号
-        $channel = \App\Order\Modules\Repository\Pay\Channel::Alipay;   //暂时保留
-        // 查询用户协议
-        $withhold = WithholdQuery::getByUserChannel($overdueInfo['user_id'], $channel);
-
-        $withholdInfo = $withhold->getData();
-
-        $agreementNo = $withholdInfo['out_withhold_no'];
-        if (!$agreementNo) {
-            DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_81001, '用户代扣协议编号错误');
-        }
-        // 代扣接口
-        $withholding = new \App\Lib\Payment\CommonWithholdingApi;
-
-        $amount = bcmul($amount , 100 );
-
-        $subject = $overdueInfo['order_no'] . "逾期扣除押金";
-
-        $withholding_data = [
-            'agreement_no'  => $agreementNo,            //支付平台代扣协议号
-            'out_trade_no'  => $business_no,            //业务系统业务码
-            'amount'        => $amount,                 //交易金额；单位：分
-            'back_url'      => config('app.url') . "/order/pay/deduDepositNotify",//后台通知地址
-            'name'          => $subject,                //交易备注
-            'user_id'       => $overdueInfo['user_id'], //业务平台用户id
-        ];
 
         try{
-            // 请求代扣接口
-            $withholdStatus = $withholding->deduct($withholding_data);
+            /**
+             * 查询用户下单时 预授权信息 获取支付系统授权码
+             */
+            $orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $overdueInfo['order_no']);
+            $fundauthNo = $orderAuthInfo->getFundauthNo();
 
-            if( !isset($withholdStatus['status']) || $withholdStatus['status'] != 'processing'){
-                DB::rollBack();
-                return apiResponse([], ApiStatus::CODE_81004, '预授权转支付失败');
-            }
-            LogApi::error('[overdueDeposit]逾期扣款押金失败-' . $overdueInfo['order_no'] , $withholdStatus);
+            $authInfo = PayQuery::getAuthInfoByAuthNo($fundauthNo);
+            // 价格
+            $amount = bcmul($amount , 100 );
+
+            $unfreezeAndPayData = [
+                'name'			=> $overdueInfo['order_no'] . "逾期扣除押金",   //交易名称
+                'out_trade_no'	=> $business_no,            //业务系统授权码
+                'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
+                'amount'		=> $amount,                 //交易金额；单位：分
+                'back_url'		=> config('ordersystem.ORDER_API')."/deduDepositNotify",//后台通知地址
+                'user_id'		=> $overdueInfo['user_id'],   //用户id
+                'remark'		=> $params['remark'], //业务描述
+            ];
+            LogApi::info("[overdueDeposit]逾期扣除押金参数为：", $unfreezeAndPayData);
+
+            $succss = CommonFundAuthApi::unfreezeAndPay($unfreezeAndPayData);
+
+            LogApi::info('[overdueDeposit]逾期扣除押金，返回的结果：', $succss);
 
         }catch(\App\Lib\ApiException $exc){
-            DB::rollBack();
-            return apiResponse([], ApiStatus::CODE_81004, $exc->getMessage());
+
+            LogApi::error('[overdueDeposit]逾期扣除押金', [$exc->getMessage()]);
+            return apiResponse([], ApiStatus::CODE_71006, $exc->getMessage());
         }
 
         // 提交事务
@@ -287,8 +279,5 @@ class OverDueDeductionController extends Controller
         return apiResponse($recordList,ApiStatus::CODE_0,"success");
 
     }
-
-
-
 
 }

@@ -5,6 +5,7 @@ use App\Activity\Modules\Repository\Activity\ExperienceDestine;
 use App\Activity\Modules\Repository\ExperienceDestineRepository;
 use App\Lib\ApiStatus;
 use App\Lib\Certification;
+use App\Lib\Channel\Channel;
 use App\Lib\Common\JobQueueApi;
 use App\Lib\Common\LogApi;
 use App\Lib\Common\SmsApi;
@@ -603,6 +604,20 @@ class OrderCreater
             DB::rollBack();
             echo $exc->getMessage();
             die;
+        }
+    }
+
+    /**
+     * 根据appid 获取渠道信息
+     * @param $appid
+     * @return bool|array
+     */
+    public function getChannelByAppId($appid){
+        //获取渠道信息
+        try{
+            $ChannelInfo = Channel::getChannel($appid);
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."GetChannel-Exception:".$e->getMessage());
         }
     }
 

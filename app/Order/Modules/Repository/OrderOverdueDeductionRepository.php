@@ -19,7 +19,6 @@ class OrderOverdueDeductionRepository
     public static function getOverdueDeductionList($param = array(), $pagesize=5)
     {
         $whereArray = array();
-        $isUncontact = 0;
 
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
@@ -152,7 +151,19 @@ class OrderOverdueDeductionRepository
         if (!$result) return false;
         return $result->toArray();
     }
+    /**
+     * 逾期扣款数据
+     * array    $where
+     * return array
+     */
+    public static function getOverdueInfo(){
+        $result =  DB::table('order_overdue_deduction')
+            ->select('order_no')->get();
+        if (!$result) return false;
+        $resultArray = objectToArray($result);
 
+        return $resultArray;
+    }
 
     /**
      * 修改方法
@@ -172,5 +183,40 @@ class OrderOverdueDeductionRepository
         if (!$result) return false;
 
         return true;
+    }
+
+    /**
+     * 获取逾期订单信息
+     * @param  $orderNo 订单编号
+     * @return array
+     */
+    public static function getOverdueOrderDetail($orderNo){
+        if(!isset( $orderNo )){
+            return false;
+        }
+        $where[] = ['order_info.order_no','=',$orderNo];
+        $order_result = DB::table('order_info')
+            ->leftJoin('order_goods', 'order_info.order_no', '=', 'order_goods.order_no')
+            ->leftJoin('order_user_certified', 'order_info.order_no', '=', 'order_user_certified.order_no')
+            ->where($where)
+            ->select('order_info.mobile','order_info.user_id','order_info.appid','order_info.zuqi_type','order_info.create_time','order_goods.yajin','order_goods.surplus_yajin','order_goods.goods_name','order_user_certified.realname')
+            ->first();
+
+        if(!$order_result){
+            return [];
+        }
+        return objectToArray($order_result);
+    }
+
+    /**
+     * 创建逾期记录
+     * @param array $data
+     */
+    public static function createOverdue(array $data){
+        $createResult = OrderOverdueDeduction::query()->insert($data);
+        if( !$createResult ){
+            return false;
+        }
+        return $createResult;
     }
 }

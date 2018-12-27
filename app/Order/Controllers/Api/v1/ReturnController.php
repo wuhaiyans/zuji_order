@@ -567,6 +567,7 @@ class ReturnController extends Controller
         // | 获取参数并验证
         //-+--------------------------------------------------------------------
         $params = $request->input();
+        LogApi::debug("[isQualified获取检测信息]",$params);
         $paramsArr = isset($params['params']['data'])? $params['params']['data'] :'';
         foreach($paramsArr as $param){
             if(empty($param['goods_no'])
@@ -578,7 +579,7 @@ class ReturnController extends Controller
             }
         }
         $operateUserInfo = isset($params['params']['userinfo'])? $params['params']['userinfo'] :'';
-        LogApi::debug("检测获取用户信息",$operateUserInfo);
+        LogApi::debug("【isQualified】检测获取用户信息",$operateUserInfo);
         if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
             return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
         }

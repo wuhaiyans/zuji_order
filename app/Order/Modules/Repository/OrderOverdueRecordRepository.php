@@ -39,11 +39,11 @@ class OrderOverdueRecordRepository
 
     public static function create($data){
 
-        $ret = OrderOverdueRecord::create($data);
-        if(!$ret){
+        $createId = OrderOverdueRecord::insertGetId($data);
+        if(!$createId){
             return false;
         }
-        return $ret->getQueueableId();
+        return $createId;
 
     }
 
