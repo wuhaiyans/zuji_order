@@ -875,6 +875,7 @@ class OrderOperate
             }
             $b =$order->deliveryOpen($data['remark']);
             if(!$b){
+                LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data,[config('web.order_warning_user')]);
                 DB::rollBack();
                 return false;
             }
@@ -886,12 +887,14 @@ class OrderOperate
             //通知收发货系统 -申请发货
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
+                LogApi::alert("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo,[config('web.order_warning_user')]);
                 DB::rollBack();
                 return false;
             }
             //增加操作日志
             $userInfo =$data['userinfo'];
-            OrderLogRepository::add($userInfo['uid'],$userInfo['username'],\App\Lib\PublicInc::Type_Admin,$data['order_no'],"确认订单","后台申请发货");
+            OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$data['order_no'],"申请发货",$data['remark']);
+
 
             DB::commit();
 
@@ -905,6 +908,7 @@ class OrderOperate
         }catch (\Exception $exc){
             DB::rollBack();
             echo $exc->getMessage();
+            return false;
             die;
 
         }

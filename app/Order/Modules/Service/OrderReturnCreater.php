@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 use App\Lib\ApiStatus;
+use App\Lib\Common\JobQueueApi;
 use App\Lib\Common\LogApi;
 use App\Lib\NotFoundException;
 use App\Lib\Order\OrderInfo;
@@ -3160,6 +3161,8 @@ class OrderReturnCreater
                     ], $userinfo);
                     LogApi::debug("[refuseSign]不需要清算，直接调起退款成功结果",$b);
                     if( $b==true ){ // 退款成功，已经关闭退款单，并且已经更新商品和订单）
+                        //取消任务队列
+                        $cancel = JobQueueApi::cancel(config('app.env')."refuseSign".$order_no);
                         //事务提交
                         DB::commit();
                         return true;
@@ -3193,6 +3196,8 @@ class OrderReturnCreater
                        return false;//创建退款清单失败
                    }
                 }
+              //取消任务队列
+              $cancel = JobQueueApi::cancel(config('app.env')."refuseSign".$order_no);
                //插入操作日志
                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_no,"退款","拒签异常处理");
                DB::commit();
