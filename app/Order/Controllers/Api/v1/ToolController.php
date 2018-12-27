@@ -28,6 +28,10 @@ class ToolController extends Controller
     public function Delay(Request $request){
         try{
             $params     = $request->all();
+            $operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
+            if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+                return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+            }
             // 参数过滤
             $rules = [
                 'begin_time'       => 'required',  // 开始时间
@@ -98,6 +102,28 @@ class ToolController extends Controller
                 LogApi::debug('[ToolDelay]修改order_goods_unit失败');
                 DB::rollBack();
                 return apiResponse([],ApiStatus::CODE_50000,"修改order_goods_unit失败");
+            }
+
+            //查询goods_no
+            $goodsInfo  = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow(['order_no'=>$order_no]);
+            $goodsNo    = $goodsInfo ? $goodsInfo['goods_no'] : "";
+
+            //记录日志
+            $goodsLog = \App\Order\Modules\Repository\GoodsLogRepository::add([
+                'order_no'      => $order_no,
+                'action'        => '异常订单延期',
+                'business_key'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_RELET,//此处用常量
+                'business_no'   => createNo(9),
+                'goods_no'      => $goodsNo,
+                'operator_id'   => $operateUserInfo['uid'],
+                'operator_name' => $operateUserInfo['username'],
+                'operator_type' => $operateUserInfo['type']==1?\App\Lib\PublicInc::Type_Admin:\App\Lib\PublicInc::Type_User,
+                'msg'           => '后台操作异常延期',
+            ]);
+            if( !$goodsLog ){
+                //事务回滚
+                DB::rollBack();
+                return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
             }
 
             DB::commit();
