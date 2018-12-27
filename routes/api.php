@@ -65,6 +65,9 @@ $api->version('v1', [
         //订单清算退款回调接口
         $api->post('fundauthToPayNotify', 'PayController@fundauthToPayNotify');
 
+        //逾期扣款回调接口
+        $api->post('deduDepositNotify', 'PayController@deduDepositNotify');
+
         //订单清算退款回调接口
         $api->post('refundClean', 'PayController@refundClean');
 
