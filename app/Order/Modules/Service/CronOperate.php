@@ -643,6 +643,11 @@ class CronOperate
                             $data = [];
                             //添加数据
                             if($orderInfo){
+                                if( $orderInfo['surplus_yajin'] == 0){
+                                    $surplus_yajin = $orderInfo['yajin'];
+                                }else{
+                                    $surplus_yajin = $orderInfo['surplus_yajin'];
+                                }
                                 $data = [
                                     'order_no'        =>$item['order_no'],
                                     'order_time'     =>$orderInfo['create_time'],
@@ -652,7 +657,7 @@ class CronOperate
                                     'user_name'      =>empty($orderInfo['realname'])?'':$orderInfo['realname'],
                                     'mobile'         =>$orderInfo['mobile'],
                                     'unpaid_amount' =>$item['amount'],
-                                    'overdue_amount'=>empty($orderInfo['surplus_yajin'])?$orderInfo['yajin']:$orderInfo['surplus_yajin'],
+                                    'overdue_amount'=>$surplus_yajin,
                                     'user_id'        =>$orderInfo['user_id'],
                                     'create_time'   =>time()
 

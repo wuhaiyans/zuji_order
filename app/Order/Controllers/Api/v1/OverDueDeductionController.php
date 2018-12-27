@@ -80,6 +80,11 @@ class OverDueDeductionController extends Controller
             if ($overdueData) {
                 $data = array();
                 foreach ($overdueData as $item) {
+                    if( $item['deduction_time'] == 0){
+                        $deduction_time = 0;
+                    }else{
+                        $deduction_time = date('Y-m-d H:i:s', $item['deduction_time']);
+                    }
                     $data[] = [
                         $item['order_no'],
                         date('Y-m-d H:i:s', $item['order_time']),
@@ -91,7 +96,7 @@ class OverDueDeductionController extends Controller
                         $item['overdue_amount'],
                         $item['deduction_name'],
                         $item['visit_name'],
-                        date('Y-m-d H:i:s', $item['deduction_time']),
+                        $deduction_time,
                         $item['deduction_amount'],
 
                     ];
