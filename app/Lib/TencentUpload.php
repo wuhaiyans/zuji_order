@@ -142,7 +142,7 @@ class TencentUpload {
                 $sign .= $k.'='.$v.'&';
             }
         }
-        $sign = strtolower( md5($sign.'key='. env('Api_Upload_Key')?env('Api_Upload_Key'):$this->api_upload_key) );
+        $sign = strtolower( md5($sign.'key='. env('API_UPLOAD_KEY')?env('API_UPLOAD_KEY'):$this->api_upload_key) );
         return $sign;
     }
 }
