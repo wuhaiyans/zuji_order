@@ -5,6 +5,7 @@ use App\Activity\Modules\Repository\Activity\ExperienceDestine;
 use App\Activity\Modules\Repository\ExperienceDestineRepository;
 use App\Lib\ApiStatus;
 use App\Lib\Certification;
+use App\Lib\Channel\Channel;
 use App\Lib\Common\JobQueueApi;
 use App\Lib\Common\LogApi;
 use App\Lib\Common\SmsApi;
@@ -76,7 +77,12 @@ class OrderCreater
 
     public function create($data){
 
-        $orderType = OrderStatus::getOrderTypeId(['pay_type'=>$data['pay_type'],'destine_no'=>$data['destine_no']]);
+        $channelInfo = self::getChannelByAppId($data['appid']);
+        if(!$channelInfo){
+            set_msg("渠道错误");
+            return false;
+        }
+        $orderType = OrderStatus::getOrderTypeId(['pay_type'=>$data['pay_type'],'destine_no'=>$data['destine_no'],'appid_type'=>$channelInfo['appid']['type']]);
 
         $orderNo = OrderOperate::createOrderNo($orderType);
 
@@ -92,6 +98,9 @@ class OrderCreater
             // 商品
             $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
             $orderCreater->setSkuComponnet($skuComponnet);
+
+            //渠道
+            $orderCreater = new ChannelComponnet($orderCreater,$channelInfo);
 
             //风控
             $orderCreater = new RiskComponnet($orderCreater);
@@ -109,10 +118,7 @@ class OrderCreater
             $orderCreater = new AddressComponnet($orderCreater);
 
             //门店地址
-            $orderCreater = new StoreAddressComponnet($orderCreater);
-
-            //渠道
-            $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
+            $orderCreater = new StoreAddressComponnet($orderCreater,$channelInfo['appid']['address']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater);
@@ -167,26 +173,9 @@ class OrderCreater
             $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderUnPay);
             LogApi::info("OrderCreate-addOrderBlock:".$orderNo."-".$b);
             if($b){
-                LogApi::error("OrderCreate-addOrderBlock:".$orderNo."-".$b);
                 LogApi::alert("OrderCreate-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
             }
 
-
-//            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$orderNo,config("ordersystem.ORDER_API")."/OrderRisk", [
-//                'method' => 'api.inner.orderRisk',
-//                'order_no'=>$orderNo,
-//                'user_id'=>$data['user_id'],
-//                'time' => time(),
-//            ],time()+60,"");
-//
-//
-//
-//        $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$orderNo,config("ordersystem.ORDER_API")."/CancelOrder", [
-//            'method' => 'api.inner.cancelOrder',
-//            'order_no'=>$orderNo,
-//            'user_id'=>$data['user_id'],
-//            'time' => time(),
-//        ],time()+config('web.order_cancel_hours'),"");
             //增加操作日志
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$orderNo,"下单","用户下单");
 
@@ -215,6 +204,11 @@ class OrderCreater
      */
     public function miniCreate($data){
         try{
+            $channelInfo = self::getChannelByAppId($data['appid']);
+            if(!$channelInfo){
+                set_msg("渠道错误");
+                return false;
+            }
             DB::beginTransaction();
             $orderType =OrderStatus::orderMiniService;
             //订单创建构造器
@@ -225,14 +219,14 @@ class OrderCreater
             // 商品
             $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
             $orderCreater->setSkuComponnet($skuComponnet);
+            //渠道
+            $orderCreater = new ChannelComponnet($orderCreater,$channelInfo);
             //风控(小程序风控信息接口不处理)
             $orderCreater = new RiskComponnet($orderCreater);
             //押金
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
-            //渠道
-            $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
             //分期
@@ -279,27 +273,10 @@ class OrderCreater
             //推送到区块链
             $b =OrderBlock::orderPushBlock($data['order_no'],OrderBlock::OrderUnPay);
             LogApi::info("OrderCreate-addOrderBlock:".$data['order_no']."-".$b);
-            if($b){
-                LogApi::error("OrderCreate-addOrderBlock:".$data['order_no']."-".$b);
+            if($b==100){
+                LogApi::alert("OrderPay-addOrderBlock-miniCreate:".$data['order_no']."-".$b,[],[config('web.order_warning_user')]);
             }
 
-
-//            //发送订单风控信息保存队列
-//            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderRisk_".$data['order_no'],config("ordersystem.ORDER_API")."/OrderRisk", [
-//                'method' => 'api.inner.orderRisk',
-//                'order_no'=>$data['order_no'],
-//                'user_id'=>$data['user_id'],
-//                'time' => time(),
-//            ],time()+60,"");
-//
-//
-////            发送取消订单队列（小程序取消订单队列）
-//            $b =JobQueueApi::addScheduleOnce(config('app.env')."OrderCancel_".$data['order_no'],config("ordersystem.ORDER_API")."/CancelOrder", [
-//                'method' => 'api.inner.miniCancelOrder',
-//                'order_no'=>$data['order_no'],
-//                'user_id'=>$data['user_id'],
-//                'time' => time(),
-//            ],time()+config('web.mini_order_cancel_hours'),"");
             OrderLogRepository::add($data['user_id'],$schemaData['user']['user_mobile'],\App\Lib\PublicInc::Type_User,$data['order_no'],"下单","用户下单");
             return $result;
 
@@ -322,6 +299,7 @@ class OrderCreater
 
         $first_amount =0;
         $total_amount =0;
+        $totalAmount =0;
         $payType =$schemaData['order']['pay_type'];
         foreach ($schemaData['sku'] as $key=>$value) {
 
@@ -330,7 +308,6 @@ class OrderCreater
             $insurance =normalizeNum($value['insurance']); //意外险
 
             $totalAmount =normalizeNum($amount+$insurance);
-
             $schemaData['sku'][$key]['instalment_total_amount'] = $totalAmount;
 
             //固定优惠券 每期金额
@@ -351,8 +328,9 @@ class OrderCreater
 
             } //乐百分支付的分期信息
             elseif ($payType == PayInc::LebaifenPay) {
-                $schemaData['sku'][$key]['month_amount'] = normalizeNum($amount/$zuqi); //每期支付金额（包含碎屏保）
-                $schemaData['sku'][$key]['first_amount'] = normalizeNum($amount/$zuqi + $insurance); //首期支付金额
+                //每期金额 单位分
+                $schemaData['sku'][$key]['month_amount'] = substr(sprintf("%.3f",$amount/15),0,-1);// 每月租金
+                $schemaData['sku'][$key]['first_amount'] = normalizeNum(substr(sprintf("%.3f",$amount/15),0,-1) + $insurance); //首期支付金额(含碎屏险)
             }
             //（花呗） 分期信息
             elseif ($payType == PayInc::PcreditPayInstallment){
@@ -421,7 +399,13 @@ class OrderCreater
     public function confirmation($data)
     {
         try {
-            $orderType = OrderStatus::getOrderTypeId(['pay_type'=>0,'destine_no'=>$data['destine_no']]);
+
+            $channelInfo = self::getChannelByAppId($data['appid']);
+            if(!$channelInfo){
+                set_msg("渠道错误");
+                return false;
+            }
+            $orderType = OrderStatus::getOrderTypeId(['pay_type'=>0,'destine_no'=>$data['destine_no'],'appid_type'=>$channelInfo['appid']['type']]);
 
             $order_no = OrderOperate::createOrderNo($orderType);
             //订单创建构造器
@@ -435,6 +419,9 @@ class OrderCreater
             $skuComponnet = new SkuComponnet($orderCreater,$data['sku']);
             $orderCreater->setSkuComponnet($skuComponnet);
 
+            //渠道
+            $orderCreater = new ChannelComponnet($orderCreater,$channelInfo);
+
             //风控
             $orderCreater = new RiskComponnet($orderCreater);
 
@@ -447,9 +434,6 @@ class OrderCreater
 
             //押金
             $orderCreater = new DepositComponnet($orderCreater);
-
-            //渠道
-            $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
             //分期
             $orderCreater = new InstalmentComponnet($orderCreater);
@@ -469,16 +453,9 @@ class OrderCreater
             $schemaData = self::dataSchemaFormate($orderCreater->getDataSchema());
 
             $result = [
-                //'coupon'         => $data['coupon'],
-                //'certified'			=> $schemaData['user']['certified']?'Y':'N',
-                //'certified_platform'=> Certification::getPlatformName($schemaData['user']['certified_platform']),
                 'credit'			=> ''.$schemaData['user']['credit'],
-               // 'credit_status'		=> $b,
                 //支付方式
                 'pay_type'=>$schemaData['order']['pay_type'],
-                // 是否需要 信用认证
-               // 'need_to_credit_certificate'			=> $schemaData['user']['certified']?'N':'Y',
-              //  'pay_info'=>$schemaData['pay_info'],
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
                 '_error_code' =>get_code(),
@@ -519,6 +496,7 @@ class OrderCreater
                 'sku_id'=>$schemaData['sku'][0]['sku_id'],
                 'spu_name'=>$schemaData['sku'][0]['spu_name'],
                 'thumb'=>$schemaData['sku'][0]['thumb'],
+                'total_zujin'=>$schemaData['sku'][0]['total_zujin'],
                 'category_id'=>$schemaData['sku'][0]['category_id'],
                 'zuqi_type'=>$schemaData['sku'][0]['zuqi_type'],
                 'pay_type'=>$schemaData['sku'][0]['pay_type'],
@@ -528,7 +506,6 @@ class OrderCreater
                 'instalment_total_amount'=>$schemaData['sku'][0]['instalment_total_amount'],
                 'month_amount'=>$schemaData['sku'][0]['month_amount'],
                 'sku_num'=>$schemaData['sku'][0]['sku_num'],
-
             ];
             return $result;
         } catch (\Exception $exc) {
@@ -545,6 +522,13 @@ class OrderCreater
     public function miniConfirmation($data)
     {
         try{
+
+            $channelInfo = self::getChannelByAppId($data['appid']);
+            if(!$channelInfo){
+                set_msg("渠道错误");
+                return false;
+            }
+
             $orderType =OrderStatus::orderMiniService;
             $data['user_id'] = intval($data['user_id']);
             $data['pay_type'] = intval($data['pay_type']);
@@ -560,21 +544,17 @@ class OrderCreater
             $skuComponnet = new SkuComponnet($orderCreater,$data['sku'],$data['pay_type']);
             $orderCreater->setSkuComponnet($skuComponnet);
 
+            //渠道
+            $orderCreater = new ChannelComponnet($orderCreater,$channelInfo);
+
             //风控(小程序风控信息接口不处理)
             $orderCreater = new RiskComponnet($orderCreater);
 
             //押金
-
             $orderCreater = new DepositComponnet($orderCreater,$data['pay_type'],$data['credit_amount']);
-
-            //代扣
-            //$orderCreater = new WithholdingComponnet($orderCreater,$data['pay_type'],$data['user_id']);
 
             //收货地址
             $orderCreater = new AddressComponnet($orderCreater);
-
-            //渠道
-            $orderCreater = new ChannelComponnet($orderCreater,$data['appid']);
 
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$data['coupon'],$data['user_id']);
@@ -603,6 +583,23 @@ class OrderCreater
             DB::rollBack();
             echo $exc->getMessage();
             die;
+        }
+    }
+
+    /**
+     * 根据appid 获取渠道信息
+     * @param $appid
+     * @return bool|array
+     */
+    public function getChannelByAppId($appid){
+        //获取渠道信息
+        try{
+            $ChannelInfo = Channel::getChannel($appid);
+            return $ChannelInfo;
+        }catch (\Exception $e){
+            LogApi::error(config('app.env')."GetChannel-Exception:".$e->getMessage());
+            LogApi::alert("GetChannel-获取渠道接口异常:".$e->getMessage(),['appid'=>$appid],[config('web.order_warning_user')]);
+            return false;
         }
     }
 

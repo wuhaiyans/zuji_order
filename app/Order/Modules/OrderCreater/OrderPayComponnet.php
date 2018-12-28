@@ -117,6 +117,10 @@ class OrderPayComponnet implements OrderCreater
             }
         }
 
+        if(!$this->withholdStatus && !$this->paymentStatus && !$this->fundauthStatus){
+            $this->isPay =false;
+        }
+
         return $filter;
     }
 

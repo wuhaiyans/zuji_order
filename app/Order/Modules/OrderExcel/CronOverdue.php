@@ -37,23 +37,26 @@ class CronOverdue
         if(isset($_GET['begin']) && isset($_GET['end'])){
             $someday = strtotime($_GET['begin']." -30 day");
             $overdueTime = strtotime($_GET['end']." -30 day");
-            $backBegin = strtotime($_GET['begin']);
-            $backEnd = strtotime($_GET['end']);
+            $backBegin = strtotime($_GET['begin']." 00:00:00");
+            $backEnd = strtotime($_GET['end']." 23:59:59");
+            $deadline = $_GET['begin']."|".$_GET['end'];
         }
         else{
-            $deadline = "2018-08-24";
+            $deadline = "2018-08-24|".date("Y-m-d");
             //检测以前是否执行过，是用上次执行时间计算，否从第一个租用中订单开始
             $someday = strtotime(date("2018-08-24"));
+            //还机开始时间
             $backBegin = $someday;
             $lastDay = Redis::get(self::$redisKey);
             if($lastDay){
                 $deadline = $lastDay;
+                //坏账开始时间
                 $someday = strtotime($lastDay." -30 day");
                 $backBegin = strtotime($lastDay);
+                $deadline = date("Y-m-d",strtotime($lastDay." -1 day"))."|".date("Y-m-d");
             }
-            $deadline.= "|".date("Y-m-d");
 
-            $overdueTime = strtotime(date("Y-m-d")." -30 day");
+            $overdueTime = strtotime(date("Y-m-d"." 23:59:59",strtotime(date("Y-m-d")." -31 day")));
             $backEnd = time();
         }
         //未还时间条件
@@ -69,74 +72,84 @@ class CronOverdue
 
         //渠道条件设置所有小程序
         $channelId = [10,14,15,16];
-        $limit = 500;
+
         //未还订单数
+
         $backCount = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($whereBack)
             ->whereIn("order_info.channel_id",$channelId)->count();
+
         $backGoodsYajin = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($whereBack)
             ->whereIn("order_info.channel_id",$channelId)->sum("order_info.goods_yajin");
         $backOrderYajin = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($whereBack)
             ->whereIn("order_info.channel_id",$channelId)->sum("order_info.order_yajin");
+
         $backMianyajin = $backGoodsYajin-$backOrderYajin;
         //坏账订单数
         $count = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
             ->whereIn("order_info.channel_id",$channelId)->count();
+
         $data = [];
         $single = 0;
         $mianyajinSum = 0;
-        //分批获取订单信息
-        for($i=0;$i<ceil($count/$limit);$i++){
-            $offset = $i*$limit;
-            $orderList = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
-                ->where($where)->whereIn("order_info.channel_id",$channelId)
-                ->offset($offset)->limit($limit)->get()->toArray();
-            $single += count($orderList);
-            //拆分出订单号
-            $orderNos = array_column($orderList,"order_no");
 
-            //获取支付用户信息
-            $miniUser = OrderMini::query()->wherein("order_no",$orderNos)->get()->toArray();
-            $miniUser = array_column($miniUser,null,"order_no");
+        $num = [];
+        if($count>0){
+            $limit = $count>=500?500:$count;
+            //分批获取订单信息
+            for($i=0;$i<ceil($count/$limit);$i++){
+                $offset = $i*$limit;
+                $orderList = Order::query()->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
+                    ->where($where)->whereIn("order_info.channel_id",$channelId)
+                    ->offset($offset)->limit($limit)->get()->toArray();
+                $single += count($orderList);
+                //拆分出订单号
+                $orderNos = array_column($orderList,"order_no");
 
-            foreach($orderList as $item){
-                $channelName = self::$channel[$item['channel_id']];
-                $miniUserId = isset($miniUser[$item['order_no']]['user_id'])?$miniUser[$item['order_no']]['user_id']:"";
-                $goodsName = $item['goods_name'];
-                $mianyajin =  $item['goods_yajin']-$item['order_yajin'];
-                $beginTime = date("Y-m-d H:i:s",$item['begin_time']);
-                $endTime = date("Y-m-d H:i:s",$item['end_time']);
-                $unit = Inc\OrderStatus::getZuqiTypeName($item['zuqi_type']);
-                $zuqi = $item['zuqi'].$unit;
-                $overdueDay = ceil((time()-$item['end_time'])/86400);
-                $data[] = [
-                    $channelName,
-                    $miniUserId,
-                    $goodsName,
-                    $mianyajin,
-                    $beginTime,
-                    $endTime,
-                    $zuqi,
-                    "法大大",
-                    "FaceId",
-                    $overdueDay,
-                ];
+                //获取支付用户信息
+                $miniUser = OrderMini::query()->wherein("order_no",$orderNos)->get()->toArray();
+                $miniUser = array_column($miniUser,null,"order_no");
 
-                $mianyajinSum+=$mianyajin;
+                foreach($orderList as $item){
+                    $channelName = self::$channel[$item['channel_id']];
+                    $miniUserId = isset($miniUser[$item['order_no']]['user_id'])?$miniUser[$item['order_no']]['user_id']:"";
+                    $goodsName = $item['goods_name'];
+                    $mianyajin =  $item['goods_yajin']-$item['order_yajin'];
+                    $beginTime = date("Y-m-d H:i:s",$item['begin_time']);
+                    $endTime = date("Y-m-d H:i:s",$item['end_time']);
+                    $unit = Inc\OrderStatus::getZuqiTypeName($item['zuqi_type']);
+                    $zuqi = $item['zuqi'].$unit;
+                    $overdueDay = ceil((time()-$item['end_time'])/86400);
+                    $data[] = [
+                        $channelName,
+                        $miniUserId,
+                        $goodsName,
+                        $mianyajin,
+                        $beginTime,
+                        $endTime,
+                        $zuqi,
+                        "法大大",
+                        "FaceId",
+                        $overdueDay,
+                    ];
+
+                    $mianyajinSum+=$mianyajin;
+                }
             }
+            $num[] = [
+                $deadline,
+                $backCount+$count,
+                $mianyajinSum+$backMianyajin,
+                $backCount+$count,
+                $backCount,
+                $count,
+                $mianyajinSum
+            ];
         }
-        $num[] = [
-            $deadline,
-            $backCount+$count,
-            $mianyajinSum+$backMianyajin,
-            $backCount+$count,
-            $backCount,
-            $count,
-            $mianyajinSum
-        ];
+
         //定义工作表名称
         $title = [
             "累计报表",
@@ -168,7 +181,7 @@ class CronOverdue
             $num,
             $data
         ];
-        Excel::xlsxExport($body,$headers,$title,date("Y-m-d"),"overdue");
+        Excel::xlsxExport($body,$headers,$title,date("Y-m-d H.i"),"overdue");
         Redis::set(self::$redisKey,date("Y-m-d"));
         echo "订单总数:".$single."<br/><br/>";
         return;

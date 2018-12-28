@@ -51,9 +51,9 @@ class MiniNotifyController extends Controller
             echo '芝麻小程序回调参数错误';exit;
         }
         $appid = $_POST['notify_app_id'];
-        //当appid = 123进行转发
-        if( $appid == config('minicategory.'.'mini_return') ){
-            $this->curl_retran( $_POST );
+        //当appid = 2018010301545959进行转发
+        if( $appid == config('miniappid.'.'mini_return') ){
+            $this->curl_retran( $_POST );die;
         }
         $CommonMiniApi = new \App\Lib\AlipaySdk\sdk\CommonMiniApi( $appid );
         $b = $CommonMiniApi->verify( $_POST );
@@ -427,89 +427,92 @@ class MiniNotifyController extends Controller
      */
     public function curl_retran(  $post = [], $timeout = 60 ){
         //入库 确认订单 回调信息
-
-        if($this->data['notify_type'] == $this->CANCEL){
-            $arr_log = [
-                'notify_type'=>$post['notify_type'],
-                'zm_order_no'=>$post['zm_order_no'],
-                'out_order_no'=>$post['out_order_no'],
-                'channel'=>$post['channel'],
-                'notify_app_id'=>$post['notify_app_id'],
-                'request_time'=>time(),
-                'data_text'=>json_encode($post),
-            ];
-        } if($this->data['notify_type'] == $this->FINISH){
-            $arr_log = [
-                'notify_type'=>$post['notify_type'],
-                'zm_order_no'=>$post['zm_order_no'],
-                'out_order_no'=>$post['out_order_no'],
-                'channel'=>$post['channel'],
-                'notify_app_id'=>$post['notify_app_id'],
-                'request_time'=>time(),
-                'data_text'=>json_encode($post),
-            ];
-        }else if($this->data['notify_type'] == $this->CREATE){
-            //入库 确认订单 回调信息
-            $arr_log = [
-                'notify_type'=>$post['notify_type'],
-                'zm_order_no'=>$post['zm_order_no'],
-                'out_order_no'=>$post['out_order_no'],
-                'credit_privilege_amount'=>$post['credit_privilege_amount'],
-                'channel'=>$post['channel'],
-                'order_create_time'=>$post['order_create_time'],
-                'notify_app_id'=>$post['notify_app_id'],
-                'request_time'=>time(),
-                'data_text'=>json_encode($post),
-            ];
-        }
-        //记录入库
-        $result = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::add($arr_log);
-        if( !$result ){
-            \App\Lib\Common\LogApi::debug('小程序回调记录失败',$arr_log);
-        }
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, env('APPID_ZUJI_URL'));
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('application/x-www-form-urlencoded'));
-        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-        $result_info = curl_exec($ch);
-        Debug::error(Location::L_AlipayMini,'芝麻小程序回调转发处理结果APPID'.env('APPID_ZUJI_URL'),$arr_log);
-        curl_close($ch);
-        //回调记录修改
-        $OrderMiniNotifyLogReturnInfo = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::getInfo([
-            'zm_order_no'=>$arr_log['zm_order_no'],
-            'out_order_no'=>$arr_log['out_order_no'],
-            'request_time'=>$arr_log['request_time'],
-        ]);
-        //判断是否可查询到数据
-        if(empty($OrderMiniNotifyLogReturnInfo)){
+        try{
+            if($post['notify_type'] == $this->CANCEL){
+                $arr_log = [
+                    'notify_type'=>$post['notify_type'],
+                    'zm_order_no'=>$post['zm_order_no'],
+                    'out_order_no'=>$post['out_order_no'],
+                    'channel'=>$post['channel'],
+                    'notify_app_id'=>$post['notify_app_id'],
+                    'request_time'=>time(),
+                    'url'=>env('APPID_ZUJI_URL'),
+                    'data_text'=>json_encode($post),
+                ];
+            } if($post['notify_type'] == $this->FINISH){
+                $arr_log = [
+                    'notify_type'=>$post['notify_type'],
+                    'zm_order_no'=>$post['zm_order_no'],
+                    'out_order_no'=>$post['out_order_no'],
+                    'channel'=>$post['channel'],
+                    'notify_app_id'=>$post['notify_app_id'],
+                    'request_time'=>time(),
+                    'url'=>env('APPID_ZUJI_URL'),
+                    'data_text'=>json_encode($post),
+                ];
+            }else if($post['notify_type'] == $this->CREATE){
+                //入库 确认订单 回调信息
+                $arr_log = [
+                    'notify_type'=>$post['notify_type'],
+                    'zm_order_no'=>$post['zm_order_no'],
+                    'out_order_no'=>$post['out_order_no'],
+                    'credit_privilege_amount'=>$post['credit_privilege_amount'],
+                    'channel'=>$post['channel'],
+                    'order_create_time'=>$post['order_create_time'],
+                    'fund_type'=>$post['fund_type'],
+                    'notify_app_id'=>$post['notify_app_id'],
+                    'request_time'=>time(),
+                    'url'=>env('APPID_ZUJI_URL'),
+                    'data_text'=>json_encode($post),
+                ];
+            }
+            //记录入库
             $result = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::add($arr_log);
             if( !$result ){
-                \App\Lib\Common\LogApi::debug('小程序回调同请求二次记录失败',$arr_log);
+                \App\Lib\Common\LogApi::debug('小程序回调记录失败',$arr_log);
             }
-        }else{
-            //拼接修改数据
-            $update = [
-                'response_time'=>time(),
-                'data_text_response'=>json_encode($result_info),
-            ];
-            $b = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::update( [
-                'id'=>$OrderMiniNotifyLogReturnInfo['id']
-            ] , $update );
-            if(!$b){
-                \App\Lib\Common\LogApi::debug('小程序回调转发返回值修改response_time记录失败',$update);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, env('APPID_ZUJI_URL'));
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('application/x-www-form-urlencoded'));
+            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+            $result_info = curl_exec($ch);
+            $arr_log['result_info'] = $result_info;
+            \App\Lib\Common\LogApi::notify('芝麻小程序回调转发处理结果',$arr_log);
+            curl_close($ch);
+            //回调记录修改
+            $OrderMiniNotifyLogReturnInfo = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::getInfo([
+                'zm_order_no'=>$arr_log['zm_order_no'],
+                'out_order_no'=>$arr_log['out_order_no'],
+                'request_time'=>$arr_log['request_time'],
+            ]);
+            //判断是否可查询到数据
+            if(empty($OrderMiniNotifyLogReturnInfo)){
+                $result = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::add($arr_log);
+                if( !$result ){
+                    \App\Lib\Common\LogApi::debug('小程序回调同请求二次记录失败',$arr_log);
+                }
+            }else{
+                //拼接修改数据
+                $update = [
+                    'response_time'=>time(),
+                    'data_text_response'=>json_encode($result_info),
+                ];
+                $b = \App\Order\Modules\Repository\OrderMiniNotifyLogReturnRepository::update( [
+                    'id'=>$OrderMiniNotifyLogReturnInfo['id']
+                ] , $update );
+                if(!$b){
+                    \App\Lib\Common\LogApi::debug('小程序回调转发返回值修改response_time记录失败',$update);
+                }
             }
+        } catch (\Exception $e){
+            \App\Lib\Common\LogApi::debug('转发catch异常',$e->getMessage());die;
         }
-
-        if($result_info === 'success'){
-            echo $result_info;die;
-        }
-        echo 'fail';
-
+        echo $result_info;die;
     }
 
 
@@ -526,11 +529,11 @@ class MiniNotifyController extends Controller
 //        ]);
 
         $b = \App\Lib\Payment\mini\MiniApi::OrderClose([
-            'out_order_no'=>'A919154437698134',//商户端订单号
-            'zm_order_no'=>'2018091900001001103544157614',//芝麻订单号
-            'out_trans_no'=>'A919154437698134',//商户端交易号
+            'out_order_no'=>'201805200001259',//商户端订单号
+            'zm_order_no'=>'2018052000001001081155396858',//芝麻订单号
+            'out_trans_no'=>'201805200001259',//商户端交易号
             'remark'=>'关闭订单操作',//订单操作说明
-            'pay_amount'=>'0.00',//关闭金额
+            'pay_amount'=>'00.00',//关闭金额
             'app_id'=>'2018032002411058',//小程序appid
         ]);
 

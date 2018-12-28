@@ -301,10 +301,10 @@ class DeliveryService
 
         if($params['channel_id']){
             $whereIn = $params['channel_id'];
-            $daochu = false;
+            $daochu = true;
         }else{
             $whereIn = null;
-            $daochu = true;
+            $daochu = false;
         }
 
         $collect = DeliveryRepository::lists($whereParams, $logic_params, $limit, $page, $whereIn);
@@ -560,7 +560,7 @@ class DeliveryService
         }
 
         //插入IMEI
-        $imei_model = Imei::create([
+        $imei_id = Imei::insertGetId([
             'imei'=>$params['imei'],
             'apple_serial'=>isset($params['apple_serial'])??'',
             'price'=>isset($params['price'])??0,
@@ -569,7 +569,7 @@ class DeliveryService
             'update_time'=>time()
         ]);
 
-        if (!$imei_model) {
+        if (!$imei_id) {
             throw new NotFoundResourceException('插入IMEI失败');
         }
 
@@ -580,12 +580,14 @@ class DeliveryService
             'type'=>ImeiLog::STATUS_OUT,
             'create_time'=>time(),
             'order_no'=>$delivery_model->order_no,
-            'imei_id'=>$imei_model->id,
+            'imei_id'=>$imei_id,
             'zuqi'=>$goods_model->zuqi,
             'zuqi_type'=>$goods_model->zuqi_type,
         ]);
 
         //更新发货单状态
+        $delivery_model->logistics_id = $params['logistics_id']??0;
+        $delivery_model->logistics_no = $params['logistics_no']??0;
         $delivery_model->status = Delivery::STATUS_SEND;
         $delivery_model->delivery_time = time();
         $delivery_model->logistics_note = '渠道商发货';

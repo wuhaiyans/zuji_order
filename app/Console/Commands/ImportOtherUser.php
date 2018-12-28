@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Lib\Common\LogApi;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use App\Order\Models\OrderUserCertified;
 
 class ImportOtherUser extends Command
 {
@@ -40,66 +39,129 @@ class ImportOtherUser extends Command
      */
     public function handle()
     {
-        $qudian = include_once("import_alipay_member/qudian_apple.php");
-        var_dump($qudian);die;
+        //用户数据
+        $qudian = include(__DIR__."/import_alipay_member/qudian_apple.php");
+        $this->exc($qudian['user_list'],$qudian['user_from']);
 
-        $appid =[
-            1,2,3,4,7,8,9,11,12,13,14,15,16,18,21,22,28,
-            40,41,42,43,44,45,46,47,48,49,
-            50,51,52,53,54,55,56,57,58,59,
-            60,61,62,63,64,65,66,67,68,69,
-            70,71,72,73,74,75,76,77,78,79,
-            80,81,82,83,84,85,86,87,88,89,
-            93,94,95,96,97,98,122,123,131,132,
-        ];
+        $qudian = include(__DIR__."/import_alipay_member/qudian_vivo.php");
+        $this->exc($qudian['user_list'],$qudian['user_from']);
 
-        $whereArr[] =['business_key','<>','10'];
-        //3点之前非关闭的订单，3点之后所有订单
-        $total = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)
-            ->count();
-        $bar = $this->output->createProgressBar($total);
+        $qudian = include(__DIR__."/import_alipay_member/tongchengbang.php");
+        $this->exc($qudian['user_list'],$qudian['user_from']);
+
+    }
+    public function exc($list,$third_user){
+        $bar = $this->output->createProgressBar(count($list));
         try{
-            $limit = 5000;
-            $page =1;
-            $totalpage = ceil($total/$limit);
-            $arr =[];
-            do {
-                $orderList = \DB::connection('mysql_01')->table('zuji_order2')->where($whereArr)->whereNotIn("appid",$appid)->forPage($page,$limit)->get();
-                $orderList =objectToArray($orderList);
 
-                foreach ($orderList as $k=>$v) {
-                        $data = [
-                            'order_no'=>$v['order_no'],
-                            'certified'=>$v['credit']>0?1:0,
-                            'certified_platform'=>$v['certified_platform'],
-                            'credit'=>$v['credit'],
-                            'card_img'=>'',
-                            'deposit_detail'=>'',
-                            'deposit_msg'=>'',
-                            'realname'=>$v['realname'],
-                            'cret_no'=>$v['cert_no'],
-                            'create_time'=>$v['create_time'],
-                        ];
-                        $ret = OrderUserCertified::updateOrCreate($data);
-                        if(!$ret->getQueueableId()){
-                            $arr[$v['order_no']] = $data;
-                        }
-                        $bar->advance();
+            foreach ($list as $k=>$v) {
 
+                //解析参数
+                $ali_user_id = $v[0];
+                $realname = $v[1];
+                $mobile = $v[2];
+                $province = $v[3];
+                $city = $v[4];
+
+                //设置业务流程走向条件 1：更新用户;2：更新用户并新增阿里用户信息;3：新增用户并新增阿里用户信息
+                $condition = "";
+                $whereArr= [
+                    ['user_id','=',$ali_user_id]
+                ];
+
+                //查询支付宝信息
+                $alipayUser = \DB::connection('mysql_01')->table('zuji_member_alipay')->where($whereArr)->first();
+
+                if($alipayUser){
+                    $condition = 1;
                 }
-                $page++;
-                sleep(1);
-            } while ($page <= $totalpage);
+                else{
+                    $condition = 2;
+                }
+                //查询用户信息
+                $where = [
+                    ['username','=',$mobile]
+                ];
+                $user = \DB::connection('mysql_01')->table('zuji_member')->where($where)->first();
+
+                if($user){
+                    $condition = $condition==1?1:2;
+                }
+                else{
+                    $condition = 3;
+                }
+
+                //支付宝数据
+                $ali_data = [
+                    'user_id'=>$ali_user_id,
+                    'province'=>$province,
+                    'city'=>$city,
+                    'nick_name'=>$realname,
+                ];
+
+                switch($condition){
+                    //更新用户
+                    case 1:
+                        $ret = $this->user_save($mobile,$third_user);
+                        break;
+                    //更新用户并新增阿里用户信息
+                    case 2:
+                        $this->user_save($mobile,$third_user);
+                        $ali_data['member_id'] = $user->id;
+                        $ret = $this->alipay_add($ali_data);
+                        break;
+                    //新增用户并新增阿里用户信息
+                    case 3:
+                        //用户数据
+                        $user_data = [
+                            'username'=>$mobile,
+                            'mobile'=>$mobile,
+                            'third_user'=>$third_user,
+                            'realname'=>$realname,
+                            'register_time'=>time(),
+                        ];
+                        $ret = $this->user_add($user_data);
+                        if($ret){
+                            $ali_data['member_id'] = $ret;
+                            $ret = $this->alipay_add($ali_data);
+                        }
+                        break;
+                }
+
+                if(!$ret){
+                    $arr[$k] = $mobile;
+                }
+                $bar->advance();
+            }
             $bar->finish();
             if(count($arr)>0){
-                LogApi::notify("订单用户信用信息导入失败",$arr);
-                echo "部分导入成功";die;
+                LogApi::notify("第三方用户数据导入失败",$arr);
+                echo "部分导入成功";
+                return;
             }
-            echo "导入成功";die;
+            echo "导入成功";
+            return;
         }catch (\Exception $e){
             echo $e->getMessage();
-            die;
+            return;
         }
     }
-
+    //更新用户
+    public function user_save($mobile,$third_user){
+        $data = [
+            'third_user'=>$third_user
+        ];
+        $ret =  \DB::connection('mysql_01')->table('zuji_member')->where(['mobile'=>$mobile])->update($data);
+        return $ret;
+    }
+    //注册用户
+    public function user_add($data){
+        $ret =  \DB::connection('mysql_01')->table('zuji_member')->insertGetId($data);
+        return $ret;
+    }
+    //注册支付宝信息
+    public function alipay_add($data){
+        $ret =  \DB::connection('mysql_01')->table('zuji_member_alipay')->insert($data);
+        return $ret;
+    }
 }

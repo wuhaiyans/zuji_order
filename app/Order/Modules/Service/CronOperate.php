@@ -18,6 +18,7 @@ use App\Order\Modules\Inc\OrderGivebackStatus;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderGoodsUnitRepository;
+use App\Order\Modules\Repository\OrderOverdueDeductionRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\WithholdQuery;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
@@ -615,6 +616,67 @@ class CronOperate
         }catch(\Exception $exc){
             \App\Lib\Common\LogApi::debug('[cronOverdueMessage提前还款短信]', ['msg'=>$exc->getMessage()]);
         }
+    }
+    /**
+     * 定时任务  获取连续两个月，总共三个月未缴租金的逾期数据
+     * $return bool
+     */
+    public static function cronOverdueDeductionMessage(){
+        try{
+            LogApi::debug('[cronOverdueDeductionMessage进入程序]');
+            //获取逾期扣款表已存在的数据
+            $getOverdueDeductionInfo = OrderOverdueDeductionRepository::getOverdueInfo();
+            $overdueData = [];
+            if( $getOverdueDeductionInfo ){
+                foreach ($getOverdueDeductionInfo as $item){
+                    $overdueData[] = $item['order_no'];
+                }
+            }
+            //获取连续两个月，总共三个月未缴租金的逾期数据
+            $orderNoArray = \App\Order\Modules\Service\OrderGoodsInstalment::instalmentOverdue();
+            if( $orderNoArray ){
+                LogApi::debug('[cronOverdueDeductionMessage获取逾期扣款表已存在的数据]', $getOverdueDeductionInfo);
+                    foreach($orderNoArray as $item){
+                        if(!in_array($item['order_no'],$overdueData,true)){
+                            //获取订单信息
+                            $orderInfo = OrderOverdueDeductionRepository::getOverdueOrderDetail($item['order_no']);
+                            $data = [];
+                            //添加数据
+                            if($orderInfo){
+                                if( $orderInfo['surplus_yajin'] == 0){
+                                    $surplus_yajin = $orderInfo['yajin'];
+                                }else{
+                                    $surplus_yajin = $orderInfo['surplus_yajin'];
+                                }
+                                $data = [
+                                    'order_no'        =>$item['order_no'],
+                                    'order_time'     =>$orderInfo['create_time'],
+                                    'app_id'          =>$orderInfo['appid'],
+                                    'goods_name'     =>$orderInfo['goods_name'],
+                                    'zuqi_type'      =>$orderInfo['zuqi_type'],
+                                    'user_name'      =>empty($orderInfo['realname'])?'':$orderInfo['realname'],
+                                    'mobile'         =>$orderInfo['mobile'],
+                                    'unpaid_amount' =>$item['amount'],
+                                    'overdue_amount'=>$surplus_yajin,
+                                    'user_id'        =>$orderInfo['user_id'],
+                                    'create_time'   =>time()
+
+                                ];
+
+                                $createResult = OrderOverdueDeductionRepository::createOverdue($data);//创建符合要求的数据
+                                if( !$createResult){
+                                    LogApi::debug('[cronOverdueDeductionMessage创建符合要求的数据失败]');
+                                    return false;
+                                }
+                            }
+
+                        }
+                    }
+                }
+        }catch (\Exception $exc){
+            LogApi::debug('[cronOverdueDeductionMessage程序异常]', ['msg'=>$exc->getMessage()]);
+        }
+
     }
 
 

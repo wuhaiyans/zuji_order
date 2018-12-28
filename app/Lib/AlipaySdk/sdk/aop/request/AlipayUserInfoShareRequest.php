@@ -3,7 +3,7 @@
  * ALIPAY API: alipay.user.info.share request
  *
  * @author auto create
- * @since 1.0, 2016-12-08 00:31:54
+ * @since 1.0, 2018-07-13 17:18:06
  */
 class AlipayUserInfoShareRequest
 {
@@ -17,7 +17,7 @@ class AlipayUserInfoShareRequest
 	private $returnUrl;
     private $needEncrypt=false;
 
-
+	
 	public function getApiMethodName()
 	{
 		return "alipay.user.info.share";

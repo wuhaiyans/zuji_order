@@ -44,6 +44,7 @@ class OrderMiniNotifyLogReturn extends Model
         'request_time',
         'response_time',
         'fund_type',
+        'url',
         'notify_app_id',
         'data_text',
     ];
