@@ -911,7 +911,7 @@ class GivebackController extends Controller
 			//-+----------------------------------------------------------------
 			// | 新增还机申请到期时间的验证  2018-12-28 吴天堂
 			//-+----------------------------------------------------------------
-			$endTime = strtotime(date("Y-m-d",$orderGoodsInfo['end_time']));
+			$endTime = strtotime(date("Y-m-d",strtotime($orderGoodsInfo['end_time'])));
 			$todayTime = strtotime(date("Y-m-d",time()));
 			//时间未到期  ,true未到期
 			$notInTimeToGive =   ( $endTime - intval(config('web.day_expiry_process_days')) > $todayTime) ?? false;
