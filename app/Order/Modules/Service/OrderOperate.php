@@ -204,7 +204,7 @@ class OrderOperate
      * @param $userId  用户ID
      * @return bool
      */
-    public function DeliveryContract($orderNo,$userId){
+    public static function DeliveryContract($orderNo,$userId){
         LogApi::info("InnerService-DeliveryContract:".$orderNo);
         $b = DeliveryDetail::addDeliveryContract($orderNo);
         if(!$b) {
