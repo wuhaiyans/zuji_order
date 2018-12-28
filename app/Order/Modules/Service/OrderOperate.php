@@ -913,6 +913,7 @@ class OrderOperate
             $b =$order->deliveryOpen($data['remark']);
             if(!$b){
                 LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data,[config('web.order_warning_user')]);
+                LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data);
                 DB::rollBack();
                 return false;
             }
