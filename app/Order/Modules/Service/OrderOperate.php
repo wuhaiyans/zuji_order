@@ -925,6 +925,7 @@ class OrderOperate
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
                 LogApi::alert("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo,[config('web.order_warning_user')]);
+                LogApi::error("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo);
                 DB::rollBack();
                 return false;
             }
