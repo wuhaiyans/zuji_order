@@ -88,9 +88,7 @@ class OrderPayNotify
                 ];
                 $b = OrderOperate::confirmOrder($data);
                 if(!$b){
-                    LogApi::alert("OrderPay-storeConfirm:".$orderNo,$data,[config('web.order_warning_user')]);
                     LogApi::error("OrderPay-storeConfirm:".$orderNo,$data);
-                    return false;
                 }
             }
 
