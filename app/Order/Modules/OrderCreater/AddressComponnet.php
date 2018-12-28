@@ -49,7 +49,7 @@ class AddressComponnet implements OrderCreater
         $this->orderType = $this->componnet->getOrderCreater()->getOrderType();
 
         //如果是线下领取订单 不走用户组件
-        if($this->orderType == OrderStatus::orderActivityService){
+        if($this->orderType == OrderStatus::orderActivityService || $this->orderType == OrderStatus::orderStoreService){
             return $this->flag && $filter;
         }
         //获取用户信息
@@ -83,7 +83,7 @@ class AddressComponnet implements OrderCreater
         }
 
         //如果是线下领取订单 不走用户组件
-        if($this->orderType == OrderStatus::orderActivityService){
+        if($this->orderType == OrderStatus::orderActivityService || $this->orderType == OrderStatus::orderStoreService){
             return true;
         }
 

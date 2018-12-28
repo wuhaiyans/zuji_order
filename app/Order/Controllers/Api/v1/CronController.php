@@ -142,7 +142,7 @@ class CronController extends Controller
     }
     public function test(){
         $a = Service\CronOperate::cronOverdueDeductionMessage();
-        return apiResponse($a, ApiStatus::CODE_34007);
+        return apiResponse($a, ApiStatus::CODE_0);
    }
 
 }

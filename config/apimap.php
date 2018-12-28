@@ -372,6 +372,7 @@ return [
     'api.inner.deliveryReceive'=>'InnerServiceController@deliveryReceive',//订单确认收货接口
 
     'api.inner.orderRisk'=>'InnerServiceController@orderRisk',//订单用户风控信息存储接口
+    'api.inner.deliveryContract'=>'InnerServiceController@DeliveryContract',// 订单发货时生成合同
 
 
     /*************************************************************************************************
@@ -419,9 +420,9 @@ return [
 	'api.overdueDeduction.overdueDeposit'      		   => 'OverDueDeductionController@overdueDeposit',       //逾期扣款操作
 	'api.overdueDeduction.overdueDepositInfo'      	   => 'OverDueDeductionController@overdueDepositInfo',       //逾期扣款详情
 	'api.overdueDeduction.overdueDepositRecord'        => 'OverDueDeductionController@overdueDepositRecord',       //逾期扣款日志
-   // 'api.cron.test'                                         => 'CronController@test',       //定时任务逾期扣款测试
-    'api.overdueVisit.visitDetail'                        => 'OverdueVisitController@visitDetail',       //逾期回访记录
-    'api.overdueVisit.createVisit'                        => 'OverdueVisitController@createVisit',       //添加回访记录
+    'api.cron.test'                                         => 'CronController@test',       //定时任务逾期扣款测试
+    'api.overdueVisit.visitDetail'                        => 'OverDueVisitController@visitDetail',       //逾期回访记录
+    'api.overdueVisit.createVisit'                        => 'OverDueVisitController@createVisit',       //添加回访记录
 
 
 ];

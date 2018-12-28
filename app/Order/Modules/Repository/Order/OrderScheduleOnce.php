@@ -27,6 +27,39 @@ class OrderScheduleOnce {
         $this->userId  = $data['user_id'];
         $this->url     = config("ordersystem.ORDER_API");
     }
+    /**
+     *  队列生成合同
+     */
+    public function DeliveryContract()
+    {
+        $this->__method([
+            'method' => 'api.inner.deliveryContract',
+            'time' =>  time()+5,
+            'function' => 'DeliveryContract',
+        ]);
+    }
+    /**
+     * 长租确认收货
+     */
+    public function OrderMonthReceive()
+    {
+        $this->__method([
+            'method' => 'api.inner.deliveryReceive',
+            'time' =>  time()+config('web.long_confirm_days'),
+            'function' => 'DeliveryReceive',
+        ]);
+    }
+    /**
+     * 短租确认收货
+     */
+    public function OrderDayReceive()
+    {
+        $this->__method([
+            'method' => 'api.inner.deliveryReceive',
+            'time' =>  time()+config('web.short_confirm_days'),
+            'function' => 'DeliveryReceive',
+        ]);
+    }
 
     /**
      * 风控队列
@@ -74,7 +107,7 @@ class OrderScheduleOnce {
     }
     private function __method( $params ){
         //发送订单风控信息保存队列
-        $b =JobQueueApi::addScheduleOnce(config('app.env').$params['function'].'_'.$this->userId,$this->url."/".$params['function'], [
+        $b =JobQueueApi::addScheduleOnce(config('app.env').$params['function'].'_'.$this->orderNo,$this->url."/".$params['function'], [
             'method' => $params['method'],
             'order_no'=>$this->orderNo,
             'user_id'=>$this->userId,

@@ -16,7 +16,37 @@ use Illuminate\Http\Request;
 class InnerServiceController extends Controller
 {
 
+    /**
+     * 订单发货生成合同
+     * @author wuhaiyan
+     * @param order_no 订单编号
+     * @param user_id 用户ID
+     *
+     */
+    public function DeliveryContract(Request $request)
+    {
 
+        $input = file_get_contents("php://input");
+        LogApi::info(__METHOD__.'() '.microtime(true).'InnerService-DeliveryContract-info:'.$input);
+        $params = json_decode($input,true);
+
+        $rules = [
+            'user_id'  => 'required',
+            'order_no'  => 'required',
+        ];
+        $validateParams = $this->validateParams($rules,$params);
+
+
+        if ($validateParams['code']!=0) {
+
+            return apiResponse([],$validateParams['code']);
+        }
+
+
+        $success =   \App\Order\Modules\Service\OrderOperate::DeliveryContract($validateParams['data']['order_no'],$validateParams['data']['user_id']);
+        return $success;
+
+    }
     /**
      * 订单风控信息存储
      * @author wuhaiyan

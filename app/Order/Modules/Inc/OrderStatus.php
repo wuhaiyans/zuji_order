@@ -252,18 +252,27 @@ class OrderStatus{
      * [
      *      'pay_type' =>'',    //【可选】 int 支付方式
      *      'destine_no' =>'',  //【可选】 string 预定编号
+     *      'appid_type'=>'',   //【必须】 int appid 类型
      *
      * ]
      *
      * @return int 订单状态
      */
     public static function getOrderTypeId($params){
-        if($params['pay_type'] == PayInc::LebaifenPay){
+        if(isset($params['pay_type']) && $params['pay_type'] == PayInc::LebaifenPay){
             //如果支付方式为乐百分 订单类型为 微回收
             $orderType =OrderStatus::miniRecover;
-        }elseif($params['destine_no']!=''){
-            //如果有预订编号 则为领取订单
-            $orderType =OrderStatus::orderActivityService;
+        }elseif($params['appid_type'] == AppIdInc::TYPE_H5){//H5
+            $orderType =OrderStatus::orderOnlineService;
+        }elseif($params['appid_type'] == AppIdInc::TYPE_API){//OPENAPI
+            $orderType =OrderStatus::orderOnlineService;
+        }elseif($params['appid_type'] == AppIdInc::TYPE_STORE){//线下门店
+            $orderType =OrderStatus::orderStoreService;
+            if(isset($params['destine_no']) && $params['destine_no']!=''){//如果有预订编号 则为领取订单
+                $orderType =OrderStatus::orderActivityService;
+            }
+        }elseif($params['appid_type'] == AppIdInc::TYPE_ALI_ZHIMA){//支付宝小程序
+            $orderType =OrderStatus::orderMiniService;
         }else{
             $orderType =OrderStatus::orderOnlineService;
         }

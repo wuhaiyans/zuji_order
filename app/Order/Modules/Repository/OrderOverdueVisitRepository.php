@@ -16,6 +16,9 @@ class OrderOverdueVisitRepository
     public static function getOverdueVisitinfo($where)
     {
         $visitDetail = OrderOverdueVisit::where($where)->orderBy('create_time',"DESC")->get()->toArray();//获取订单的所有回访信息
+        if(!$visitDetail){
+            return [];
+        }
         return $visitDetail;
     }
     /*

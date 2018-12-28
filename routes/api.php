@@ -65,6 +65,9 @@ $api->version('v1', [
         //订单清算退款回调接口
         $api->post('fundauthToPayNotify', 'PayController@fundauthToPayNotify');
 
+        //逾期扣款回调接口
+        $api->post('deduDepositNotify', 'PayController@deduDepositNotify');
+
         //订单清算退款回调接口
         $api->post('refundClean', 'PayController@refundClean');
 
@@ -108,6 +111,8 @@ $api->version('v1', [
         //隊列取消订单
         $api->any('CancelOrder', 'InnerServiceController@cancelOrder');
 
+        //隊列增加订单发货时生成合同
+        $api->any('DeliveryContract', 'InnerServiceController@DeliveryContract');
         //隊列增加风控看板信息
         $api->any('OrderRisk', 'InnerServiceController@orderRisk');
         //隊列返回风控 订单押金信息
@@ -131,7 +136,7 @@ $api->version('v1', [
         //出账记录导出
         $api->any('listReletExport', 'ReletController@listReletExport');
         //逾期扣款导出
-        $api->any('overdueDeductionExport','OverdueDeductionController@overdueDeductionExport');
+        $api->any('overdueDeductionExport','OverDueDeductionController@overdueDeductionExport');
 
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************

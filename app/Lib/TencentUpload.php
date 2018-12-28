@@ -13,8 +13,8 @@ namespace App\Lib;
  */
 class TencentUpload {
 
-    private $api_upload_key = '8oxq1kma0eli9vlxnyj8v7qk335uvrf0';
-    private $api_upload_url = 'https://dev-api.nqyong.com/api/upload_hjx';
+//    private $api_upload_key = '8oxq1kma0eli9vlxnyj8v7qk335uvrf0';
+//    private $api_upload_url = 'https://dev-api.nqyong.com/api/upload_hjx';
 
     private $header = [
         "version"   =>  "0.01",
@@ -125,7 +125,7 @@ class TencentUpload {
         $data['params'] = $this->params;
         $json = json_encode($data);
 
-        $response = Curl::post(env('API_UPLOAD')?env('API_UPLOAD'):$this->api_upload_url,$json);
+        $response = Curl::post(env('API_UPLOAD'),$json);
         $result = json_decode($response,true);
         if($result){
             return $result['body'];
@@ -142,7 +142,7 @@ class TencentUpload {
                 $sign .= $k.'='.$v.'&';
             }
         }
-        $sign = strtolower( md5($sign.'key='. env('Api_Upload_Key')?env('Api_Upload_Key'):$this->api_upload_key) );
+        $sign = strtolower( md5($sign.'key='. env('API_UPLOAD_KEY')) );
         return $sign;
     }
 }

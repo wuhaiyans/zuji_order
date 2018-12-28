@@ -190,6 +190,11 @@ class SkuComponnet implements OrderCreater
                     $this->getOrderCreater()->setError('商品租期错误');
                     $this->flag = false;
                 }
+                //判断开始日期 和结束日期 必须大于今天
+                if( $skuInfo['begin_time'] < date("Y-m-d") || $skuInfo['end_time'] < date("Y-m-d")){
+                    $this->getOrderCreater()->setError('商品开始日期或结束日期错误');
+                    $this->flag = false;
+                }
             }else{
                 // 租期[1,12]之间的正整数
                 if( $skuInfo['zuqi']<1 || $skuInfo['zuqi']>12 ){
