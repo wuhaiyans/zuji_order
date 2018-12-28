@@ -3,6 +3,7 @@
 namespace App\Warehouse\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
+use App\Lib\TencentUpload;
 use App\Lib\Warehouse\Receive;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Models\ReceiveGoods;
@@ -312,7 +313,7 @@ class ReceiveController extends Controller
             'check_description' => 'required',
             'check_result' => 'required',
             'compensate_amount' => 'required',
-            'goods_no' => 'required',
+            'goods_no' => 'required'
         ];
 
         $params = $this->_dealParams($rules);
@@ -353,8 +354,7 @@ class ReceiveController extends Controller
             WarehouseWarning::warningWarehouse('[检测完成]失败',[$params,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
-
-        return apiResponse(['items'=>$items]);
+        return apiResponse();
     }
 
     /**

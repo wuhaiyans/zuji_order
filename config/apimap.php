@@ -410,4 +410,18 @@ return [
 	'api.user.getInfo'        => 'UserController@getUserInfo',          //查询手机号
 
 	'api.user.setMobile'     => 'UserController@setMobile',          //更换手机号
+
+    /*************************************************************************************************
+     * ******************************逾期扣款处理*************************************
+     ************************************************************************************************/
+    'api.overdueDeduction.overdueDeductionList'        => 'OverDueDeductionController@overdueDeductionList',          //逾期扣款列表
+    'api.overdueDeduction.overdueDeductionExport'      => 'OverDueDeductionController@overdueDeductionExport',       //逾期扣款导出
+	'api.overdueDeduction.overdueDeposit'      		   => 'OverDueDeductionController@overdueDeposit',       //逾期扣款操作
+	'api.overdueDeduction.overdueDepositInfo'      	   => 'OverDueDeductionController@overdueDepositInfo',       //逾期扣款详情
+	'api.overdueDeduction.overdueDepositRecord'        => 'OverDueDeductionController@overdueDepositRecord',       //逾期扣款日志
+    'api.cron.test'                                         => 'CronController@test',       //定时任务逾期扣款测试
+    'api.overdueVisit.visitDetail'                        => 'OverDueVisitController@visitDetail',       //逾期回访记录
+    'api.overdueVisit.createVisit'                        => 'OverDueVisitController@createVisit',       //添加回访记录
+
+
 ];

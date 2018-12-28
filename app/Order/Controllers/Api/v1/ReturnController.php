@@ -76,7 +76,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'申请退换货失败',//错误信息提示
-                'data'=>['$ex'=>$return],//错误返回数据
+                'data'=>[
+                    '$ex'=>$return,
+                    'params' => $params
+                ],//错误返回数据
             ],self::$email);
             //回滚事务
             return apiResponse([],ApiStatus::CODE_34006,"申请失败");
@@ -121,7 +124,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'申请退款失败',//错误信息提示
-                'data'=>['$ex'=>$return],//错误返回数据
+                'data'=>[
+                    '$ex'=>$return,
+                    'order_no' => $params['order_no']
+                ],//错误返回数据
             ],self::$email);
             return apiResponse([],ApiStatus::CODE_34005,"取消订单失败");
         }
@@ -168,7 +174,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'退换货审核失败',//错误信息提示
-                'data'=>['$ex'=>$res],//错误返回数据
+                'data'=>[
+                    '$ex'=>$res,
+                    'params' => $params['detail']
+                ],//错误返回数据
             ],self::$email);
             return apiResponse([],ApiStatus::CODE_33001,"退换货审核失败");
         }
@@ -209,7 +218,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'退款审核失败',//错误信息提示
-                'data'=>['$ex'=>$res],//错误返回数据
+                'data'=>[
+                    '$ex'=>$res,
+                    'refund_no' => $params['refund_no']
+                ],//错误返回数据
             ],self::$email);
             return apiResponse([],ApiStatus::CODE_33002,"退款审核失败");
         }
@@ -391,7 +403,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'物流单号上传',//错误信息提示
-                'data'=>['$ex'=>$res],//错误返回数据
+                'data'=>[
+                    '$ex' => $res,
+                    'params' => $params['goods_info']
+                ],//错误返回数据
             ],self::$email);
             return apiResponse([], ApiStatus::CODE_33003,'上传物流失败');
         }
@@ -428,7 +443,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'退货结果查看失败',//错误信息提示
-                'data'=>['$ex'=>$ret],//错误返回数据
+                'data'=>[
+                    '$ex'=>$ret,
+                    'goods_no' => $params['goods_no']
+                ],//错误返回数据
             ],self::$email);
             return apiResponse([],ApiStatus::CODE_33005);//退换货结果查看失败
         }
@@ -471,7 +489,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'取消退货申请是失败',//错误信息提示
-                'data'=>['$ex'=>$ret],//错误返回数据
+                'data'=>[
+                    '$ex'=>$ret,
+                    'refund_no' => $params['refund_no']
+                ],//错误返回数据
             ],self::$email);
             return apiResponse([],ApiStatus::CODE_33004);//取消退换货失败
         }
@@ -508,7 +529,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'取消退款失败',//错误信息提示
-                'data'=>['$ex'=>$ret],//错误返回数据
+                'data'=>[
+                    '$ex'=>$ret,
+                    'refund_no' => $params['refund_no']
+                ],//错误返回数据
             ],self::$email);
             return apiResponse([],ApiStatus::CODE_33007);//取消退款失败
         }
@@ -543,6 +567,7 @@ class ReturnController extends Controller
         // | 获取参数并验证
         //-+--------------------------------------------------------------------
         $params = $request->input();
+        LogApi::debug("[isQualified获取检测信息]",$params);
         $paramsArr = isset($params['params']['data'])? $params['params']['data'] :'';
         foreach($paramsArr as $param){
             if(empty($param['goods_no'])
@@ -554,7 +579,7 @@ class ReturnController extends Controller
             }
         }
         $operateUserInfo = isset($params['params']['userinfo'])? $params['params']['userinfo'] :'';
-        LogApi::debug("检测获取用户信息",$operateUserInfo);
+        LogApi::debug("【isQualified】检测获取用户信息",$operateUserInfo);
         if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
             return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
         }
@@ -567,7 +592,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'退换货结果检测执行失败',//错误信息提示
-                'data'=>['$ex'=>$res],//错误返回数据
+                'data'=>[
+                    '$ex'=>$res,
+                    'params' => $params['data']
+                ],//错误返回数据
             ],self::$email);
             return  apiResponse([],ApiStatus::CODE_33008,"修改失败");//修改检测结果失败
         }
@@ -598,7 +626,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'换货确认收货失败',//错误信息提示
-                'data'=>['$ex'=>$res],//错误返回数据
+                'data'=>[
+                    '$ex' => $res,
+                    'params' => $params['refund_no']
+                ],//错误返回数据
             ],self::$email);
             return  apiResponse([],ApiStatus::CODE_35009,"收货失败");//换货确认收货失败
         }
@@ -634,7 +665,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'换货用户收货通知失败',//错误信息提示
-                'data'=>['$ex'=>$res],//错误返回数据
+                'data'=>[
+                    '$ex' => $res,
+                    'refund_no' => $params['refund_no']
+                ],//错误返回数据
             ],self::$email);
             return  apiResponse([],ApiStatus::CODE_33009);//修改失败
         }
@@ -708,7 +742,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'拒绝退款失败',//错误信息提示
-                'data'=>['$ex'=>$res],//错误返回数据
+                'data'=>[
+                    '$ex' => $res,
+                    'refund_no' => $params['refund_no']
+                ],//错误返回数据
             ],self::$email);
             return apiResponse([],ApiStatus::CODE_34004);//拒绝退款失败
         }
@@ -740,7 +777,10 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'允许进入售后和退换货失败',//错误信息提示
-                'data'=>['$ex'=>$return],//错误返回数据
+                'data'=>[
+                    '$ex' => $return,
+                    'params' => $orders['params']
+                ],//错误返回数据
             ],self::$email);
             return apiResponse([],ApiStatus::CODE_0);//允许进入售后和退换货
         }
@@ -789,7 +829,9 @@ class ReturnController extends Controller
             \App\Lib\Common\LogApi::alert('return-create:exception-error', [
                 'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
                 'tip'=>'获取线下退货退款列表失败',//错误信息提示
-                'data'=>['$ex'=>$e],//错误返回数据
+                'data'=>[
+                    '$ex' => $e,
+                ],//错误返回数据
             ],self::$email);
             return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
 

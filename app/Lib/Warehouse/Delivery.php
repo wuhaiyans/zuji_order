@@ -105,7 +105,8 @@ class Delivery
      *  'order_no'  => '', //【必须】string 订单编号
      *  'business_key'=>'',//【必须】string 业务编码
      *  'business_no'=>'',//【必须】string 业务编号
-     *  'channel_id'=>'',//【必须】string 所属渠道ID
+     *  'channel_id'=>'',//【必须】int 所属渠道ID
+     *  'order_type'=>'',//【必须】int 订单类型
      *  'appid'=>'',//【必须】string 来源appid
      *  'predict_delivery_time'=>'',//【必须】string 预计发货时间
      *  'customer'  => '',//【必须】string 收货人姓名
@@ -124,6 +125,7 @@ class Delivery
             'order_no'  => $orderInfo['order_no'],
             'business_key'=>$orderInfo['business_key'],
             'business_no'=>$orderInfo['business_no'],
+            'order_type'=>$orderInfo['order_type'],
             'channel_id'=>$orderInfo['channel_id'],
             'appid'=>$orderInfo['appid'],
             'predict_delivery_time'=>$orderInfo['predict_delivery_time'],
@@ -343,7 +345,11 @@ class Delivery
     {
 
       $response =\App\Lib\Order\Delivery::delivery($orderDetail, $goods_info,$operatorInfo);
-
+      LogApi::info("OrderDelivery-request:".$orderDetail['order_no'],[
+          'order_info'=>$orderDetail,
+          'goods_info'=>$goods_info,
+          'operator_info'=>$operatorInfo,
+      ]);
       $response =json_decode($response,true);
       if($response['code']!=ApiStatus::CODE_0){
           LogApi::error("OrderDelivery-Request:",[
@@ -355,6 +361,7 @@ class Delivery
           LogApi::error("OrderDelivery-Response:",$response);
           return false;
       }
+      LogApi::info("OrderDelivery-request:".$orderDetail['order_no'],$response);
       return true;
     }
 

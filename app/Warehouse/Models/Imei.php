@@ -37,7 +37,7 @@ class Imei extends Warehouse
      * 可填充字段
      */
     protected $fillable = [
-        'imei', 'price', 'status', 'brand', 'name', 'price', 'apple_serial',
+        'imei', 'status', 'brand', 'name', 'price', 'apple_serial',
         'quality', 'color', 'business', 'storage', 'create_time', 'update_time','id'
     ];
 

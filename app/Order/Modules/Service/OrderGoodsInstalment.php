@@ -211,6 +211,103 @@ class OrderGoodsInstalment
         return $result;
     }
 
+    /**
+     * 逾期分期
+     * @return array [order_no]  逾期订单
+     */
+    public static function instalmentOverdue(){
+
+        $order_status   = \App\Order\Modules\Inc\OrderStatus::OrderInService;  //在服务中
+        $order_type     = \App\Order\Modules\Inc\OrderStatus::orderMiniService;  //去除小程序订单
+        $status         = OrderInstalmentStatus::FAIL;  // 扣款失败
+        $fileNum        = 2;  // 连续扣款失败次数
+
+        $sql = "SELECT order_no,times,amount FROM
+                `order_goods_instalment`
+                WHERE order_no IN(
+                    SELECT
+                        order_no
+                    FROM
+                    (
+                            SELECT
+                                count(*) AS num,
+                                order_goods_instalment.order_no
+                            FROM
+                                `order_goods_instalment`
+                            LEFT JOIN `order_info` ON `order_info`.`order_no` = `order_goods_instalment`.`order_no`
+                            LEFT JOIN `order_overdue_deduction` ON `order_overdue_deduction`.`order_no` = `order_goods_instalment`.`order_no`
+                            WHERE
+                                (
+                                    `order_info`.`order_status` = " . $order_status . "
+                                    AND `order_info`.`order_type` <> " . $order_type . "
+                                    AND `order_goods_instalment`.`status` = " . $status . "
+                                    AND `order_overdue_deduction`.`order_no` IS NULL
+                                )
+                            GROUP BY
+                                `order_goods_instalment`.`order_no`
+                            HAVING
+                                `num` >= ".$fileNum."
+                            ORDER BY
+                                `order_info`.`id` DESC
+                        ) as tmp GROUP BY order_no
+                ) AND status = " . $status;
+
+        $result = DB::select($sql);
+        $instalmentList = objectToArray($result);
+
+        // 以订单为维度 分组
+        $instalmentList = array_group_by($instalmentList, 'order_no');
+
+//
+//        $whereArray = [
+//            ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService],   //在服务中
+//            ['order_info.order_type', '<>', \App\Order\Modules\Inc\OrderStatus::orderMiniService],  //去除小程序订单
+//            ['order_goods_instalment.status', '=', OrderInstalmentStatus::FAIL],   // 扣款失败
+//        ];
+//
+//        /**
+//         * 订单在服务中 分期连续两个月 未扣款成功
+//         */
+//        $result =  \App\Order\Models\OrderGoodsInstalment::select(
+//            DB::raw("count(*) as num,order_goods_instalment.order_no"))
+//            ->where($whereArray)
+//            ->whereNull('order_overdue_deduction.order_no')
+//            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
+//            ->leftJoin('order_overdue_deduction', 'order_overdue_deduction.order_no', '=', 'order_goods_instalment.order_no')
+//            ->groupBy('order_goods_instalment.order_no')
+//            ->orderBy('order_info.id','DESC')
+//            ->having('num', '>=', 2)
+//            ->get();
+//        if (!$result) return false;
+//        $instalmentList =  $result->toArray();
+//        if(!$instalmentList){
+//            return [];
+//        }
+
+        $array = [];
+        // 循环查询
+        foreach($instalmentList as $key => &$item){
+            // 如果总数小于两期 且不是连续的两期 则去除 此条数据
+            if(count($item) < 3){
+                if(abs($item[0]['times'] - $item[1]['times']) > 1){
+                    continue;
+                    //array_splice($instalmentList,$key,1);
+                }
+            }
+            $amount = 0;
+            foreach($item as $v){
+                $amount +=$v['amount'];
+            }
+
+            $orderInfo['order_no']  = $key;
+            $orderInfo['amount']    = $amount;
+
+            $array[] = $orderInfo;
+        }
+
+        return $array;
+    }
+
 
 
 }

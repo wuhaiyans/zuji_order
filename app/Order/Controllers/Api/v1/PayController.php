@@ -585,6 +585,67 @@ class PayController extends Controller
 		
 	}
 
+	/**
+	 * 资金预授权转支付通知
+	 * Author: heaven
+	 * @param Request $request
+	 * @return \Illuminate\Http\JsonResponse
+	 */
+	public function fundauthToPayNotify(){
+		$input = file_get_contents("php://input");
+		LogApi::info('[fundauthToPayNotify]分期转支付回调接口回调参数:'.$input);
+
+		$params = json_decode($input,true);
+
+		if( is_null($params) ){
+			LogApi::info('[fundauthToPayNotify]预授权转支付回调逻辑参数为空', $params);
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is null',
+			]);exit;
+		}
+		if( !is_array($params) ){
+			LogApi::info('[fundauthToPayNotify]预授权转支付回调逻辑参数不是数组', $params);
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is array',
+			]);exit;
+		}
+
+		try{
+			// 开启事务
+			DB::beginTransaction();
+
+			$b = \App\Order\Modules\Repository\Order\Instalment::paySuccess($params);
+
+			LogApi::info('[fundauthToPayNotify]进入分期预授权转支付回调逻辑：分期更新支付状态和支付时间，返回的结果', $b);
+			if( $b ){
+				// 提交事务
+				DB::commit();
+				echo json_encode([
+					'status' => 'ok',
+					'msg' => "预授权转支付扣款通知处理成功",
+				]);exit;
+
+			}else{
+				// 提交事务
+				DB::rollback();
+				echo json_encode([
+					'status' => 'error',
+					'msg' => "异步回调处理错误",
+				]);exit;
+			}
+
+
+		} catch (\Exception $e) {
+			DB::rollBack();
+			LogApi::error(__method__.'[fundauthToPayNotify回调预授权转支付]回调接口异常 ', [$e,$params]);
+			$this->innerErrMsg(__METHOD__ . "()预授权转支付回调接口异常 " .$e->getMessage());
+
+		}
+
+	}
+
    /**
      * 订单清算退款回调地址
      * Author: heaven
@@ -1384,6 +1445,64 @@ class PayController extends Controller
 
         }
     }
+
+	/**
+	 * 扣除押金支付通知
+	 * Author: heaven
+	 * @param Request $request
+	 * @return \Illuminate\Http\JsonResponse
+	 */
+	public function deduDepositNotify(){
+		$input = file_get_contents("php://input");
+		LogApi::info('[deduDepositNotify]扣除押金回调接口回调参数:'.$input);
+
+		$params = json_decode($input,true);
+
+		if( is_null($params) ){
+			LogApi::info('[deduDepositNotify]扣除押金回调逻辑参数为空', $params);
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is null',
+			]);exit;
+		}
+		if( !is_array($params) ){
+			LogApi::info('[deduDepositNotify]扣除押金回调逻辑参数不是数组', $params);
+			echo json_encode([
+				'status' => 'error',
+				'msg' => 'notice data is array',
+			]);exit;
+		}
+
+		try{
+			// 开启事务
+			DB::beginTransaction();
+
+			$b = \App\Order\Modules\Service\OrderOverdueDeduction::OverdueDeductionNotify($params);
+			if( $b ){
+				// 提交事务
+				DB::commit();
+				echo json_encode([
+					'status' => 'ok',
+					'msg' => "扣除押金支付扣款通知处理成功",
+				]);exit;
+
+			}else{
+				// 提交事务
+				DB::rollback();
+				echo json_encode([
+					'status' => 'error',
+					'msg' => "异步回调处理错误",
+				]);exit;
+			}
+
+		} catch (\Exception $e) {
+			DB::rollBack();
+			LogApi::error(__method__.'[deduDepositNotify]扣除押金回调接口异常 ', [$e,$params]);
+			$this->innerErrMsg(__METHOD__ . "()扣除押金回调接口异常 " .$e->getMessage());
+
+		}
+
+	}
 
 
 }

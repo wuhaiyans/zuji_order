@@ -297,9 +297,7 @@ class BuyoutController extends Controller
             return apiResponse([],ApiStatus::CODE_20001,"该订单未到买断时间");
         }
         //获取剩余未支付租金
-        $where[] = ['status','=', \App\Order\Modules\Inc\OrderInstalmentStatus::UNPAID];
-        $where[] = ['goods_no','=',$goodsInfo['goods_no']];
-        $instaulment = OrderGoodsInstalmentRepository::getSumAmount($where);
+        $instaulment = OrderGoodsInstalmentRepository::getSumAmount($goodsInfo['goods_no']);
         $fenqiPrice = $instaulment['amount']?$instaulment['amount']:0;
         $fenqishu = $instaulment['fenqishu']?$instaulment['fenqishu']:0;
         $buyoutPrice = $goodsInfo['buyout_price'];

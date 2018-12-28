@@ -63,6 +63,12 @@ $api->version('v1', [
         $api->post('unfreezeAndPayClean', 'PayController@unfreezeAndPayClean');
 
         //订单清算退款回调接口
+        $api->post('fundauthToPayNotify', 'PayController@fundauthToPayNotify');
+
+        //逾期扣款回调接口
+        $api->post('deduDepositNotify', 'PayController@deduDepositNotify');
+
+        //订单清算退款回调接口
         $api->post('refundClean', 'PayController@refundClean');
 
         //订单清算退押金回调接口
@@ -127,7 +133,8 @@ $api->version('v1', [
 
         //出账记录导出
         $api->any('listReletExport', 'ReletController@listReletExport');
-
+        //逾期扣款导出
+        $api->any('overdueDeductionExport','OverDueDeductionController@overdueDeductionExport');
 
     /***********************************************************************************************
      * ******************************cron 脚本处理start    heaven********************************

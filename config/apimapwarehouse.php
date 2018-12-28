@@ -32,6 +32,7 @@ return [
     'warehouse.delivery.show' => 'DeliveryController@show', //发货清单列表
     'warehouse.delivery.imeis' => 'DeliveryController@imeis', //对应发货单imei列表
     'warehouse.delivery.send' => 'DeliveryController@send', //发货反馈
+    'warehouse.delivery.channelSend' => 'DeliveryController@channelSend', //渠道自己发货反馈
     'warehouse.delivery.logistics' => 'DeliveryController@logistics', //修改快递物流信息
     'warehouse.delivery.match' => 'DeliveryController@match', //配货
     'warehouse.delivery.cancelMatch' => 'DeliveryController@cancelMatch', //取消配货
@@ -68,5 +69,6 @@ return [
     'warehouse.receive.imeiIn'=> 'ReceiveController@imeiIn', //确认入库
     'warehouse.receive.orderImeiIn'=> 'ReceiveController@orderImeiIn', //确认入库(订单工具)
 
+    'warehouse.checkitem.getDetails'=> 'CheckItemController@getDetails', //查看检测详情
 
 ];

@@ -190,6 +190,11 @@ class SkuComponnet implements OrderCreater
                     $this->getOrderCreater()->setError('商品租期错误');
                     $this->flag = false;
                 }
+                //判断开始日期 和结束日期 必须大于今天
+                if( $skuInfo['begin_time'] < date("Y-m-d") || $skuInfo['end_time'] < date("Y-m-d")){
+                    $this->getOrderCreater()->setError('商品开始日期或结束日期错误');
+                    $this->flag = false;
+                }
             }else{
                 // 租期[1,12]之间的正整数
                 if( $skuInfo['zuqi']<1 || $skuInfo['zuqi']>12 ){
@@ -268,12 +273,16 @@ class SkuComponnet implements OrderCreater
 
             //计算买断金额
             $buyout_amount =normalizeNum( max(0,normalizeNum($skuInfo['market_price'] * 1.2-$skuInfo['shop_price'] * $skuInfo['zuqi']))  );
-
+            //判断 如果优惠金额大于总租金 优惠金额为 总租金
+            if($order_coupon_amount>$skuInfo['shop_price']*$skuInfo['zuqi']){
+                $order_coupon_amount =$skuInfo['shop_price']*$skuInfo['zuqi'];
+            }
             //计算优惠后的总租金
             $amount_after_discount =normalizeNum($skuInfo['shop_price']*$skuInfo['zuqi']-$first_coupon_amount-$order_coupon_amount);
             if($amount_after_discount <0){
                 $amount_after_discount =0.00;
             }
+
             //设置订单金额的赋值 （目前一个商品 就暂时写死 多个商品后 根据文案 进行修改）
             $this->orderZujin =$amount_after_discount+$spuInfo['yiwaixian'];
             $this->orderFenqi =intval($skuInfo['zuqi_type']) ==1?1:intval($skuInfo['zuqi']);
@@ -328,6 +337,7 @@ class SkuComponnet implements OrderCreater
                     'discount_amount' => 0,//$skuInfo['buyout_price'], //商品优惠金额 （商品系统为buyout_price字段）
                     'amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
                     'all_amount'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])+$spuInfo['yiwaixian']),
+                    'total_zujin'=>normalizeNum($skuInfo['shop_price']*intval($skuInfo['zuqi'])),
                     'yajin_limit'=>normalizeNum($spuInfo['yajin_limit']), //最小押金值
                     'first_coupon_amount' => $first_coupon_amount,
                     'order_coupon_amount' => $order_coupon_amount,

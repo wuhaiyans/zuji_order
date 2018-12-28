@@ -154,7 +154,7 @@ class InstalmentController extends Controller
 
             // 是否允许扣款
             $item['allow_pay']  = 0;
-            if($orderInfo['order_status'] == \App\Order\Modules\Inc\OrderStatus::OrderInService || $orderInfo['pay_type'] == \App\Order\Modules\Inc\PayInc::FlowerFundauth){
+            if($orderInfo['order_status'] == \App\Order\Modules\Inc\OrderStatus::OrderInService && $orderInfo['pay_type'] != \App\Order\Modules\Inc\PayInc::FlowerFundauth){
                 if($item['status'] == OrderInstalmentStatus::UNPAID || $item['status'] == OrderInstalmentStatus::FAIL ){
                     if($allow == 0){
                         $item['allow_pay']  = 1;
@@ -239,7 +239,7 @@ class InstalmentController extends Controller
         $instalmentInfo['fenqi_amount']     = $goodInfo['zujin'];//$instalmentInfo['original_amount'];
 
         // 租金抵用券
-        $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
+        $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id'],$orderInfo['appid']);
         if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
             $discount_amount = $couponInfo['youhui'] / 100;
 

@@ -397,10 +397,10 @@ class Instalment {
 			}
 
 
-			/*
+			/**
 			 * 	H5订单查询 订单扣款交易信息
 			 */
-			if($orderInfo['order_type']  == \App\Order\Modules\Inc\OrderStatus::orderOnlineService){
+			if($orderInfo['pay_type'] != \App\Order\Modules\Inc\PayInc::FlowerFundauth && $orderInfo['order_type']  == \App\Order\Modules\Inc\OrderStatus::orderOnlineService){
 
 				// 查询扣款交易
 				$withholdData = [
@@ -427,6 +427,7 @@ class Instalment {
 				'pay_type'   		=> 0,
 
 			];
+
 			// 修改分期状态
 			$b = \App\Order\Modules\Repository\OrderGoodsInstalmentRepository::save(['business_no'=>$param['out_trade_no']], $data);
 			if(!$b){

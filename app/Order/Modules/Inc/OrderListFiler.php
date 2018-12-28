@@ -33,6 +33,7 @@ class OrderListFiler
                     'refund_list'=> Inc\ReturnStatus::getStatusGroupList(),
                     'zuqi_type' =>Inc\OrderStatus::getZuqiType(),
                     'risk_status_list' =>OrderRiskCheckStatus::getStatusList(),
+                    'deduction_status_list'=>OrderOverdueStatus::getStatusList(),//扣款状态
                 );
     }
 

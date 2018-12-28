@@ -127,7 +127,6 @@ class WithholdController extends Controller
             // 判断用户代扣协议是否允许 解约
             $withhold = WithholdQuery::getByUserChannel($userId,$channel);
             if($withhold->getCounter() != 0){
-                LogApi::alert("unsign:不允许解除代扣",$params['params'],self::$email);
                 DB::rollBack();
                 return apiResponse( [], ApiStatus::CODE_50000, '不允许解约');
             }
@@ -279,6 +278,7 @@ class WithholdController extends Controller
             // 花呗支付方式 扣除押金 - 扣除预授权 金额
             if($orderInfo['zuqi_type'] != OrderStatus::ZUQI_TYPE_DAY){
                 LogApi::error('[fundauth_createpay]花呗分期代扣押金 只支持短租：'.$subject);
+                OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 return apiResponse([], ApiStatus::CODE_71006, '扣款失败');
             }
 
@@ -296,7 +296,7 @@ class WithholdController extends Controller
                     'out_trade_no'	=> $business_no,            //业务系统授权码
                     'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
                     'amount'		=> $amount,                 //交易金额；单位：分
-                    'back_url'		=> $backUrl,                //后台通知地址
+                    'back_url'		=> config('app.url') . "/order/pay/fundauthToPayNotify",//后台通知地址
                     'user_id'		=> $orderInfo['user_id'],   //用户id
                     'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
                 ];
@@ -308,7 +308,6 @@ class WithholdController extends Controller
 
             }catch(\App\Lib\ApiException $exc){
 
-                LogApi::alert("fundauth_createpay:花呗分期代扣押金",[$exc->getMessage()],self::$email);
                 LogApi::error('[fundauth_createpay]花呗分期代扣押金', [$exc->getMessage()]);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
 
@@ -348,14 +347,12 @@ class WithholdController extends Controller
 
 
                 if( !isset($withholdStatus['status']) || $withholdStatus['status'] != 'processing'){
-                    LogApi::alert("withhold_createpay:分期代扣错误,返回的结果及参数分别为",[$withholdStatus,$withholding_data],self::$email);
                     LogApi::error('[withhold_createpay]分期代扣错误,返回的结果及参数分别为：', [$withholdStatus,$withholding_data]);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                 }
                 LogApi::error('[withhold_createpay]分期代扣请求-' . $instalmentInfo['order_no'] , $withholdStatus);
 
             }catch(\App\Lib\ApiException $exc){
-                LogApi::alert("withhold_createpay:分期代扣失败",[$exc->getMessage()],self::$email);
                 LogApi::error('[withhold_createpay]分期代扣失败', [$exc->getMessage()]);
                 OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
 
@@ -547,7 +544,7 @@ class WithholdController extends Controller
                         'out_trade_no'	=> $business_no,            //业务系统授权码
                         'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
                         'amount'		=> $amount,                 //交易金额；单位：分
-                        'back_url'		=> $backUrl,                //后台通知地址
+                        'back_url'		=> config('app.url') . "/order/pay/fundauthToPayNotify",//后台通知地址
                         'user_id'		=> $orderInfo['user_id'],   //用户id
                         'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
                     ];
@@ -559,7 +556,6 @@ class WithholdController extends Controller
 
                 }catch(\App\Lib\ApiException $exc){
 
-                    LogApi::alert("fundauth_createpay:花呗分期代扣押金",[$exc->getMessage()],self::$email);
                     LogApi::error('[fundauth_createpay]花呗分期代扣押金', [$exc->getMessage()]);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
 
@@ -600,14 +596,12 @@ class WithholdController extends Controller
                     $withStatus = $withholding->deduct($withholding_data);
 
                     if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
-                        LogApi::alert("multiCreatepay:分期代扣错误,返回的结果及参数分别为：", [$withStatus,$withholding_data],self::$email);
                         LogApi::error('[multiCreatepay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
                         OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                     }
 
                     \App\Lib\Common\LogApi::error('multiCreatepay分期代扣返回:'.$instalmentInfo['order_no'], $withStatus);
                 }catch(\App\Lib\ApiException $exc){
-                    LogApi::alert("multiCreatepay:分期代扣错误", $withholding_data,self::$email);
                     \App\Lib\Common\LogApi::error('multiCreatepay:分期代扣错误', $withholding_data);
                     OrderGoodsInstalment::instalment_failed($instalmentInfo['fail_num'], $instalmentId);
                     //捕获异常 买家余额不足
@@ -892,7 +886,7 @@ class WithholdController extends Controller
                         'out_trade_no'	=> $business_no,            //业务系统授权码
                         'fundauth_no'	=> $authInfo['out_fundauth_no'], //支付系统授权码
                         'amount'		=> $amount,                 //交易金额；单位：分
-                        'back_url'		=> $backUrl,                //后台通知地址
+                        'back_url'		=> config('app.url') . "/order/pay/fundauthToPayNotify",//后台通知地址
                         'user_id'		=> $orderInfo['user_id'],   //用户id
                         'remark'		=> '花呗预授权'.$orderInfo['order_no'].'扣除押金', //业务描述
                     ];
@@ -904,7 +898,6 @@ class WithholdController extends Controller
 
                 }catch(\App\Lib\ApiException $exc){
 
-                    LogApi::alert("fundauth_createpay:花呗分期代扣押金",[$exc->getMessage()],self::$email);
                     LogApi::error('[fundauth_createpay]花呗分期代扣押金', [$exc->getMessage()]);
                     OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
 
@@ -945,13 +938,11 @@ class WithholdController extends Controller
                         $withStatus = $withholding->deduct($withholding_data);
 
                         if( !isset($withStatus['status']) || $withStatus['status'] != 'processing'){
-                            LogApi::alert("crontabCreatepay:分期代扣错误,返回的结果及参数分别为", [$withStatus,$withholding_data],self::$email);
                             LogApi::error('[createpay]分期代扣错误,返回的结果及参数分别为：', [$withStatus,$withholding_data]);
                             OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
                         }
                         LogApi::info('[crontabCreatepay]分期代扣返回：'.$subject.'：结果及调用的参数:', [$withStatus,$withholding_data]);
                     }catch(\App\Lib\ApiException $exc){
-                        LogApi::alert("crontabCreatepay:分期代扣错误异常".$subject, [$exc->getMessage()],self::$email);
                         LogApi::error('[crontabCreatepay]分期代扣错误异常：'.$subject, $exc);
                         OrderGoodsInstalment::instalment_failed($item['fail_num'], $item['id']);
                         //捕获异常 买家余额不足
@@ -1092,7 +1083,7 @@ class WithholdController extends Controller
 
 			$youhui = 0;
 			// 租金抵用券
-			$couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id']);
+			$couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id'],$orderInfo['appid']);
 
 			if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
 				$youhui = $couponInfo['youhui'] / 100;

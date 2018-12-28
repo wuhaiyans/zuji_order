@@ -20,6 +20,8 @@ class VerifyCsrfToken extends Middleware
 		'/order/pay/withholdCreatePayNotify',	// 代扣扣款异步通知
 		'/order/pay/fundauthNotify',			// 资金预授权冻结通知
 		'/order/pay/fundauthUnfreezeNotify',	// 资金预授权解冻通知
+		'/order/pay/fundauthToPayNotify',		// 资金预授权转支付通知
+		'/order/pay/deduDepositNotify',		// 扣除押金通知
 
 		'/order/mini/withholdingCloseCancelNotify',	// 小程序订单回调接口POST请求通知
 
