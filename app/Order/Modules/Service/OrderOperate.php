@@ -1925,12 +1925,12 @@ class OrderOperate
                $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
                $isBuyOut = $values['goods_status']>=Inc\OrderGoodStatus::BUY_OFF && $values['goods_status']<Inc\OrderGoodStatus::RELET;
                $goodsList[$keys]['is_buyout'] = $isBuyOut ?? 0;
-                $endTime = strtotime(date("Y-m-d",$values['end_time']));
-                $todayTime = strtotime(date("Y-m-d",time()));
-                //时间未到期  ,true未到期
-               $notInTimeToGive =   ( $endTime - intval(config('web.day_expiry_process_days')) > $todayTime) ?? false;
+//                $endTime = strtotime(date("Y-m-d",$values['end_time']));
+//                $todayTime = strtotime(date("Y-m-d",time()));
+//                //时间未到期  ,true未到期
+//               $notInTimeToGive =   ( $endTime - intval(config('web.day_expiry_process_days')) > $todayTime) ?? false;
                $isGiveBack = $values['goods_status']>=Inc\OrderGoodStatus::BACK_IN_THE_MACHINE && $values['goods_status']<Inc\OrderGoodStatus::BUY_OFF;
-               $goodsList[$keys]['is_giveback'] = ($isGiveBack || $notInTimeToGive) ?? 0;
+               $goodsList[$keys]['is_giveback'] = $isGiveBack ?? 0;
                $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
                if (empty($actArray)){
                    $goodsList[$keys]['act_goods_state']= [];
