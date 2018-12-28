@@ -82,12 +82,13 @@ class OrderPayNotify
                         'remark'=>'线下订单自动待发货',      //【必须】string 备注
                         'userinfo '=>[
                             'type'=>PublicInc::Type_System,     //【必须】int 用户类型:1管理员，2用户,3系统，4线下,
-                            'user_id'=>1,   //【必须】int用户ID
-                            'user_name'=>'系统', //【必须】string用户名
+                            'uid'=>1,   //【必须】int用户ID
+                            'username'=>'系统', //【必须】string用户名
                         ]
                 ];
                 $b = OrderOperate::confirmOrder($data);
                 if(!$b){
+                    LogApi::alert("OrderPay-storeConfirm:".$orderNo,$data,[config('web.order_warning_user')]);
                     LogApi::error("OrderPay-storeConfirm:".$orderNo,$data);
                 }
             }
