@@ -86,7 +86,7 @@ class DeliveryDetail {
      * @return bool
      */
 
-    public static function addDeliveryContract(string $orderNo,array $goodsInfo):bool{
+    public static function addDeliveryContract(string $orderNo,array $goodsInfo=[]):bool{
         $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$orderNo]);
         $instalment = OrderGoodsInstalmentRepository::queryList(['order_no'=>$orderNo,'times'=>1],['limit'=>1]);
         $payment_day ="";
@@ -109,16 +109,19 @@ class DeliveryDetail {
         $goods = OrderRepository::getGoodsListByOrderId($orderNo);
 
         foreach ($goods as $k=>$v){
-            foreach ($goodsInfo as $key=>$value){
-                $imei ="";
-                if(in_array($v['goods_no'],$value)){
-                    $value['imei2'] =isset($value['imei2'])?$value['imei2']:'';
-                    $value['imei3'] =isset($value['imei3'])?$value['imei3']:'';
-                    $value['serial_number'] =isset($value['serial_number'])?$value['serial_number']:'';
-                    
-                    $imei = $value['imei1']." ".$value['imei2']." ".$value['imei3']." ".$value['serial_number'];
-                }
-            }
+            $goodsDeliveryInfo = self::getGoodsDeliveryInfo($orderNo,$v['goods_no']);
+            $value = $goodsDeliveryInfo->getData();
+            $imei= $value['imei1']." ".$value['imei2']." ".$value['imei3']." ".$value['serial_number'];
+//            foreach ($goodsInfo as $key=>$value){
+//                $imei ="";
+//                if(in_array($v['goods_no'],$value)){
+//                    $value['imei2'] =isset($value['imei2'])?$value['imei2']:'';
+//                    $value['imei3'] =isset($value['imei3'])?$value['imei3']:'';
+//                    $value['serial_number'] =isset($value['serial_number'])?$value['serial_number']:'';
+//
+//                    $imei = $value['imei1']." ".$value['imei2']." ".$value['imei3']." ".$value['serial_number'];
+//                }
+//            }
             $v['chengse'] = OrderGoodStatus::spec_chengse_value($v['chengse']);
             $goodsData=[
                 'spu_id'=>$v['prod_id'],

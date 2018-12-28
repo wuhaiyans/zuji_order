@@ -156,6 +156,8 @@ class OrderOperate
      * @return bool
      */
     private static function _orderDelvery(Order $order,$orderDetail,$goodsInfo,$operatorInfo){
+
+        $orderInfo =$order->getData();
         //更新订单表状态
         $b=$order->deliveryFinish();
         if(!$b){
@@ -174,12 +176,19 @@ class OrderOperate
             set_msg("增加发货详情失败");
             return false;
         }
-        //增加发货时生成合同
-        $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
-        if(!$b) {
-            set_msg("生成合同失败");
-            return false;
-        }
+//        //增加发货时生成合同 -- 走队列
+//        $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
+//        if(!$b) {
+//            set_msg("生成合同失败");
+//            return false;
+//        }
+
+        //增加发货时生成合同队列
+        //发送订单消息队列
+        $schedule = new OrderScheduleOnce(['user_id'=>$orderInfo['user_id'],'order_no'=>$orderInfo['order_no']]);
+        //生成合同
+        $schedule->DeliveryContract();
+
         //增加操作日志
         if(!empty($operatorInfo)){
             OrderLogRepository::add($operatorInfo['user_id'],$operatorInfo['user_name'],$operatorInfo['type'],$orderDetail['order_no'],"发货",$orderDetail['logistics_note']);
@@ -187,6 +196,24 @@ class OrderOperate
         return true;
 
 
+    }
+
+    /**
+     * 发货生成合同
+     * @param $orderNo 订单编号
+     * @param $userId  用户ID
+     * @return bool
+     */
+    public function DeliveryContract($orderNo,$userId){
+        LogApi::info("InnerService-DeliveryContract:".$orderNo);
+        $b = DeliveryDetail::addDeliveryContract($orderNo);
+        if(!$b) {
+            LogApi::alert("InnerService-DeliveryContract:".$orderNo,[],[config('web.order_warning_user')]);
+            LogApi::info("InnerService-DeliveryContract-error:".$orderNo);
+            return false;
+        }
+        LogApi::info("InnerService-DeliveryContract-success:".$orderNo);
+        return true;
     }
     /**
      * 延迟发货操作
@@ -965,6 +992,7 @@ class OrderOperate
                 ];
                 $id =OrderRiskRepository::add($riskData);
                 if(!$id){
+
                     LogApi::error(config('app.env')."[orderRiskSave] save-error",$riskData);
                     return  ApiStatus::CODE_31006;
                 }
