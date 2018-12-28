@@ -103,8 +103,8 @@ class OrderOperate
                     DB::rollBack();
                     return false;
                 }
-                //判断短租订单服务时间 判断是否是延迟发货
-                if($orderInfo['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_DAY && $orderInfo['order_type'] != Inc\OrderStatus::orderActivityService){
+                //判断短租订单服务时间 判断是否是延迟发货 线下不延迟发货
+                if($orderInfo['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_DAY && $orderInfo['order_type'] != Inc\OrderStatus::orderActivityService && $orderInfo['order_type'] != Inc\OrderStatus::orderStoreService){
                     $b = self::_orderDelayDelivery($orderDetail['order_no']);
                     if(!$b){
                         LogApi::alert("OrderDelivery-delayError:".$orderDetail['order_no'].get_msg(),[],[config('web.order_warning_user')]);
@@ -113,23 +113,50 @@ class OrderOperate
                         return false;
                     }
                 }
-                DB::commit();
-                //增加确认收货队列
-                $schedule = new OrderScheduleOnce(['user_id'=>$orderInfo['user_id'],'order_no'=>$orderInfo['order_no']]);
-                if($orderInfo['zuqi_type'] ==1){
-                    $schedule->OrderDayReceive();
-                }else{
-                    $schedule->OrderMonthReceive();
+                //如果是线下订单 自动确认收货 - 调用确认收货操作
+                if($orderInfo['order_type'] == Inc\OrderStatus::orderStoreService){
+                    $params['order_no'] =$orderInfo['order_no'];
+                    $userInfo = self::_orderReceive($order,$params,1);
+                    if(!$userInfo){
+                        LogApi::alert("OrderDelivery-orderReceive:".$orderDetail['order_no'].get_msg(),[],[config('web.order_warning_user')]);
+                        LogApi::error("OrderDelivery-orderReceive:".$orderDetail['order_no'].get_msg());
+                        DB::rollBack();
+                        return false;
+                    }
+
                 }
-                // 订单发货成功后 发送短信
-                $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderDetail['order_no'],SceneConfig::ORDER_DELIVERY);
-                $orderNoticeObj->notify();
+
+                DB::commit();
+                if($orderInfo['order_type'] != Inc\OrderStatus::orderStoreService){
+                    //增加确认收货队列
+                    $schedule = new OrderScheduleOnce(['user_id'=>$orderInfo['user_id'],'order_no'=>$orderInfo['order_no']]);
+                    if($orderInfo['zuqi_type'] ==1){
+                        $schedule->OrderDayReceive();
+                    }else{
+                        $schedule->OrderMonthReceive();
+                    }
+
+                    // 订单发货成功后 发送短信
+                    $orderNoticeObj = new OrderNotice(Inc\OrderStatus::BUSINESS_ZUJI,$orderDetail['order_no'],SceneConfig::ORDER_DELIVERY);
+                    $orderNoticeObj->notify();
+
+                }
 
                 //推送到区块链
                 $b =OrderBlock::orderPushBlock($orderDetail['order_no'],OrderBlock::OrderShipped);
                 LogApi::info("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b);
                 if($b==100){
                     LogApi::alert("OrderDelivery-addOrderBlock:".$orderDetail['order_no']."-".$b,[],[config('web.order_warning_user')]);
+                }
+
+                //如果线下增加自动确认收货推送到区块链
+                if($orderInfo['order_type'] == Inc\OrderStatus::orderStoreService) {
+                    //推送到区块链
+                    $b = OrderBlock::orderPushBlock($orderDetail['order_no'], OrderBlock::OrderTakeDeliver);
+                    LogApi::info("OrderDeliveryReceive-addOrderBlock:" . $orderDetail['order_no'] . "-" . $b);
+                    if ($b == 100) {
+                        LogApi::alert("OrderDeliveryReceive-addOrderBlock:" . $orderDetail['order_no'] . "-" . $b, [], [config('web.order_warning_user')]);
+                    }
                 }
 
                 return true;
@@ -540,7 +567,7 @@ class OrderOperate
     /**
      * 确认收货接口
      * @author wuhaiyan
-     * @param  $system //【可选】int 0 前后端操作,1 自动执行任务
+     * @param  $system //【可选】int 0 前后端操作,1 系统执行任务
      * @param $params
      * [
      *  'order_no' =>'',//【必须】string 订单编号
@@ -568,22 +595,15 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            if($system){
-                $remark="系统确认收货";
-                $params['userinfo']['uid'] =1;
-                $params['userinfo']['username'] ="系统";
-                $params['userinfo']['type'] =\App\Lib\PublicInc::Type_System;
-            }
 
             //订单确认收货系列操作
-            $b =self::_orderReceive($order,$params,$system);
-            if(!$b){
+            $userInfo =self::_orderReceive($order,$params,$system);
+            if(!$userInfo){
                 LogApi::alert("DeliveryReceive:".get_msg(),$params,[config('web.order_warning_user')]);
                 LogApi::error("DeliveryReceive:".get_msg(),$params);
                 DB::rollBack();
                 return false;
             }
-            $userInfo =$params['userinfo'];
             $params=[
                 'order_no'=>$orderNo,//
                 'receive_type'=>$userInfo['type'],//类型：String  必有字段  备注：签收类型1管理员，2用户,3系统，4线下
@@ -608,6 +628,7 @@ class OrderOperate
             if($b==100){
                 LogApi::alert("OrderDeliveryReceive-addOrderBlock:".$orderNo."-".$b,[],[config('web.order_warning_user')]);
             }
+
             return true;
 
     }
@@ -617,13 +638,23 @@ class OrderOperate
      * @param $order 订单对象
      * @param $params 参数同确认收货接口
      * @param int $system
-     * @return bool
+     * @return array|false 返回操作人信息
      */
 
     private static function _orderReceive(Order $order,$params,$system=0){
         $orderNo =$params['order_no'];
+        if($system){
+            $params['remark']="系统确认收货";
+            $params['userinfo']['uid'] =1;
+            $params['userinfo']['username'] ="系统";
+            $params['userinfo']['type'] =\App\Lib\PublicInc::Type_System;
+        }
         $remark = isset($params['remark'])?$params['remark']:'';
-        $userInfo =$params['userinfo'];
+        $userInfo =$params['userinfo']??[];
+        if(empty($userInfo)){
+            set_msg("操作人信息错误");
+            return false;
+        }
         $orderInfo = $order->getData();
         //更新订单状态
         $b =$order->sign();
@@ -687,7 +718,7 @@ class OrderOperate
         //插入操作日志
         OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$orderNo,"确认收货",$remark);
 
-        return true;
+        return $userInfo;
     }
 
     /**
