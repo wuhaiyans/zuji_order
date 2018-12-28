@@ -237,10 +237,10 @@ class OrderOperate
         if(!$b) {
             LogApi::alert("InnerService-DeliveryContract:".$orderNo,[],[config('web.order_warning_user')]);
             LogApi::info("InnerService-DeliveryContract-error:".$orderNo);
-            return false;
+            return  ApiStatus::CODE_60001;
         }
         LogApi::info("InnerService-DeliveryContract-success:".$orderNo);
-        return true;
+        return  ApiStatus::CODE_0;
     }
     /**
      * 延迟发货操作

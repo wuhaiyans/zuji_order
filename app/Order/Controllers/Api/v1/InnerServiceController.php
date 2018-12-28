@@ -44,7 +44,11 @@ class InnerServiceController extends Controller
 
 
         $success =   \App\Order\Modules\Service\OrderOperate::DeliveryContract($validateParams['data']['order_no'],$validateParams['data']['user_id']);
-        return $success;
+        if ($success) {
+
+            return $this->innerErrMsg(ApiStatus::$errCodes[$success]);
+        }
+        return $this->innerOkMsg();
 
     }
     /**
