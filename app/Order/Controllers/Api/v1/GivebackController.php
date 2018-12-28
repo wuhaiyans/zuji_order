@@ -907,6 +907,18 @@ class GivebackController extends Controller
 
 		//还机信息为空则返回还机申请页面信息
 		if( !$orderGivebackInfo ){
+			
+			//-+----------------------------------------------------------------
+			// | 新增还机申请到期时间的验证  2018-12-28 吴天堂
+			//-+----------------------------------------------------------------
+			$endTime = strtotime(date("Y-m-d",strtotime($orderGoodsInfo['end_time'])));
+			$todayTime = strtotime(date("Y-m-d",time()));
+			//时间未到期  ,true未到期
+			$notInTimeToGive =   ( $endTime - intval(config('web.day_expiry_process_days')) > $todayTime) ?? false;
+			if( $notInTimeToGive ){
+				return apiResponse([], ApiStatus::CODE_92500, '租期到期前48小时内方可操作还机!');
+			}
+			
 			//组合最终返回商品基础数据
 			$data['goods_info'] = $orderGoodsInfo;//商品信息
 			// jinlin 2018-9-29 改
