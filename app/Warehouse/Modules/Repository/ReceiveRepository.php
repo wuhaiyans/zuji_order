@@ -505,16 +505,20 @@ class ReceiveRepository
         $params['check_description'] = isset($params['check_description']) ? $params['check_description'] : '无';
         $params['compensate_amount'] = isset($params['compensate_amount']) ? $params['compensate_amount'] : 0;
 
-        $update_obj = new TencentUpload();
-        $upload_imgs = $update_obj->file_upload_all();
-        $imgs = [];
-        foreach ($upload_imgs as $key=>$item) {
-            if($item['ret']){
-                return false;
+        if($params['check_result']==CheckItems::RESULT_FALSE){
+            $update_obj = new TencentUpload();
+            $upload_imgs = $update_obj->file_upload_all();
+            $imgs = [];
+            foreach ($upload_imgs as $key=>$item) {
+                if($item['ret']){
+                    return false;
+                }
+                $imgs[] = $item['img']['url'];
             }
-            $imgs[] = $item['img']['url'];
+            $params['imgs'] = json_encode($imgs);
+        }else{
+            $params['imgs']=0;
         }
-        $params['imgs'] = json_encode($imgs);
 
         $model = new CheckItems();
         return $model->create($params);
