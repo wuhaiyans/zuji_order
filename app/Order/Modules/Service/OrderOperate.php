@@ -104,7 +104,7 @@ class OrderOperate
                     return false;
                 }
                 //判断短租订单服务时间 判断是否是延迟发货
-                if($orderInfo['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_DAY){
+                if($orderInfo['zuqi_type'] == Inc\OrderStatus::ZUQI_TYPE_DAY && $orderInfo['order_type'] != Inc\OrderStatus::orderActivityService){
                     $b = self::_orderDelayDelivery($orderDetail['order_no']);
                     if(!$b){
                         LogApi::alert("OrderDelivery-delayError:".$orderDetail['order_no'].get_msg(),[],[config('web.order_warning_user')]);
@@ -250,7 +250,7 @@ class OrderOperate
 
 
                 //修改订单分期扣款时间
-                $b = OrderGoodsInstalmentRepository::delayInstalment($orderDetail['order_no'],$delayDay);
+                $b = OrderGoodsInstalmentRepository::delayInstalment($orderNo,$delayDay);
                 if(!$b){
                     set_msg("修改分期延期扣款时间失败");
                     return false;
