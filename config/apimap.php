@@ -372,6 +372,7 @@ return [
     'api.inner.deliveryReceive'=>'InnerServiceController@deliveryReceive',//订单确认收货接口
 
     'api.inner.orderRisk'=>'InnerServiceController@orderRisk',//订单用户风控信息存储接口
+    'api.inner.deliveryContract'=>'InnerServiceController@DeliveryContract',// 订单发货时生成合同
 
 
     /*************************************************************************************************

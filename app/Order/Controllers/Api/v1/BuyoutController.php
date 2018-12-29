@@ -291,11 +291,12 @@ class BuyoutController extends Controller
         //按月处理
         elseif($goodsInfo['zuqi_type'] == 2){
             $triggerTime = config("web.month_expiry_process_days");
+            $newTime = $goodsInfo['end_time']-$triggerTime;
+            if($newTime>time()){
+                return apiResponse([],ApiStatus::CODE_20001,"该订单未到买断时间");
+            }
         }
-        $newTime = $goodsInfo['end_time']-$triggerTime;
-        if($newTime>time()){
-            return apiResponse([],ApiStatus::CODE_20001,"该订单未到买断时间");
-        }
+
         //获取剩余未支付租金
         $instaulment = OrderGoodsInstalmentRepository::getSumAmount($goodsInfo['goods_no']);
         $fenqiPrice = $instaulment['amount']?$instaulment['amount']:0;

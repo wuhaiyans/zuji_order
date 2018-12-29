@@ -111,6 +111,8 @@ $api->version('v1', [
         //隊列取消订单
         $api->any('CancelOrder', 'InnerServiceController@cancelOrder');
 
+        //隊列增加订单发货时生成合同
+        $api->any('DeliveryContract', 'InnerServiceController@DeliveryContract');
         //隊列增加风控看板信息
         $api->any('OrderRisk', 'InnerServiceController@orderRisk');
         //隊列返回风控 订单押金信息

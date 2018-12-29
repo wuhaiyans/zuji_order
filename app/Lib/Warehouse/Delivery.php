@@ -144,12 +144,12 @@ class Delivery
         //LogApi::info("发货申请回执",$res);
 		
         $res = json_decode($res, true);;
-//
-//		\App\Lib\Common\LogApi::debug( '发货申请', [
-//			'url' => $base_api,
-//			'request' => $params,
-//			'response' => $res,
-//		] );
+
+		\App\Lib\Common\LogApi::info( 'deliveryApply', [
+			'url' => $base_api,
+			'request' => $params,
+			'response' => $res,
+		] );
 
         if (!$res || !isset($res['code']) || $res['code'] != 0) {
             session()->flash(self::SESSION_ERR_KEY, $res['msg']);
