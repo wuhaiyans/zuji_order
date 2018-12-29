@@ -947,10 +947,12 @@ class OrderOperate
         }catch (\Exception $exc){
             DB::rollBack();
             echo $exc->getMessage();
+            LogApi::error("OrderConfirm-Exception:".$data['order_no'].$exc->getMessage());
             return false;
             die;
 
         }
+        return true;
 
     }
     /**
