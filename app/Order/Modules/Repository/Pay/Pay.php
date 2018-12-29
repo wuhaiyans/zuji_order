@@ -754,6 +754,17 @@ class Pay extends \App\Lib\Configurable
 			'update_time' => time(),
 		]);
 		if( !$b ){
+		    $log_data = [
+		        'where'=>[
+		            'business_type'=>$this->businessType,
+		            'business_no'	=> $this->businessNo,
+		        ],
+		        'update'=>[
+		            'payment_channel' => $channel,
+		            'update_time' => time(),
+		        ]
+		    ];
+		    LogApi::error('支付环节支付渠道设置失败',$log_data);
 			throw new \Exception( '支付环节支付渠道设置失败' );
 		}
 		$data =[
