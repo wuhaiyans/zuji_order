@@ -226,6 +226,34 @@ class OrderOperate
     }
 
     /**
+     * 订单申请发货
+     * @param $orderNo 订单编号
+     * @param $userId  用户ID
+     * @return bool
+     */
+    public static function DeliveryApply($orderNo,$userId){
+
+        //调用确认订单接口
+        $data=[
+            'order_no'  => $orderNo, //【必须】string 订单编号
+            'remark'=>'线下订单自动待发货',      //【必须】string 备注
+            'userinfo '=>[
+                'type'=>\App\Lib\PublicInc::Type_System,     //【必须】int 用户类型:1管理员，2用户,3系统，4线下,
+                'uid'=>1,   //【必须】int用户ID
+                'username'=>'系统', //【必须】string用户名
+            ]
+        ];
+        $b = OrderOperate::confirmOrder($data);
+        if(!$b){
+            LogApi::alert("OrderPay-storeConfirm:".$orderNo,$data,[config('web.order_warning_user')]);
+            LogApi::error("OrderPay-storeConfirm:".$orderNo,$data);
+            return  ApiStatus::CODE_60001;
+        }
+        LogApi::info("InnerService-DeliveryApply-success:".$orderNo);
+        return  ApiStatus::CODE_0;
+    }
+
+    /**
      * 发货生成合同
      * @param $orderNo 订单编号
      * @param $userId  用户ID
@@ -912,7 +940,6 @@ class OrderOperate
                 return false;
             }
             $b =$order->deliveryOpen($data['remark']);
-            LogApi::info("OrderConfirm-deliveryOpen:".$data['order_no'].$b);
             if(!$b){
                 LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data,[config('web.order_warning_user')]);
                 LogApi::error("OrderConfirm-updateOrderStatus:".$data['order_no'],$data);
@@ -928,7 +955,6 @@ class OrderOperate
 
             //通知收发货系统 -申请发货
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
-            LogApi::info("OrderConfirm-delivery:".$data['order_no'].$delivery);
             if(!$delivery){
                 LogApi::alert("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo,[config('web.order_warning_user')]);
                 LogApi::error("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo);
@@ -945,7 +971,6 @@ class OrderOperate
             if($b==100){
                 LogApi::alert("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b,[],[config('web.order_warning_user')]);
             }
-            LogApi::info("OrderConfirm-over:".$data['order_no']);
             DB::commit();
             return true;
         }catch (\Exception $exc){
