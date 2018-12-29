@@ -237,11 +237,6 @@ class OrderOperate
         $data=[
             'order_no'  => $orderNo, //【必须】string 订单编号
             'remark'=>'线下订单自动待发货',      //【必须】string 备注
-            'userinfo '=>[
-                'type'=>\App\Lib\PublicInc::Type_System,     //【必须】int 用户类型:1管理员，2用户,3系统，4线下,
-                'uid'=>1,   //【必须】int用户ID
-                'username'=>'系统', //【必须】string用户名
-            ]
         ];
         $b = OrderOperate::confirmOrder($data);
         if(!$b){
@@ -929,7 +924,6 @@ class OrderOperate
      */
 
     public static function confirmOrder($data){
-        LogApi::error("OrderConfirm-1:".$data['order_no'],$data);
         if(empty($data)){return false;}
         DB::beginTransaction();
         try{
@@ -940,7 +934,6 @@ class OrderOperate
                 return false;
             }
             $b =$order->deliveryOpen($data['remark']);
-            LogApi::error("OrderConfirm-2:".$data['order_no'].$b,$data);
             if(!$b){
                 LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data,[config('web.order_warning_user')]);
                 LogApi::error("OrderConfirm-updateOrderStatus:".$data['order_no'],$data);
@@ -956,17 +949,23 @@ class OrderOperate
 
             //通知收发货系统 -申请发货
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
-            LogApi::error("OrderConfirm-3:".$data['order_no'].$delivery,$data);
             if(!$delivery){
                 LogApi::alert("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo,[config('web.order_warning_user')]);
                 LogApi::error("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo);
                 DB::rollBack();
                 return false;
             }
+            DB::commit();
 
             //增加操作日志
+            if(isset($data['userinfo']) && !empty($data['userinfo'])){
+                $data['userinfo']=[
+                    'uid'=>1,
+                    'username'=>'system',
+                    'type'=>\App\Lib\PublicInc::Type_System,
+                ];
+            }
             $userInfo =$data['userinfo'];
-            LogApi::error("OrderConfirm-4:".$data['order_no'].$delivery,$data);
             OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$data['order_no'],"申请发货",$data['remark']);
             //推送到区块链
             $b =OrderBlock::orderPushBlock($data['order_no'],OrderBlock::OrderConfirmed);
@@ -974,9 +973,8 @@ class OrderOperate
             if($b==100){
                 LogApi::alert("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b,[],[config('web.order_warning_user')]);
             }
-            DB::commit();
-            LogApi::error("OrderConfirm-5:".$data['order_no'].$delivery,$data);
             return true;
+
         }catch (\Exception $exc){
             DB::rollBack();
             LogApi::error("OrderConfirm-Exception:".$data['order_no'].$exc->getMessage());
