@@ -1127,12 +1127,12 @@ class WithholdController extends Controller
 			DB::commit();
 		} catch (\App\Lib\ApiException $ex) {
 			DB::rollBack();
-            LogApi::alert("repayment:主动还款失败", [$ex->getOriginalValue(),$ex->getMessage()],self::$email);
+            LogApi::alert("repayment:主动还款失败", [$ex->getOriginalValue(),$ex->getMessage(),$payData],self::$email);
             LogApi::error('系统接口异常',$ex->getOriginalValue());
 			return apiResponse([], ApiStatus::CODE_50000, "服务器繁忙，请稍候重试...");
 		} catch (\Exception $ex) {
 			DB::rollBack();
-            LogApi::alert("repayment:主动还款失败", [$ex->getMessage()],self::$email);
+            LogApi::alert("repayment:主动还款失败", [$ex->getMessage(),$payData],self::$email);
 			LogApi::error('系统异常',$ex);
 			return apiResponse([], ApiStatus::CODE_50000, "服务器繁忙，请稍候重试...");
 		} 
