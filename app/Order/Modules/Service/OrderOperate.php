@@ -913,17 +913,17 @@ class OrderOperate
             $b =$order->deliveryOpen($data['remark']);
             if(!$b){
                 LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data,[config('web.order_warning_user')]);
-                LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data);
+                LogApi::error("OrderConfirm-updateOrderStatus:".$data['order_no'],$data);
                 DB::rollBack();
                 return false;
             }
-            LogApi::info("OrderConfirm-success1:".$data['order_no']);
+
             $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
             $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
             $orderInfo['business_key'] = Inc\OrderStatus::BUSINESS_ZUJI;
             $orderInfo['business_no'] =$data['order_no'];
             $orderInfo['order_no']=$data['order_no'];
-            LogApi::info("OrderConfirm-success2:".$data['order_no']);
+
             //通知收发货系统 -申请发货
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
@@ -932,8 +932,6 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            LogApi::info("OrderConfirm-success3:".$data['order_no']);
-            DB::commit();
 
             //增加操作日志
             $userInfo =$data['userinfo'];
@@ -944,14 +942,13 @@ class OrderOperate
             if($b==100){
                 LogApi::alert("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b,[],[config('web.order_warning_user')]);
             }
+            DB::commit();
             return true;
         }catch (\Exception $exc){
             DB::rollBack();
             LogApi::error("OrderConfirm-Exception:".$data['order_no'].$exc->getMessage());
             return false;
         }
-        LogApi::info("OrderConfirm-success4:".$data['order_no']);
-        return true;
 
     }
     /**
