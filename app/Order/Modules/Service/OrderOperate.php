@@ -902,8 +902,9 @@ class OrderOperate
 
     public static function confirmOrder($data){
         if(empty($data)){return false;}
-        DB::beginTransaction();
+
         try{
+            DB::beginTransaction();
             //更新订单状态
             $order = Order::getByNo($data['order_no']);
             if(!$order){
@@ -911,6 +912,7 @@ class OrderOperate
                 return false;
             }
             $b =$order->deliveryOpen($data['remark']);
+            LogApi::info("OrderConfirm-deliveryOpen:".$data['order_no'].$b);
             if(!$b){
                 LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data,[config('web.order_warning_user')]);
                 LogApi::error("OrderConfirm-updateOrderStatus:".$data['order_no'],$data);
@@ -926,6 +928,7 @@ class OrderOperate
 
             //通知收发货系统 -申请发货
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
+            LogApi::info("OrderConfirm-delivery:".$data['order_no'].$delivery);
             if(!$delivery){
                 LogApi::alert("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo,[config('web.order_warning_user')]);
                 LogApi::error("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo);
@@ -942,6 +945,7 @@ class OrderOperate
             if($b==100){
                 LogApi::alert("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b,[],[config('web.order_warning_user')]);
             }
+            LogApi::info("OrderConfirm-over:".$data['order_no']);
             DB::commit();
             return true;
         }catch (\Exception $exc){
