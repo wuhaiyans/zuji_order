@@ -917,11 +917,13 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
+            LogApi::info("OrderConfirm-success1:".$data['order_no']);
             $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
             $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
             $orderInfo['business_key'] = Inc\OrderStatus::BUSINESS_ZUJI;
             $orderInfo['business_no'] =$data['order_no'];
             $orderInfo['order_no']=$data['order_no'];
+            LogApi::info("OrderConfirm-success2:".$data['order_no']);
             //通知收发货系统 -申请发货
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
@@ -930,13 +932,12 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
+            LogApi::info("OrderConfirm-success3:".$data['order_no']);
+            DB::commit();
+
             //增加操作日志
             $userInfo =$data['userinfo'];
             OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$data['order_no'],"申请发货",$data['remark']);
-
-
-            DB::commit();
-
             //推送到区块链
             $b =OrderBlock::orderPushBlock($data['order_no'],OrderBlock::OrderConfirmed);
             LogApi::info("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b);
@@ -946,12 +947,10 @@ class OrderOperate
             return true;
         }catch (\Exception $exc){
             DB::rollBack();
-            echo $exc->getMessage();
             LogApi::error("OrderConfirm-Exception:".$data['order_no'].$exc->getMessage());
             return false;
-            die;
-
         }
+        LogApi::info("OrderConfirm-success4:".$data['order_no']);
         return true;
 
     }
