@@ -938,28 +938,28 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            $b =$order->deliveryOpen($data['remark']);
-            if(!$b){
-                LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data,[config('web.order_warning_user')]);
-                LogApi::error("OrderConfirm-updateOrderStatus:".$data['order_no'],$data);
-                DB::rollBack();
-                return false;
-            }
-
-            $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
-            $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
-            $orderInfo['business_key'] = Inc\OrderStatus::BUSINESS_ZUJI;
-            $orderInfo['business_no'] =$data['order_no'];
-            $orderInfo['order_no']=$data['order_no'];
-
-            //通知收发货系统 -申请发货
-            $delivery =Delivery::apply($orderInfo,$goodsInfo);
-            if(!$delivery){
-                LogApi::alert("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo,[config('web.order_warning_user')]);
-                LogApi::error("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo);
-                DB::rollBack();
-                return false;
-            }
+//            $b =$order->deliveryOpen($data['remark']);
+//            if(!$b){
+//                LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data,[config('web.order_warning_user')]);
+//                LogApi::error("OrderConfirm-updateOrderStatus:".$data['order_no'],$data);
+//                DB::rollBack();
+//                return false;
+//            }
+//
+//            $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
+//            $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
+//            $orderInfo['business_key'] = Inc\OrderStatus::BUSINESS_ZUJI;
+//            $orderInfo['business_no'] =$data['order_no'];
+//            $orderInfo['order_no']=$data['order_no'];
+//
+//            //通知收发货系统 -申请发货
+//            $delivery =Delivery::apply($orderInfo,$goodsInfo);
+//            if(!$delivery){
+//                LogApi::alert("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo,[config('web.order_warning_user')]);
+//                LogApi::error("OrderConfirm-DeliveryApply:".$data['order_no'],$orderInfo);
+//                DB::rollBack();
+//                return false;
+//            }
 
             LogApi::info("OrderConfirm-DeliveryApply:".$data['userinfo']);
             $userInfo =$data['userinfo'];
