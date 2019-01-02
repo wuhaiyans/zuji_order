@@ -237,6 +237,11 @@ class OrderOperate
         $data=[
             'order_no'  => $orderNo, //【必须】string 订单编号
             'remark'=>'线下订单自动待发货',      //【必须】string 备注
+            'userinfo'=>[
+                'uid'=>1,
+                'username'=>'system',
+                'type'=>\App\Lib\PublicInc::Type_System,
+            ],
         ];
         $b = OrderOperate::confirmOrder($data);
         if(!$b){
@@ -955,16 +960,8 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            DB::commit();
 
-            //增加操作日志
-            if(isset($data['userinfo']) && !empty($data['userinfo'])){
-                $data['userinfo']=[
-                    'uid'=>1,
-                    'username'=>'system',
-                    'type'=>\App\Lib\PublicInc::Type_System,
-                ];
-            }
+            LogApi::info("OrderConfirm-DeliveryApply:".$data['userinfo']);
             $userInfo =$data['userinfo'];
             OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$data['order_no'],"申请发货",$data['remark']);
             //推送到区块链
@@ -973,6 +970,7 @@ class OrderOperate
             if($b==100){
                 LogApi::alert("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b,[],[config('web.order_warning_user')]);
             }
+            DB::commit();
             return true;
 
         }catch (\Exception $exc){

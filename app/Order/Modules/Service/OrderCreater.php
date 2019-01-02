@@ -169,6 +169,8 @@ class OrderCreater
             $schedule->CancelOrder();
             //发送订单押金信息返回风控系统
             $schedule->YajinReduce();
+            //发送申请发货队列
+            $schedule->DeliveryApply();
             //推送到区块链
             $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderUnPay);
             LogApi::info("OrderCreate-addOrderBlock:".$orderNo."-".$b);

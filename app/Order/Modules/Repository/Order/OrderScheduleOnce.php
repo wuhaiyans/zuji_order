@@ -34,7 +34,7 @@ class OrderScheduleOnce {
     {
         $this->__method([
             'method' => 'api.inner.deliveryApply',
-            'time' =>  time()+1,
+            'time' =>  time()+5,
             'function' => 'DeliveryApply',
         ]);
     }
