@@ -501,6 +501,7 @@ class SkuComponnet implements OrderCreater
                     'quantity'=>1,
                     'goods_yajin'=>$v['yajin'],
                     'yajin'=>$v['deposit_yajin'],
+                    'surplus_yajin'=>$v['deposit_yajin'],
                     'zuqi'=>$v['zuqi'],
                     'zuqi_type'=>$v['zuqi_type'],
                     'zujin'=>$v['zujin'],
