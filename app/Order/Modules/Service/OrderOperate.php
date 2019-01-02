@@ -961,7 +961,7 @@ class OrderOperate
 //                return false;
 //            }
 
-            LogApi::info("OrderConfirm-DeliveryApply:".$data['userinfo']);
+            LogApi::info("OrderConfirm-DeliveryApply:",$data['userinfo']);
             $userInfo =$data['userinfo'];
             OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$data['order_no'],"申请发货",$data['remark']);
             //推送到区块链
