@@ -39,8 +39,13 @@ class OrderOverdueVisitRepository
             'visit_text'=>$params['visit_text'],
             'create_time'=>time()
         ];
-        $createResult = OrderOverdueVisit::query()->insert($data);
+        $createResult = OrderOverdueVisit::query()->insert($data);//插入回访记录
         if( !$createResult ){
+            return false;
+        }
+        //修改订单的记录的回访id
+        $updateResult = OrderOverdueDeduction::where('order_no','=',$params['order_no'])->save(['visit_id'=>$params['visit_id']]);
+        if( !$updateResult ){
             return false;
         }
         return true;

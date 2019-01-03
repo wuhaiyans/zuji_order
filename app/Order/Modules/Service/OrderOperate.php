@@ -718,12 +718,13 @@ class OrderOperate
                 set_msg("增加商品租期表失败");
                 return false;
             }
-            //更新订单商品的状态
-            $b = OrderGoodsRepository::setGoodsInService($orderNo);
-            if(!$b){
-                set_msg("更新商品状态失败");
-                return false;
-            }
+        }
+
+        //更新订单商品的状态
+        $b = OrderGoodsRepository::setGoodsInService($orderNo);
+        if(!$b){
+            set_msg("更新商品状态失败");
+            return false;
         }
 
         //调用乐百分确认收货
