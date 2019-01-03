@@ -248,8 +248,8 @@ class OrderBuyout
 				'business_type' => ''.OrderStatus::BUSINESS_BUYOUT,
 				'business_no' => $buyout['buyout_no']
 		];
-		if($goodsInfo['yajin']>0 ){
-			$clearData['auth_unfreeze_amount'] = $goodsInfo['yajin'];
+		if($goodsInfo['surplus_yajin']>0 ){
+			$clearData['auth_unfreeze_amount'] = $goodsInfo['surplus_yajin'];
 			$clearData['auth_unfreeze_status'] = OrderCleaningStatus::depositUnfreezeStatusUnpayed;
 			$clearData['status'] = OrderCleaningStatus::orderCleaningUnfreeze;
 			if($orderInfo['order_type'] != OrderStatus::orderMiniService){
@@ -414,7 +414,7 @@ class OrderBuyout
 			return false;
 		}
 		//无押金直接返回成功
-		if($goodsInfo['yajin']==0){
+		if($goodsInfo['surplus_yajin']==0){
 			if($orderInfo['order_type'] == \App\Order\Modules\Inc\OrderStatus::orderMiniService){
 				//查询芝麻订单
 				$miniOrderInfo = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($orderInfo['order_no']);
@@ -464,7 +464,7 @@ class OrderBuyout
 				'realName'=>$orderInfo['realname'],
 				'orderNo'=>$orderInfo['order_no'],
 				'goodsName'=>$goodsInfo['goods_name'],
-				'tuihuanYajin'=>normalizeNum($goodsInfo['yajin']),
+				'tuihuanYajin'=>normalizeNum($goodsInfo['surplus_yajin']),
 		];
 		//相应支付渠道使用相应短信模板
 		if($orderInfo['channel_id'] == Config::CHANNELID_MICRO_RECOVERY){
