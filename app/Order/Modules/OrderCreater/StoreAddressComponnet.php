@@ -26,9 +26,10 @@ class StoreAddressComponnet implements OrderCreater
 
     //收货地址
     private $address;
-    public function __construct(OrderCreater $componnet)
+    public function __construct(OrderCreater $componnet,string $address)
     {
         $this->componnet = $componnet;
+        $this->address =$address;
     }
 
     /**
@@ -52,16 +53,19 @@ class StoreAddressComponnet implements OrderCreater
         $filter =$this->componnet->filter();
         $this->orderType = $this->componnet->getOrderCreater()->getOrderType();
 
+        $data =$this->componnet->getOrderCreater()->getDataSchema();
+
+        if($this->orderType == OrderStatus::orderStoreService || $this->orderType == OrderStatus::orderActivityService){
+            if($this->address==""){
+                $this->getOrderCreater()->setError('店面地址配置不允许为空');
+                $this->flag = false;
+            }
+        }
         if($this->orderType == OrderStatus::orderActivityService){
             $data = $this->componnet->getDataSchema();
             $activity = ActivityThemeRepository::getInfo(['activity_id'=>$data['activity']['activity_id']]);
             if(!$activity){
                 $this->getOrderCreater()->setError('活动店面主题错误');
-                $this->flag = false;
-            }
-            $this->address =StoreAddress::getStoreAddress($activity['appid']);
-            if(!$this->address){
-                $this->getOrderCreater()->setError('店面地址配置不允许为空');
                 $this->flag = false;
             }
         }
@@ -87,7 +91,7 @@ class StoreAddressComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
-        if($this->orderType != OrderStatus::orderActivityService){
+        if($this->orderType != OrderStatus::orderActivityService && $this->orderType != OrderStatus::orderStoreService){
             return true;
         }
         $data =$this->getDataSchema();
@@ -103,6 +107,7 @@ class StoreAddressComponnet implements OrderCreater
             'create_time'=>time(),
         ];
         $id =OrderUserAddressRepository::add($addressData);
+
         if(!$id){
             LogApi::alert("OrderCreate:保存订单门店地址失败",$addressData,[config('web.order_warning_user')]);
             LogApi::error(config('app.env')."OrderCreate-Add-StoreAddress-error",$addressData);

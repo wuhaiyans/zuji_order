@@ -58,6 +58,13 @@ class Receive
     {
         $receive_detail = [];
 
+
+        $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($order_no);
+        if (!$orderInfo) {
+            \App\Lib\Common\LogApi::debug('[GiveBackCreateReceive]订单不存在'.$order_no);
+            return false;
+        }
+
         $logistics_id = isset($data['logistics_id']) ? $data['logistics_id'] : 0;
         $logistics_no = isset($data['logistics_no']) ? $data['logistics_no'] : 0;
 //
@@ -90,6 +97,7 @@ class Receive
             'customer_address' => $data['customer_address'],
             'channel_id' => $data['channel_id'],
             'appid' => $data['appid'],
+            'order_type' => $orderInfo['order_type'],
             'business_no'      =>isset($goods_info[0]['business_no'])?$goods_info[0]['business_no']:'',
         ];
 

@@ -85,10 +85,9 @@ class OrderOverdueDeduction
         if($param['status'] == "success"){
 
             $businessNo = $param['out_trade_no'];
-
             LogApi::info("[deduDepositNotify]逾期扣除押金回调", $param);
-            $OverdueDeductionInfo = self::getOverdueDeductionInfo(['business_no' => $businessNo]);
-            if( !is_array($OverdueDeductionInfo)){
+            $overdueDeductionInfo = OrderOverdueDeductionRepository::info(['business_no' => $businessNo]);
+            if( !is_array($overdueDeductionInfo)){
                 LogApi::error('[deduDepositNotify]逾期扣除押金数据错误');
                 return false;
             }
@@ -97,7 +96,7 @@ class OrderOverdueDeduction
              * 修改逾期表状态
              */
             $data = [
-                'overdue_amount'    => $OverdueDeductionInfo['overdue_amount'] - $OverdueDeductionInfo['deduction_amount'], // 剩余押金金额
+                'overdue_amount'    => $overdueDeductionInfo['overdue_amount'] - $overdueDeductionInfo['deduction_amount'], // 剩余押金金额
                 'deduction_time'    => time(),
                 'update_time'   	=> time(),
                 'deduction_status'  => \App\Order\Modules\Inc\OrderOverdueStatus::SUCCESS,
@@ -111,10 +110,11 @@ class OrderOverdueDeduction
             /**
              * 修改逾期扣款记录表
              */
+
             $rData = [
                 'status'  => \App\Order\Modules\Inc\OrderOverdueStatus::SUCCESS,
             ];
-            $rb = \App\Order\Modules\Repository\OrderOverdueRecordRepository::save(['overdue_id' => $OverdueDeductionInfo['id']],$rData);
+            $rb = \App\Order\Modules\Repository\OrderOverdueRecordRepository::save(['overdue_id' => $overdueDeductionInfo['id']],$rData);
             if(!$rb){
                 \App\Lib\Common\LogApi::error('[deduDepositNotify]修改分期扣款记录失败');
                 return false;
@@ -124,11 +124,22 @@ class OrderOverdueDeduction
             /**
              * 修改商品表剩余押金
              */
+            $goodsInfo = \App\Order\Modules\Repository\OrderGoodsRepository::getGoodsRow(['order_no'=>$overdueDeductionInfo['order_no']]);
+            if(!$goodsInfo){
+                \App\Lib\Common\LogApi::error('[deduDepositNotify]查询商品信息错误');
+                return false;
+            }
+
+            if($goodsInfo['surplus_yajin'] < $overdueDeductionInfo['deduction_amount']){
+                \App\Lib\Common\LogApi::error('[deduDepositNotify]剩余押金小于所扣除押金');
+                return false;
+            }
+
             $goodsData = [
-                'surplus_yajin'             => 'surplus_yajin' - $OverdueDeductionInfo['deduction_amount'],// 剩余押金
+                'surplus_yajin'             => $goodsInfo['surplus_yajin'] - $overdueDeductionInfo['deduction_amount'],// 剩余押金
             ];
             $orderGoods = new \App\Order\Modules\Repository\OrderGoodsRepository();
-            $result = $orderGoods->update(['order_no' => $OverdueDeductionInfo['order_no']], $goodsData);
+            $result = $orderGoods->update(['order_no' => $overdueDeductionInfo['order_no']], $goodsData);
             if(!$result){
                 \App\Lib\Common\LogApi::error('[deduDepositNotify]修改商品剩余押金失败');
                 return false;
