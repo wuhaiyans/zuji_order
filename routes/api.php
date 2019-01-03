@@ -65,6 +65,9 @@ $api->version('v1', [
         //订单清算退款回调接口
         $api->post('fundauthToPayNotify', 'PayController@fundauthToPayNotify');
 
+        //逾期扣款回调接口
+        $api->post('deduDepositNotify', 'PayController@deduDepositNotify');
+
         //订单清算退款回调接口
         $api->post('refundClean', 'PayController@refundClean');
 
@@ -108,6 +111,8 @@ $api->version('v1', [
         //隊列取消订单
         $api->any('CancelOrder', 'InnerServiceController@cancelOrder');
 
+        //隊列增加订单发货时生成合同
+        $api->any('DeliveryContract', 'InnerServiceController@DeliveryContract');
         //隊列增加风控看板信息
         $api->any('OrderRisk', 'InnerServiceController@orderRisk');
         //隊列返回风控 订单押金信息
@@ -116,6 +121,8 @@ $api->version('v1', [
         $api->any('CancelOrderBuyout', 'InnerServiceController@cancelOrderBuyout');
         //隊列确认收货订单
         $api->any('DeliveryReceive', 'InnerServiceController@deliveryReceive');
+        //隊列确认订单-申请发货
+        $api->any('DeliveryApply', 'InnerServiceController@DeliveryApply');
 
 
         //预约退款回调接口
@@ -173,6 +180,9 @@ $api->version('v1', [
 
     // 定时任务 扣款逾期短信
     $api->get('sendMessage', 'ActiveController@sendMessage');
+
+    // 定时任务 获取连续两个月，总共三个月未缴租金的逾期数据
+    $api->get('cronOverdueDeductionMessage', 'CronController@cronOverdueDeductionMessage');
 
     /*************************************************************************************************
      * ******************************cron 脚本处理end   heaven*************************************

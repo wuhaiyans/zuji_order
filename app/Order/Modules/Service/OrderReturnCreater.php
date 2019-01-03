@@ -872,16 +872,6 @@ class OrderReturnCreater
                 $create_data['refund_amount']          = $return_info['pay_amount'];//应退金额
                 $create_data['auth_unfreeze_amount']  = $return_info['auth_unfreeze_amount'];//应退押金
                 $create_data['auth_deduction_amount'] = $return_info['auth_deduction_amount'];//应扣押金
-                //退款：直接支付
-              /*  if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::FlowerStagePay ||$order_info['pay_type']==\App\Order\Modules\Inc\PayInc::UnionPay){
-                    $create_data['refund_amount']=$order_info['order_amount']+$order_info['order_insurance'];//退款金额=订单实际支付总租金+意外险总金额
-                    $create_data['auth_unfreeze_amount']=$order_info['order_yajin'];//订单实际支付押金
-                }
-                //退款：代扣+预授权
-                if($order_info['pay_type']==\App\Order\Modules\Inc\PayInc::WithhodingPay){
-                   // $create_data['refund_amount']=$order_info['order_amount']+$order_info['order_insurance'];//退款金额=订单实际支付总租金+意外险总金额
-                    $create_data['auth_unfreeze_amount']=$order_info['order_yajin'];//订单实际支付押金
-                }*/
                 LogApi::info("[refundApply]创建退款清单参数",$create_data);
                 if( $create_data['refund_amount']>0 || $create_data['auth_unfreeze_amount']>0){
                     $create_clear=\App\Order\Modules\Repository\OrderClearingRepository::createOrderClean($create_data);//创建退款清单

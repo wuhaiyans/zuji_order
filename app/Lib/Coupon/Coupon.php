@@ -41,11 +41,12 @@ class Coupon extends \App\Lib\BaseApi{
      * @param $user_id 用户ID
      * @return string
      */
-    public static function getUserCoupon($user_id){
+    public static function getUserCoupon($user_id, $appid = ''){
         $data = config('tripartite.Interior_Goods_Request_data');
         $data['method'] ='zuji.coupon.voucher.get';
         $data['params'] = [
             'user_id'=>$user_id,
+            'appid'  =>$appid,
         ];
 
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));

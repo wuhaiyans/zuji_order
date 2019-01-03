@@ -802,8 +802,6 @@ class OrderController extends Controller
         LogApi::info("OrderDelivery_request",$params);
         $res = OrderOperate::delivery($params['order_info'],$params['goods_info'],$params['operator_info']);
         if(!$res){
-            LogApi::alert("OrderDelivery:".get_msg(),$params,[config('web.order_warning_user')]);
-            LogApi::error("OrderDelivery:".get_msg());
             return apiResponse([],ApiStatus::CODE_30014,get_msg());
         }
         LogApi::info("OrderDelivery_response".$res);
@@ -874,8 +872,8 @@ class OrderController extends Controller
      * ]
      * $userinfo [
      *      'type'=>'',     //【必须】int 用户类型:1管理员，2用户,3系统，4线下,
-     *      'user_id'=>1,   //【必须】int用户ID
-     *      'user_name'=>1, //【必须】string用户名
+     *      'uid'=>1,   //【必须】int用户ID
+     *      'username'=>1, //【必须】string用户名
      *      'mobile'=>1,    //【必须】string手机号
      * ]
      * @param Request $request

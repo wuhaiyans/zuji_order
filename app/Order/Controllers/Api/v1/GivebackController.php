@@ -453,7 +453,7 @@ class GivebackController extends Controller
 	}
 
 	/**
-	 * 还机确认收货结果
+	 * 还机检测
 	 * @param Request $request
 	 */
 	public function confirmEvaluation( Request $request ) {
@@ -547,7 +547,8 @@ class GivebackController extends Controller
 
 		$paramsArr['instalment_num'] = $instalmentNum;//需要支付的分期的期数
 		$paramsArr['instalment_amount'] = $instalmentAmount;//需要支付的分期的金额
-		$paramsArr['yajin'] = $orderGoodsInfo['yajin'];//押金金额
+		//剩余押金（押金可能被代扣扣除，计算按照剩余押金计算）【2019-01-03马晓雨】
+		$paramsArr['surplus_yajin'] = $orderGoodsInfo['surplus_yajin'];//押金金额
 
 		//开启事务
 		DB::beginTransaction();
@@ -907,6 +908,18 @@ class GivebackController extends Controller
 
 		//还机信息为空则返回还机申请页面信息
 		if( !$orderGivebackInfo ){
+			
+			//-+----------------------------------------------------------------
+			// | 新增还机申请到期时间的验证  2018-12-28 吴天堂
+			//-+----------------------------------------------------------------
+			$endTime = strtotime(date("Y-m-d",strtotime($orderGoodsInfo['end_time'])));
+			$todayTime = strtotime(date("Y-m-d",time()));
+			//时间未到期  ,true未到期
+			$notInTimeToGive =   ( $endTime - intval(config('web.day_expiry_process_days')) > $todayTime) ?? false;
+			if( $notInTimeToGive ){
+				return apiResponse([], ApiStatus::CODE_92500, '租期到期前48小时内方可操作还机!');
+			}
+			
 			//组合最终返回商品基础数据
 			$data['goods_info'] = $orderGoodsInfo;//商品信息
 			// jinlin 2018-9-29 改
@@ -986,14 +999,14 @@ class GivebackController extends Controller
 			$data['compensate_info'] = [
 				'compensate_all_amount' => $compensate_amount,
 				'compensate_deduction_amount' => $compensate_amount,
-				'compensate_release_amount' => normalizeNum($orderGoodsInfo['yajin'] - $compensate_amount),
+				'compensate_release_amount' => normalizeNum($orderGoodsInfo['surplus_yajin'] - $compensate_amount),
 			];
 		}else{
 
 			$data['compensate_info'] = [
 				'compensate_all_amount' => $compensate_amount,
 				'compensate_deduction_amount' => 0,
-				'compensate_release_amount' => $orderGoodsInfo['yajin'],
+				'compensate_release_amount' => $orderGoodsInfo['surplus_yajin'],
 			];
 		}
 		
@@ -1032,7 +1045,7 @@ class GivebackController extends Controller
 		//-+--------------------------------------------------------------------
 		// | 有押金->退押金处理（执行清算处理）
 		//-+--------------------------------------------------------------------
-		if( $paramsArr['yajin'] != 0 ){
+		if( $paramsArr['surplus_yajin'] != 0 ){
 			//还机单清算
 			$orderCleanResult = $this->__orderClean( $paramsArr );
 			if( !$orderCleanResult ){
@@ -1162,7 +1175,7 @@ class GivebackController extends Controller
 		// | 业务验证（押金>=赔偿金：还机清算 || 押金<赔偿金：还机支付）、更新还机单
 		//-+--------------------------------------------------------------------
 		//押金>=赔偿金：还机清算
-		if( $paramsArr['yajin'] >= $paramsArr['compensate_amount'] ){
+		if( $paramsArr['surplus_yajin'] >= $paramsArr['compensate_amount'] ){
 			$tradeResult = $this->__orderClean($paramsArr);
 
 			//拼接需要更新还机单状态更新还机单状态
@@ -1245,7 +1258,7 @@ class GivebackController extends Controller
 		$data['payment_status'] = OrderGivebackStatus::PAYMENT_STATUS_IN_PAY;
 		$data['payment_time'] = time();
 
-		if($paramsArr['yajin'] < $paramsArr['compensate_amount']){
+		if($paramsArr['surplus_yajin'] < $paramsArr['compensate_amount']){
 			$smsModel = "GivebackEvaNoWitNoEnoNo";
 		}else{
 			$smsModel = "GivebackEvaNoWitNoEno";
@@ -1284,7 +1297,7 @@ class GivebackController extends Controller
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
 	 */
 	private function __orderClean( $paramsArr ) {
-		if( $paramsArr['yajin'] != 0 ){
+		if( $paramsArr['surplus_yajin'] != 0 ){
 			//获取当时订单支付时的相关pay的对象信息【查询payment_no和funath_no】
 			$payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,$paramsArr['order_no'] );
 			$paymentNo = $payObj->getPaymentNo();
@@ -1299,7 +1312,7 @@ class GivebackController extends Controller
 			'business_type' => ''.\App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,
 			'business_no' => $paramsArr['giveback_no'],
 			'auth_deduction_amount' => $paramsArr['compensate_amount'],//扣除押金金额
-			'auth_unfreeze_amount' => $paramsArr['yajin']-$paramsArr['compensate_amount'],//退还押金金额
+			'auth_unfreeze_amount' => $paramsArr['surplus_yajin']-$paramsArr['compensate_amount'],//退还押金金额
 			'out_payment_no' => $paymentNo,//payment_no
 			'out_auth_no' => $fundauthNo,//和funath_no
 		];

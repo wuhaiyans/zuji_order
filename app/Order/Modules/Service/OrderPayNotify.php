@@ -15,6 +15,7 @@ use App\Lib\Common\LogApi;
 use App\Lib\PublicInc;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\Order\Order;
+use App\Order\Modules\Repository\Order\OrderScheduleOnce;
 use App\Order\Modules\Repository\OrderLogRepository;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\ShortMessage\SceneConfig;
@@ -76,23 +77,10 @@ class OrderPayNotify
             OrderLogRepository::add($orderInfo['user_id'],$orderInfo['mobile'],\App\Lib\PublicInc::Type_User,$orderInfo['order_no'],"支付","支付成功");
             //如果线下订单 订单状态直接转为 已确认待发货状态
             if($orderInfo['order_type'] == OrderStatus::orderStoreService){
-                //调用确认订单接口
-                $data=[
-                        'order_no'  => $orderNo, //【必须】string 订单编号
-                        'remark'=>'线下订单自动待发货',      //【必须】string 备注
-                        'userinfo '=>[
-                            'type'=>PublicInc::Type_System,     //【必须】int 用户类型:1管理员，2用户,3系统，4线下,
-                            'user_id'=>0,   //【必须】int用户ID
-                            'user_name'=>'system', //【必须】string用户名
-                            'mobile'=>13000000000,    //【必须】string手机号
-                        ]
-                ];
-                $b = OrderOperate::confirmOrder($data);
-                if(!$b){
-                    LogApi::alert("OrderPay-storeConfirm:".$orderNo,$data,[config('web.order_warning_user')]);
-                    LogApi::error("OrderPay-storeConfirm:".$orderNo,$data);
-                    return false;
-                }
+                //发送订单消息队列
+                $schedule = new OrderScheduleOnce(['user_id'=>$orderInfo['user_id'],'order_no'=>$orderNo]);
+                //发送申请发货队列
+                $schedule->DeliveryApply();
             }
 
 

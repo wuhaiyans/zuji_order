@@ -191,6 +191,7 @@ class OverDueDeductionController extends Controller
         $business_no = createNo('YQ');
         $data = [
             'business_no'       => $business_no,
+            'deduction_amount'  => $amount,                 //扣款金额
             'deduction_status'  => \App\Order\Modules\Inc\OrderOverdueStatus::PAYING,// 修改状态支付中
         ];
         $b = OrderOverdueDeductionRepository::save(['id'=>$overdueId],$data);
@@ -198,8 +199,6 @@ class OverDueDeductionController extends Controller
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_32002, "修改逾期交易号数据异常");
         }
-
-
         // 创建扣款记录表数据
         $recordData = [
             'overdue_id'        => $overdueId,              //逾期表ID
@@ -209,13 +208,11 @@ class OverDueDeductionController extends Controller
             'status'            => \App\Order\Modules\Inc\OrderOverdueStatus::PAYING,//扣除押金状态
             'create_time'       => time(),
         ];
-
         $recordb = \App\Order\Modules\Repository\OrderOverdueRecordRepository::create($recordData);
         if( $recordb === false ){
             DB::rollBack();
             return apiResponse([], ApiStatus::CODE_32002, "修改逾期扣款记录数据异常");
         }
-
 
         try{
             /**
