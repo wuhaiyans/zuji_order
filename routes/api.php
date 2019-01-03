@@ -121,6 +121,8 @@ $api->version('v1', [
         $api->any('CancelOrderBuyout', 'InnerServiceController@cancelOrderBuyout');
         //隊列确认收货订单
         $api->any('DeliveryReceive', 'InnerServiceController@deliveryReceive');
+        //隊列确认订单-申请发货
+        $api->any('DeliveryApply', 'InnerServiceController@DeliveryApply');
 
 
         //预约退款回调接口

@@ -28,6 +28,17 @@ class OrderScheduleOnce {
         $this->url     = config("ordersystem.ORDER_API");
     }
     /**
+     *  队列申请发货
+     */
+    public function DeliveryApply()
+    {
+        $this->__method([
+            'method' => 'api.inner.deliveryApply',
+            'time' =>  time()+5,
+            'function' => 'DeliveryApply',
+        ]);
+    }
+    /**
      *  队列生成合同
      */
     public function DeliveryContract()

@@ -226,6 +226,34 @@ class OrderOperate
     }
 
     /**
+     * 订单申请发货
+     * @param $orderNo 订单编号
+     * @param $userId  用户ID
+     * @return bool
+     */
+    public static function DeliveryApply($orderNo,$userId){
+
+        //调用确认订单接口
+        $data=[
+            'order_no'  => $orderNo, //【必须】string 订单编号
+            'remark'=>'线下订单自动待发货',      //【必须】string 备注
+            'userinfo'=>[
+                'uid'=>1,
+                'username'=>'system',
+                'type'=>\App\Lib\PublicInc::Type_System,
+            ],
+        ];
+        $b = OrderOperate::confirmOrder($data);
+        if(!$b){
+            LogApi::alert("InnerService-DeliveryApply-:".$orderNo,$data,[config('web.order_warning_user')]);
+            LogApi::error("InnerService-DeliveryApply-:".$orderNo,$data);
+            return  ApiStatus::CODE_60001;
+        }
+        LogApi::info("InnerService-DeliveryApply-success:".$orderNo);
+        return  ApiStatus::CODE_0;
+    }
+
+    /**
      * 发货生成合同
      * @param $orderNo 订单编号
      * @param $userId  用户ID
@@ -913,15 +941,17 @@ class OrderOperate
             $b =$order->deliveryOpen($data['remark']);
             if(!$b){
                 LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data,[config('web.order_warning_user')]);
-                LogApi::alert("OrderConfirm-updateOrderStatus:".$data['order_no'],$data);
+                LogApi::error("OrderConfirm-updateOrderStatus:".$data['order_no'],$data);
                 DB::rollBack();
                 return false;
             }
+
             $goodsInfo = OrderRepository::getGoodsListByOrderId($data['order_no']);
             $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$data['order_no']]);
             $orderInfo['business_key'] = Inc\OrderStatus::BUSINESS_ZUJI;
             $orderInfo['business_no'] =$data['order_no'];
             $orderInfo['order_no']=$data['order_no'];
+
             //通知收发货系统 -申请发货
             $delivery =Delivery::apply($orderInfo,$goodsInfo);
             if(!$delivery){
@@ -930,26 +960,22 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
-            //增加操作日志
+
             $userInfo =$data['userinfo'];
             OrderLogRepository::add($userInfo['uid'],$userInfo['username'],$userInfo['type'],$data['order_no'],"申请发货",$data['remark']);
-
-
-            DB::commit();
-
             //推送到区块链
             $b =OrderBlock::orderPushBlock($data['order_no'],OrderBlock::OrderConfirmed);
             LogApi::info("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b);
             if($b==100){
                 LogApi::alert("OrderConfirm-addOrderBlock:".$data['order_no']."-".$b,[],[config('web.order_warning_user')]);
             }
+            DB::commit();
             return true;
+
         }catch (\Exception $exc){
             DB::rollBack();
-            echo $exc->getMessage();
+            LogApi::error("OrderConfirm-Exception:".$data['order_no'].$exc->getMessage());
             return false;
-            die;
-
         }
 
     }

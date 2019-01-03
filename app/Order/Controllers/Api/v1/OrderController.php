@@ -872,8 +872,8 @@ class OrderController extends Controller
      * ]
      * $userinfo [
      *      'type'=>'',     //【必须】int 用户类型:1管理员，2用户,3系统，4线下,
-     *      'user_id'=>1,   //【必须】int用户ID
-     *      'user_name'=>1, //【必须】string用户名
+     *      'uid'=>1,   //【必须】int用户ID
+     *      'username'=>1, //【必须】string用户名
      *      'mobile'=>1,    //【必须】string手机号
      * ]
      * @param Request $request
