@@ -258,6 +258,12 @@ class OrderWithhold
                 return false;
             }
             $instalmentId = $instalmentInfo['id'];
+            // 订单
+            $orderInfo = OrderRepository::getInfoById($instalmentInfo['order_no']);
+            if( !$orderInfo ){
+                LogApi::error("[repaymentNotify]订单不存在");
+                return false;
+            }
 
             try{
                 $payObj = \App\Order\Modules\Repository\Pay\PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,$params['business_no']);
@@ -289,7 +295,7 @@ class OrderWithhold
             if(!empty($counponInfo)){
                 $counponInfo  = $counponInfo[0];
                 // 修改优惠券使用状态
-                \App\Lib\Coupon\Coupon::useCoupon([$counponInfo['coupon_id']]);
+                \App\Lib\Coupon\Coupon::useCoupon([$counponInfo['coupon_id']],$orderInfo['appid']);
 
                 $_data['payment_amount']    = $paymentAmount; // 实际支付金额 元
                 $_data['discount_amount']   = $instalmentInfo['amount'] - $paymentAmount;
