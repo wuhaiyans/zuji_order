@@ -44,7 +44,7 @@ class OrderOverdueVisitRepository
             return false;
         }
         //修改订单的记录的回访id
-        $updateResult = OrderOverdueDeduction::where('order_no','=',$params['order_no'])->save(['visit_id'=>$params['visit_id']]);
+        $updateResult = OrderOverdueDeduction::where('order_no','=',$params['order_no'])->update(['visit_id'=>$params['visit_id']]);
         if( !$updateResult ){
             return false;
         }
