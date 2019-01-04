@@ -17,4 +17,6 @@ return array(
     'gatewayUrl' => "https://openapi.alipay.com/gateway.do",
     //签名方式
     'sign_type' => "RSA2",
+    // debug输出开启
+    'debug_info' => true,
 );
