@@ -2,7 +2,8 @@
 namespace App\Order\Controllers\Api\v1;
 
 use App\Order\Modules\Repository\Pay\UnderPay\OrderBuyout;
-use App\Order\Modules\OrderCreater\InstalmentComponnet;
+use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
 
 class TestController extends Controller
 {
@@ -18,7 +19,26 @@ class TestController extends Controller
 	}
 
 	public function sendSms() {
+		$youhui = 0;
+		// 租金抵用券
+		$couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon(3209,1);
+		p($couponInfo);
 
+		// 创建优惠券使用记录
+		$couponData = [
+			'coupon_id'         => 19,
+			'discount_amount'   => '0.01',
+			'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+			'business_no'       => 'FB10489812984066',
+		];
+		$couponId = \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
+		if(!$couponId){
+			return apiResponse([], ApiStatus::CODE_71001, "创建优惠券使用记录失败");
+		}
+
+
+
+		die;
 
 		$_data = [
 			'zujin'		    => '159.00',	//【必选】price 每期租金
