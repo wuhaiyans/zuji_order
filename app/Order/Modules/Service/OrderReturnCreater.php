@@ -362,6 +362,7 @@ class OrderReturnCreater
             $return_info['order_status']           = $order_info['order_status'];     //订单状态
             $return_info['order_type']             = $order_info['order_type'];      //订单类型
             $return_info['risk_check']             = $order_info['risk_check'];      //风控审核
+            $return_info['pay_type']                = $order_info['pay_type'];      //支付类型
 
             LogApi::debug("[createRefund]内部逻辑参数",$return_info);
             //已支付，直接退款
