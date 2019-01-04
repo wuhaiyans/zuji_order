@@ -252,6 +252,8 @@ class InstalmentController extends Controller
                 $instalmentInfo['discount_amount']     = $discount_amount;
                 $instalmentInfo['amount']              = $amount;
             }
+        }else{
+            $instalmentInfo['discount_amount']     = '0.00';
         }
 
         $instalmentInfo['status'] = $instalmentInfo['status'] == OrderInstalmentStatus::SUCCESS ? "是" : "否";
