@@ -26,5 +26,5 @@ return array(
     'enable_pay_channels' => 'balance,moneyFund,pcredit,pcreditpayInstallment,creditCard,debitCardExpress',
 	
 	// debug输出开启
-	'debug_info' => true,
+	'debug_info' => false,
 );
