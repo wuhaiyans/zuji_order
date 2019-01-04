@@ -247,7 +247,7 @@ class InstalmentController extends Controller
                 $instalmentInfo['discount_amount']     = $instalmentInfo['amount'];
                 $instalmentInfo['amount']              = '0.01';    //最少支付一分钱
             }else{
-                $amount = $instalmentInfo['amount'] - $couponInfo['youhui'] > 0 ? $instalmentInfo['amount'] - $couponInfo['youhui'] : 0;
+                $amount = $instalmentInfo['amount'] - $discount_amount > 0 ? $instalmentInfo['amount'] - $discount_amount : 0;
 
                 $instalmentInfo['discount_amount']     = $discount_amount;
                 $instalmentInfo['amount']              = $amount;
