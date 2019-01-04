@@ -81,7 +81,7 @@ class Coupon extends \App\Lib\BaseApi{
         ];
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);
-        \App\Lib\Common\LogApi::notify('使用优惠券接口zuji.goods.coupon.status1.set',[
+        \App\Lib\Common\LogApi::notify('[useCoupon]使用优惠券接口zuji.goods.coupon.status1.set',[
             'request'=>$data,
             'response'=>$info
         ]);
