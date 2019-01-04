@@ -6,6 +6,7 @@ namespace App\Order\Modules\Service;
 
 use App\Lib\Order\OrderInfo;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
+use App\Order\Modules\Inc\OrderOverdueStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Repository\OrderOverdueDeductionRepository;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +37,7 @@ class OrderOverdueDeduction
                 $overdueInfoArray['data'][$keys]['zuqi_name'] =  OrderStatus::getZuqiTypeName($values['zuqi_type']);
 
                 //扣款状态
-                $overdueInfoArray['data'][$keys]['deduction_name'] = OrderInstalmentStatus::getStatusName($values['deduction_status']);
+                $overdueInfoArray['data'][$keys]['deduction_name'] = OrderOverdueStatus::getStatusName($values['deduction_status']);
 
             }
 
