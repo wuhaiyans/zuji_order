@@ -238,6 +238,7 @@ class OrderWithhold
      * @return json
      */
     public static function repaymentNotify($params){
+        LogApi::error('[repaymentNotify]提前还款处理参数',$params);
         //过滤参数
         $rule = [
             'business_type'     => 'required',//业务类型
