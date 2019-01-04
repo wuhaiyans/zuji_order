@@ -31,9 +31,9 @@ class OrderOverdueDeductionRepository
             $whereArray[] = ['order_no', '=', $param['keywords']];
         }
 
-        //订单来源
+        //渠道
         if (isset($param['app_id']) && !empty($param['app_id'])) {
-            $whereArray[] = ['app_id', '=', $param['app_id']];
+            $whereArray[] = ['channel_id', '=', $param['app_id']];
         }
 
 
@@ -98,7 +98,7 @@ class OrderOverdueDeductionRepository
 
         //订单来源
         if (isset($param['app_id']) && !empty($param['app_id'])) {
-            $whereArray[] = ['app_id', '=', $param['app_id']];
+            $whereArray[] = ['channel_id', '=', $param['app_id']];
         }
 
 
@@ -199,7 +199,7 @@ class OrderOverdueDeductionRepository
             ->leftJoin('order_goods', 'order_info.order_no', '=', 'order_goods.order_no')
             ->leftJoin('order_user_certified', 'order_info.order_no', '=', 'order_user_certified.order_no')
             ->where($where)
-            ->select('order_info.mobile','order_info.user_id','order_info.appid','order_info.zuqi_type','order_info.create_time','order_goods.yajin','order_goods.surplus_yajin','order_goods.goods_name','order_user_certified.realname')
+            ->select('order_info.mobile','order_info.user_id','order_info.channel_id','order_info.appid','order_info.zuqi_type','order_info.create_time','order_goods.yajin','order_goods.surplus_yajin','order_goods.goods_name','order_user_certified.realname')
             ->first();
 
         if(!$order_result){

@@ -644,13 +644,14 @@ class CronOperate
                             //添加数据
                             if($orderInfo){
                                 if( $orderInfo['surplus_yajin'] == 0){
-                                    $surplus_yajin = $orderInfo['yajin'];//
+                                    $surplus_yajin = $orderInfo['yajin'];
                                 }else{
                                     $surplus_yajin = $orderInfo['surplus_yajin'];
                                 }
                                 $data = [
                                     'order_no'        =>$item['order_no'],
                                     'order_time'     =>$orderInfo['create_time'],
+                                    'channel_id'     =>$orderInfo['channel_id'],
                                     'app_id'          =>$orderInfo['appid'],
                                     'goods_name'     =>$orderInfo['goods_name'],
                                     'zuqi_type'      =>$orderInfo['zuqi_type'],
