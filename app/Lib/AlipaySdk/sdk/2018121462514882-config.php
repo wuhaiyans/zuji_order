@@ -18,5 +18,5 @@ return array(
     //签名方式
     'sign_type' => "RSA2",
     // debug输出开启
-    'debug_info' => true,
+    'debug_info' => false,
 );
