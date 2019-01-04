@@ -3695,10 +3695,10 @@ class OrderReturnCreater
         $create_data['refund_amount'] = $return_info['pay_amount'];//应退金额
         $create_data['auth_unfreeze_amount'] = $return_info['auth_unfreeze_amount'];//应退押金
         $create_data['auth_deduction_amount'] = $return_info['auth_deduction_amount'];//应扣押金
-        if(isset($createData['out_payment_no'])){
+        if(isset($return_info['out_payment_no'])){
             $create_data['out_payment_no'] = $return_info['out_payment_no'];
         }
-        if(isset($createData['out_auth_no'])){
+        if(isset($return_info['out_auth_no'])){
             $create_data['out_auth_no'] = $return_info['out_auth_no'];
         }
         LogApi::info("[createClear]创建退款清单参数",$create_data);
