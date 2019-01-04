@@ -368,10 +368,36 @@ class OrderReturnCreater
             //已支付，直接退款
             if( $order_info['order_status'] == OrderStatus::OrderPayed ){
                 $return_info['refund_no'] = $params['order_no'];
-                $refundResult = self::refundPay($return_info, $userinfo);
-                if(!$refundResult){
-                    DB::rollBack();
-                    return false;
+                //如果金额都为0，直接关闭订单
+                if (!(
+                    $return_info['pay_amount'] > 0
+                    || $return_info['auth_unfreeze_amount'] > 0
+                    || $return_info['auth_deduction_amount'] > 0
+                )) {
+                    $b = self::refundSuccessCallback($return_info, $userinfo);//调用退款处理
+                    if (!$b) {
+                        DB::rollBack();
+                        return false;
+                    }
+                }else{
+                    //创建清单
+                    $create_clear = self::createClear($return_info);
+                    if (!$create_clear) {
+                        DB::rollBack();
+                        return false; //创建清单失败
+                    }
+                    //设置出账参数变量
+                    $cleanAccount = [];
+                    $cleanAccount['params']['clean_no'] = $create_clear;
+                    $cleanAccount['userinfo'] = $userinfo;
+                    LogApi::debug("[createRefund]出账参数",$cleanAccount);
+                    //调用出账
+                    $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
+                    if ($accountRes['code']!=0){
+                        DB::rollBack();
+                        return false;
+                    }
+
                 }
 
             }else{
