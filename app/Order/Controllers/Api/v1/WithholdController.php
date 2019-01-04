@@ -1102,7 +1102,11 @@ class WithholdController extends Controller
 					'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
 					'business_no'       => $business_no,
 				];
-				\App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
+				$couponId = \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
+                if(!$couponId){
+                    DB::rollBack();
+                    return apiResponse([], ApiStatus::CODE_71001, "创建优惠券使用记录失败");
+                }
 			}
 
 			// 创建支付单
