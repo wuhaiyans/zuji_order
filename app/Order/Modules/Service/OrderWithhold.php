@@ -293,6 +293,7 @@ class OrderWithhold
 
             $counponInfo  = \App\Order\Modules\Repository\OrderCouponRepository::find($where);
 
+            \App\Lib\Common\LogApi::error('[repaymentNotify]优惠券信息',$counponInfo);
             if(!empty($counponInfo)){
                 $counponInfo  = $counponInfo[0];
                 // 修改优惠券使用状态
