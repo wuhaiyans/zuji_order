@@ -67,7 +67,7 @@ class OrderOverdueDeduction
                 $overdueInfo[$keys]['zuqi_name'] =  OrderStatus::getZuqiTypeName($values['zuqi_type']);
 
                 //扣款状态
-                $overdueInfo[$keys]['deduction_name'] = OrderInstalmentStatus::getStatusName($values['deduction_status']);
+                $overdueInfo[$keys]['deduction_name'] = OrderOverdueStatus::getStatusName($values['deduction_status']);
 
             }
 
@@ -96,11 +96,14 @@ class OrderOverdueDeduction
             /**
              * 修改逾期表状态
              */
+
+            $totalAmount = $overdueDeductionInfo['deduction_amount'] + $overdueDeductionInfo['total_amount'];
             $data = [
                 'overdue_amount'    => $overdueDeductionInfo['overdue_amount'] - $overdueDeductionInfo['deduction_amount'], // 剩余押金金额
                 'deduction_time'    => time(),
                 'update_time'   	=> time(),
                 'deduction_status'  => \App\Order\Modules\Inc\OrderOverdueStatus::SUCCESS,
+                'total_amount'      => $totalAmount,
             ];
             $b = OrderOverdueDeductionRepository::save(['business_no' => $businessNo], $data);
             if(!$b){

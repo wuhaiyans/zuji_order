@@ -252,9 +252,15 @@ class InstalmentController extends Controller
                 $instalmentInfo['discount_amount']     = $discount_amount;
                 $instalmentInfo['amount']              = $amount;
             }
+        }else{
+            $instalmentInfo['discount_amount']     = '0.00';
         }
 
+        $instalmentInfo['withhold_status'] = $instalmentInfo['status'] == OrderInstalmentStatus::SUCCESS ? 1 : 0 ;
+
         $instalmentInfo['status'] = $instalmentInfo['status'] == OrderInstalmentStatus::SUCCESS ? "是" : "否";
+
+
 
         // 用户信息
         $memberInfo = \App\Lib\User\User::getUser($instalmentInfo['user_id']);

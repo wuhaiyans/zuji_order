@@ -21,7 +21,7 @@ class OrderOverdueStatus{
 
 
     /**
-     * 获取代扣协议状态列表
+     * 获取逾期扣款状态列表
      * @return array
      */
     public static function getStatusList(){
