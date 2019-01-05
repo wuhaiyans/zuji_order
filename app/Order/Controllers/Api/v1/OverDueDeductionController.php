@@ -64,8 +64,8 @@ class OverDueDeductionController extends Controller
         $abc = 1;
 
         // excel头信息
-        $headers = ['订单编号', '下单时间', '订单来源','商品名称','用户名','手机号','累计未缴纳租金','押金','扣款状态', '回访标识及记录',
-            '扣款时间','扣款金额'];
+        $headers = ['订单编号', '下单时间', '订单来源','商品名称','用户名','手机号','累计未缴纳租金(单位:元)','押金(单位:元)','扣款状态', '回访标识及记录',
+            '扣款时间','扣款金额(单位:元)'];
 
         $overdueExcel = array();
         while(true) {
@@ -75,7 +75,6 @@ class OverDueDeductionController extends Controller
             $offset = ($outPages - 1) * $total_export_count;
             $params['page'] = intval(($offset / $pre_count)+ $abc) ;
             ++$abc;
-            $overdueData = array();
             $overdueData = OrderOverdueDeduction::OverdueDeductionExport($params,$pre_count);
             if ($overdueData) {
                 $data = array();
