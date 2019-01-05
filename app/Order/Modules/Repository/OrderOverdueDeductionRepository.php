@@ -83,8 +83,6 @@ class OrderOverdueDeductionRepository
     public static function overdueDeductionListExport($param = array(), $pagesize=5)
     {
         $whereArray = array();
-        $isUncontact = 0;
-
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
         {
@@ -111,11 +109,6 @@ class OrderOverdueDeductionRepository
         if (isset($param['visit_id'])) {
             $whereArray[] = ['visit_id', '=', $param['visit_id']];
         }
-        //长短租类型
-        if (isset($param['zuqi_type'])) {
-            $whereArray[] = ['zuqi_type', '=', $param['zuqi_type']];
-        }
-
         if (isset($param['page'])) {
             $page = $param['page'];
         } else {
@@ -124,12 +117,14 @@ class OrderOverdueDeductionRepository
         }
 
         $overdueList = DB::table('order_overdue_deduction')
-            ->select('*')
+            ->leftJoin('order_overdue_record','order_overdue_deduction.id', '=', 'order_overdue_record.overdue_id')
             ->where($whereArray)
-            ->orderBy('create_time', 'DESC')
+            ->select('order_overdue_deduction.*','order_overdue_record.deduction_amount as d_amount','order_overdue_record.status as d_status','order_overdue_record.create_time as d_time')
+            ->orderBy('order_overdue_deduction.create_time', 'DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();
-        $overdueListArray  = array_column(objectToArray($overdueList),NULL,'order_no');
+
+        $overdueListArray  = objectToArray($overdueList);
         if( !$overdueListArray ){
             return [];
 

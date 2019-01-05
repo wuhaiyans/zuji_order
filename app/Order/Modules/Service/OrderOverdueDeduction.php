@@ -62,12 +62,23 @@ class OrderOverdueDeduction
 
                 //回访标识
                 $overdueInfo[$keys]['visit_name'] = !empty($values['visit_id'])? OrderStatus::getVisitName($values['visit_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
-
-                //租期类型
-                $overdueInfo[$keys]['zuqi_name'] =  OrderStatus::getZuqiTypeName($values['zuqi_type']);
-
-                //扣款状态
-                $overdueInfo[$keys]['deduction_name'] = OrderOverdueStatus::getStatusName($values['deduction_status']);
+                if($values['d_status']){
+                    //扣款状态
+                    $overdueInfo[$keys]['deduction_name'] = OrderOverdueStatus::getStatusName($values['d_status']);
+                }else{
+                    //扣款状态
+                    $overdueInfo[$keys]['deduction_name'] = OrderOverdueStatus::getStatusName(OrderOverdueStatus::UNPAID);
+                }
+                //扣款金额
+                if(empty($values['d_amount'])){
+                    $overdueInfo[$keys]['d_amount'] = 0;
+                }
+                //扣款时间
+                if(empty($values['d_time'])){
+                    $overdueInfo[$keys]['d_time'] = 0;
+                }else{
+                    $overdueInfo[$keys]['d_time'] = date('Y-m-d H:i:s', $values['d_time']);
+                }
 
             }
 
