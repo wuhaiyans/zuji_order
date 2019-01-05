@@ -441,13 +441,13 @@ class OrderReturnCreater
                     return false;//创建失败
                 }
                 $return_info['refund_no'] = $data['refund_no'];
-                if($data['status'] == ReturnStatus::ReturnAgreed){ //审核同意，创建清算
+               /* if($data['status'] == ReturnStatus::ReturnAgreed){ //审核同意，创建清算
                     $refundResult = self::refundPay($return_info, $userinfo);
                     if( !$refundResult ){
                         DB::rollBack();
                         return false;
                     }
-                }
+                }*/
                 //创建清算单
                 $create_clear = self::createClear($return_info) ;
                 if(!$create_clear){
@@ -3801,8 +3801,5 @@ class OrderReturnCreater
        // OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","退款成功;"."备注:".$return_info['reason_text']);//添加日志
         return true;
 
-
     }
-
-
 }
