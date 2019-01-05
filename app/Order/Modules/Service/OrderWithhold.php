@@ -300,7 +300,7 @@ class OrderWithhold
                 \App\Lib\Coupon\Coupon::useCoupon([$counponInfo['coupon_id']],$orderInfo['appid']);
 
                 $_data['payment_amount']    = $paymentAmount; // 实际支付金额 元
-                $_data['discount_amount']   = $instalmentInfo['amount'] - $paymentAmount;
+                $_data['discount_amount']   = $instalmentInfo['amount'] - $paymentAmount > 0 ? $instalmentInfo['amount'] - $paymentAmount : 0;
 
                 $recordData['discount_type']                = $counponInfo['coupon_type'];
                 $recordData['discount_value']               = $counponInfo['coupon_no'];
