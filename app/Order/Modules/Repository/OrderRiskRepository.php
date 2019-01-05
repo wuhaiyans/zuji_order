@@ -31,7 +31,7 @@ class OrderRiskRepository
     {
         if (empty($orderNo)) return false;
         $whereArray = array();
-        $whereArray[] = ['order_no', '=', $orderNo];
+        $whereArray[] = ['order_no', '=', (string)$orderNo];
         if (!empty($type)) {
 
             $whereArray[] = ['type', '=', $type];
