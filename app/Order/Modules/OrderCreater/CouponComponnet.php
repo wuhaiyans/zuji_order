@@ -154,6 +154,9 @@ class CouponComponnet implements OrderCreater
             }
 
         }
+        if(empty($coupon)){
+            return true;
+        }
         $appid =$this->getOrderCreater()->getAppid();
         /**
          * 调用优惠券使用接口
