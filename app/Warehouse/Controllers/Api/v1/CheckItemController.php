@@ -9,6 +9,7 @@ namespace App\Warehouse\Controllers\Api\v1;
 
 
 use App\Lib\ApiStatus;
+use App\Warehouse\Models\Receive;
 use App\Warehouse\Modules\Repository\CheckItemRepository;
 
 class CheckItemController extends Controller
@@ -39,6 +40,16 @@ class CheckItemController extends Controller
         }
 
         return \apiResponse($data);
+    }
+
+    /**
+     * 线下门店待检测数量
+     */
+    public function receiveNum(){
+        $request = request()->input();
+        $channel_id = json_decode($request['userinfo']['channel_id'], true);
+        $count = Receive::where(['status'=>Receive::STATUS_RECEIVED,'channel_id'=>$channel_id])->count();
+        return \apiResponse(['count'=>$count]);
     }
 
 }

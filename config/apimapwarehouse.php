@@ -44,6 +44,9 @@ return [
     'warehouse.delivery.export' => 'DeliveryController@export', //导出excel
 
     'warehouse.delivery.statistics' => 'DeliveryController@statistics', //最终数量统计
+    'warehouse.delivery.deliveryNum'=> 'DeliveryController@deliveryNum', //线下门店待发货数量
+    'warehouse.delivery.xianxiaList'=> 'DeliveryController@xianxiaList', //线下门店待发货列表
+    'warehouse.delivery.xianxiaDelivery'=> 'DeliveryController@xianxiaDelivery', //线下门店发货
 
 
     //收货 待完成
@@ -70,5 +73,8 @@ return [
     'warehouse.receive.orderImeiIn'=> 'ReceiveController@orderImeiIn', //确认入库(订单工具)
 
     'warehouse.checkitem.getDetails'=> 'CheckItemController@getDetails', //查看检测详情
+    'warehouse.checkitem.receiveNum'=> 'CheckItemController@receiveNum', //线下门店待检测数量
+    'warehouse.receive.xianxiaCheckItemsFinish'=> 'ReceiveController@xianxiaCheckItemsFinish', //线下门店检测完成
+
 
 ];

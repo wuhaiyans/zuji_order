@@ -64,6 +64,7 @@ class DeliveryController extends Controller
             'predict_delivery_time'=>'required', //预计发货时间
             'channel_id'=>'required', //预计发货时间
             'appid'=>'required', //预计发货时间
+            'order_type'=>'required'//订单类型
         ];
 
         $params = $this->_dealParams($rules);
@@ -340,16 +341,16 @@ class DeliveryController extends Controller
             $user_info['user_name'] = $params['user_name'];
             $user_info['type'] = $params['type'];
 
+            //修改发货信息
+            $this->delivery->send($params);
             //通知订单接口
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
             LogApi::info('delivery_send_order_info:',$result['order_no'].'_'.$a);
-            if($a){
-                //修改发货信息
-                $this->delivery->send($params);
-
-            }else{
+            if(!$a){
                 DB::rollBack();
+                WarehouseWarning::warningWarehouse('[发货]通知订单失败',[$params,$a]);
                 return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
+
             }
 
             DB::commit();
@@ -696,7 +697,102 @@ class DeliveryController extends Controller
         return \apiResponse([]);
     }
 
+    /**
+     * 线下门店待发货数量
+     */
+    public function deliveryNum(){
+        $request = request()->input();
+        $channel_id = json_decode($request['userinfo']['channel_id'], true);
+        $count = Delivery::where(['status'=>Delivery::STATUS_INIT,'channel_id'=>$channel_id])->count();
+        return \apiResponse(['count'=>$count]);
+    }
 
+    /**
+     * 线下门店待发货列表
+     */
+    public function xianxiaList(){
+        $request = request()->input();
+        $channel_id = json_decode($request['userinfo']['channel_id'], true);
+        $list_obj = Delivery::where(['status'=>Delivery::STATUS_INIT,'channel_id'=>$channel_id])->get();
+        if($list_obj){
+            return \apiResponse($list_obj->toArray());
+        }else{
+            return \apiResponse([]);
+        }
+    }
+
+    /**
+     * 线下门店发货
+     *
+     * @param IMEI
+     * @param 发货备注
+     * @param 图片
+     */
+    public function xianxiaDelivery(){
+        $rules = [
+            'delivery_no' => 'required',//发货单号必填
+            'imei' => 'required',//IMEI必填
+            'imei_id' => 'required',//必填
+            'order_no' => 'required',//订单编号必填
+            'goods_no' => 'required', //商品编号
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (count($params)<5) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+        LogApi::info('delivery_send_info_channelSend',$params);
+
+        $request = request()->input();
+        $user = $request['userinfo'];
+
+        //设置默认数据
+        $params['logistics_id']=1001;
+        $params['logistics_no']='1001';
+        $params['logistics_note']='线下发货';
+
+        try {
+            DB::beginTransaction();
+            $result = $this->_info($params['delivery_no']);
+            //线下发货
+            $orderDetail = [
+                'order_no' => $result['order_no'],
+                'logistics_id' => $params['logistics_id'],
+                'logistics_no' => $params['logistics_no'],
+                'logistics_note'=>$params['logistics_id']
+            ];
+
+            //操作员信息,用户或管理员操作有
+            $user_info['user_id'] = $user['uid'];
+            $user_info['user_name'] = $user['username'];
+            $user_info['type'] = $user['type'];
+            //修改发货信息
+            DeliveryService::xianxiaSend($params);
+            //通知订单接口
+            LogApi::info('delivery_send_order_info_xianxiaDelivery',[$orderDetail,$result['goods_info'],$user_info]);
+            $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+            if(!$a){
+                DB::rollBack();
+                WarehouseWarning::warningWarehouse('[线下门店发货]通知订单失败',[$params,$a]);
+                return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
+
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            WarehouseWarning::warningWarehouse('[线下门店发货]失败',[$params,$e]);
+            return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50000, $e->getMessage());
+        }
+
+        return \apiResponse([]);
+    }
+
+
+    /**
+     * @param $delivery_no
+     * @return array
+     */
     protected function _info($delivery_no)
     {
         $model = Delivery::where(['delivery_no'=>$delivery_no])->first();

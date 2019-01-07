@@ -2,7 +2,7 @@
 /**
  * 收货单仓库
  *
- * User: wansq
+ * User: wanjinlin
  * Date: 2018/5/9
  * Time: 11:17
  */
@@ -137,6 +137,7 @@ class ReceiveRepository
                 'business_no' => $data['business_no'],
                 'channel_id' => $data['channel_id'],
                 'appid' => $data['appid'],
+                'order_type' => $data['order_type'],
             ];
 
             $model = new Receive();
@@ -519,6 +520,36 @@ class ReceiveRepository
         }else{
             $params['imgs']=0;
         }
+
+        $model = new CheckItems();
+        return $model->create($params);
+    }
+
+    /**
+     * 录入检测单(线下门店)
+     */
+    public static function xianxiaCheckItem($params)
+    {
+        //$params['create_time'] = time();
+        $params['check_result'] = isset($params['check_result']) ? $params['check_result'] : CheckItems::RESULT_FALSE;
+        $params['check_description'] = isset($params['check_description']) ? $params['check_description'] : '无';
+        $params['compensate_amount'] = isset($params['compensate_amount']) ? $params['compensate_amount'] : 0;
+
+//        图片上传待商议
+//        if($params['check_result']==CheckItems::RESULT_FALSE){
+//            $update_obj = new TencentUpload();
+//            $upload_imgs = $update_obj->file_upload_all();
+//            $imgs = [];
+//            foreach ($upload_imgs as $key=>$item) {
+//                if($item['ret']){
+//                    return false;
+//                }
+//                $imgs[] = $item['img']['url'];
+//            }
+//            $params['imgs'] = json_encode($imgs);
+//        }else{
+            $params['imgs']=0;
+//        }
 
         $model = new CheckItems();
         return $model->create($params);
