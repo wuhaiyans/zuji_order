@@ -56,6 +56,16 @@ class Config {
      * @var int 37
      */
     const CHANNELID_SCHOOL_STORE  = '37';
+    /**
+     * 渠道配置<b>【苹果小程序】</b>
+     * @var int 39
+     */
+    const CHANNELID_MINI_APPLE  = '39';
+    /**
+     * 渠道配置<b>【VIVO小程序】</b>
+     * @var int 40
+     */
+    const CHANNELID_MINI_VIVO  = '40';
 
 	
 	/**
@@ -139,6 +149,140 @@ class Config {
 				SceneConfig::ORDER_CREATE           	=> 'SMS_113461066',//用户下单
                 SceneConfig::REFUND_SUCCESS 		 	=> 'SMS_113461060', //（取消订单、退货退款）退款成功
 			],
+            // 苹果小程序
+            self::CHANNELID_MINI_APPLE => [
+
+                SceneConfig::ORDER_CREATE 			 	=> 'SMS_113461223', //用户下单
+                SceneConfig::ORDER_PAY 				 	=> 'SMS_113461224', //用户支付或授权 成功
+                SceneConfig::ORDER_CANCEL               	=> 'SMS_113461225', //用户/后台/自动任务取消订单
+                SceneConfig::ORDER_DELIVERY            	=> 'SMS_113461227', //订单发货短信
+                SceneConfig::ORDER_MONTH_RECEIVE    	    => 'SMS_113461228', //订单月租签收短信
+                SceneConfig::ORDER_MONTH_BEFORE_MONTH_ENDING =>'SMS_000000000',//订单到期前一个月发送信息-月租
+                SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING  =>'SMS_000000000',//订单到期前一周发送信息-月租
+                SceneConfig::ORDER_MONTH_OVER_MONTH_ENDING   =>'SMS_000000000',//订单逾期一个月发送信息-月租
+                SceneConfig::ORDER_DAY_BEFORE_ONE_ENDING     =>'SMS_000000000',//订单到期前一天发送信息-短租
+
+                SceneConfig::REFUND_APPLY_RISK_ACCEPT 			 	=> 'SMS_000000000', //申请退款1 风控审核通过
+                SceneConfig::REFUND_APPLY_RISK_REFUSE 			 	=> 'SMS_113461226', //申请退款2 风控未通过
+
+
+                SceneConfig::RETURN_APPLY 			 	=> 'SMS_000000000', //申请退货
+                SceneConfig::RETURN_APPLY_AGREE 	 	    => 'SMS_000000000', //退货审核通过
+                SceneConfig::RETURN_APPLY_DISAGREE 		=> 'SMS_000000000', //退货审核不通过
+                SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_000000000', //退货检测合格
+                SceneConfig::RETURN_UNQUALIFIED 	 	=> 'SMS_000000000', //退货检测不合格
+                SceneConfig::RETURN_DELIVERY 		 	=> 'SMS_000000000', //退货收到客户手机
+                SceneConfig::REFUND_SUCCESS 			=> 'SMS_000000000', //退款成功
+
+                SceneConfig::INSTALMENT_WITHHOLD 	 	=> 'SMS_000000000', //代扣扣款短信
+                SceneConfig::WITHHOLD_FAIL 		 		=> 'SMS_000000000', //扣款失败
+                SceneConfig::WITHHOLD_WARMED	 	 	    => 'SMS_000000000', //即将逾期
+                SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_000000000', //扣款失败生成逾期
+                SceneConfig::REPAYMENT 				 	=> 'SMS_000000000', //提前还款短信
+                SceneConfig::WITHHOLD_FAIL_INITIATIVE   => 'SMS_000000000', //扣款失败主动发送短信
+
+                SceneConfig::WITHHOLD_ADVANCE_ONE      	=> 'SMS_000000000', //提前一天还款短信
+                SceneConfig::WITHHOLD_ADVANCE_THREE   	=> 'SMS_000000000', //提前三天 还款短信
+                SceneConfig::WITHHOLD_ADVANCE_SEVEN   	=> 'SMS_000000000', //提前七天 还款短信
+
+                SceneConfig::WITHHOLD_OVERDUEONE   		=> 'SMS_000000000', //扣款失败生成逾期 一天
+                SceneConfig::WITHHOLD_OVERDUETHREE   	=> 'SMS_000000000', //扣款失败生成逾期 三天
+
+
+                //还机
+                SceneConfig::GIVEBACK_CREATE 			    => 'SMS_000000000', //还机申请
+                SceneConfig::GIVEBACK_CONFIRMDELIVERY 	=> 'SMS_000000000', //还机确认收货 有剩余的租金
+                SceneConfig::GIVEBACK_CONFIRMNOWITH     	=> 'SMS_000000000', //还机确认收货 无剩余的租金
+                SceneConfig::GIVEBACK_WITHHOLDSUCCESS 	=> 'SMS_000000000', //系统执行代扣成功后发送
+                SceneConfig::GIVEBACK_WITHHOLDFAIL	 	=> 'SMS_000000000', //系统执行代扣成功后发送
+                SceneConfig::GIVEBACK_PAYMENT	 		    => 'SMS_000000000', //财务收到用户剩余租金成功时发送
+                SceneConfig::GIVEBACK_EVANOWITYESENONO	=> 'SMS_000000000', //库管点击检测不合格、输入赔偿金额时发送
+                SceneConfig::GIVEBACK_EVANOWITYESENO   	=> 'SMS_000000000', //库管点击检测不合格、输入赔偿金额时发送
+                SceneConfig::GIVEBACK_EVANOWITNOENONO	=> 'SMS_000000000', //库管点击检测不合格、输入赔偿金额时发送
+                SceneConfig::GIVEBACK_EVANOWITNOENO	 	=> 'SMS_000000000', //库管点击检测不合格、输入赔偿金额时发送
+                SceneConfig::GIVEBACK_RETURNDEPOSIT	 	=> 'SMS_000000000', //财务系统完成押金退还时发送
+                //买断
+                SceneConfig::BUYOUT_CONFIRM					=> 'SMS_000000000', //买断确认短信
+                SceneConfig::BUYOUT_PAYMENT					=> 'SMS_000000000', //买断支付短信
+                SceneConfig::BUYOUT_PAYMENT_END				=> 'SMS_000000000', //买断完成短信
+
+                //退押金
+                SceneConfig::RETURN_DEPOSIT				=> 'SMS_000000000', //财务系统完成押金退还时发送
+
+                SceneConfig::CRONREPAYMENT				=> 'SMS_000000000', //月初发送提前还款短信
+                SceneConfig::DESTINE_CREATE              => 'SMS_000000000', //订金退款申请短信
+                SceneConfig::DESTINE_REFUND              => 'SMS_000000000  ',//订金退款成功短信
+
+                // 续租
+                SceneConfig::RELETSUCCESS               => 'SMS_000000000  ',//续租成功
+
+            ],
+            // VIVO小程序
+            self::CHANNELID_MINI_VIVO => [
+                SceneConfig::ORDER_CREATE 			 	=> 'SMS_113461243', //用户下单
+                SceneConfig::ORDER_PAY 				 	=> 'SMS_113461244', //用户支付或授权 成功
+                SceneConfig::ORDER_CANCEL               	=> 'SMS_113461245', //用户/后台/自动任务取消订单
+                SceneConfig::ORDER_DELIVERY            	=> 'SMS_113461247', //订单发货短信
+                SceneConfig::ORDER_MONTH_RECEIVE    	    => 'SMS_113461248', //订单月租签收短信
+                SceneConfig::ORDER_MONTH_BEFORE_MONTH_ENDING =>'SMS_000000000',//订单到期前一个月发送信息-月租
+                SceneConfig::ORDER_MONTH_BEFORE_WEEK_ENDING  =>'SMS_000000000',//订单到期前一周发送信息-月租
+                SceneConfig::ORDER_MONTH_OVER_MONTH_ENDING   =>'SMS_000000000',//订单逾期一个月发送信息-月租
+                SceneConfig::ORDER_DAY_BEFORE_ONE_ENDING     =>'SMS_000000000',//订单到期前一天发送信息-短租
+
+                SceneConfig::REFUND_APPLY_RISK_ACCEPT 			 	=> 'SMS_000000000', //申请退款1 风控审核通过
+                SceneConfig::REFUND_APPLY_RISK_REFUSE 			 	=> 'SMS_113461246', //申请退款2 风控未通过
+
+
+                SceneConfig::RETURN_APPLY 			 	=> 'SMS_000000000', //申请退货
+                SceneConfig::RETURN_APPLY_AGREE 	 	    => 'SMS_000000000', //退货审核通过
+                SceneConfig::RETURN_APPLY_DISAGREE 		=> 'SMS_000000000', //退货审核不通过
+                SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_000000000', //退货检测合格
+                SceneConfig::RETURN_UNQUALIFIED 	 	=> 'SMS_000000000', //退货检测不合格
+                SceneConfig::RETURN_DELIVERY 		 	=> 'SMS_000000000', //退货收到客户手机
+                SceneConfig::REFUND_SUCCESS 			=> 'SMS_000000000', //退款成功
+
+                SceneConfig::INSTALMENT_WITHHOLD 	 	=> 'SMS_000000000', //代扣扣款短信
+                SceneConfig::WITHHOLD_FAIL 		 		=> 'SMS_000000000', //扣款失败
+                SceneConfig::WITHHOLD_WARMED	 	 	    => 'SMS_000000000', //即将逾期
+                SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_000000000', //扣款失败生成逾期
+                SceneConfig::REPAYMENT 				 	=> 'SMS_000000000', //提前还款短信
+                SceneConfig::WITHHOLD_FAIL_INITIATIVE   => 'SMS_000000000', //扣款失败主动发送短信
+
+                SceneConfig::WITHHOLD_ADVANCE_ONE      	=> 'SMS_000000000', //提前一天还款短信
+                SceneConfig::WITHHOLD_ADVANCE_THREE   	=> 'SMS_000000000', //提前三天 还款短信
+                SceneConfig::WITHHOLD_ADVANCE_SEVEN   	=> 'SMS_000000000', //提前七天 还款短信
+
+                SceneConfig::WITHHOLD_OVERDUEONE   		=> 'SMS_000000000', //扣款失败生成逾期 一天
+                SceneConfig::WITHHOLD_OVERDUETHREE   	=> 'SMS_000000000', //扣款失败生成逾期 三天
+
+
+                //还机
+                SceneConfig::GIVEBACK_CREATE 			    => 'SMS_000000000', //还机申请
+                SceneConfig::GIVEBACK_CONFIRMDELIVERY 	=> 'SMS_000000000', //还机确认收货 有剩余的租金
+                SceneConfig::GIVEBACK_CONFIRMNOWITH     	=> 'SMS_000000000', //还机确认收货 无剩余的租金
+                SceneConfig::GIVEBACK_WITHHOLDSUCCESS 	=> 'SMS_000000000', //系统执行代扣成功后发送
+                SceneConfig::GIVEBACK_WITHHOLDFAIL	 	=> 'SMS_000000000', //系统执行代扣成功后发送
+                SceneConfig::GIVEBACK_PAYMENT	 		    => 'SMS_000000000', //财务收到用户剩余租金成功时发送
+                SceneConfig::GIVEBACK_EVANOWITYESENONO	=> 'SMS_000000000', //库管点击检测不合格、输入赔偿金额时发送
+                SceneConfig::GIVEBACK_EVANOWITYESENO   	=> 'SMS_000000000', //库管点击检测不合格、输入赔偿金额时发送
+                SceneConfig::GIVEBACK_EVANOWITNOENONO	=> 'SMS_000000000', //库管点击检测不合格、输入赔偿金额时发送
+                SceneConfig::GIVEBACK_EVANOWITNOENO	 	=> 'SMS_000000000', //库管点击检测不合格、输入赔偿金额时发送
+                SceneConfig::GIVEBACK_RETURNDEPOSIT	 	=> 'SMS_000000000', //财务系统完成押金退还时发送
+                //买断
+                SceneConfig::BUYOUT_CONFIRM					=> 'SMS_000000000', //买断确认短信
+                SceneConfig::BUYOUT_PAYMENT					=> 'SMS_000000000', //买断支付短信
+                SceneConfig::BUYOUT_PAYMENT_END				=> 'SMS_000000000', //买断完成短信
+
+                //退押金
+                SceneConfig::RETURN_DEPOSIT				=> 'SMS_000000000', //财务系统完成押金退还时发送
+
+                SceneConfig::CRONREPAYMENT				=> 'SMS_000000000', //月初发送提前还款短信
+                SceneConfig::DESTINE_CREATE              => 'SMS_000000000', //订金退款申请短信
+                SceneConfig::DESTINE_REFUND              => 'SMS_000000000  ',//订金退款成功短信
+
+                // 续租
+                SceneConfig::RELETSUCCESS               => 'SMS_000000000  ',//续租成功
+            ],
 
 			// 大疆
 			self::CHANNELID_MINI_DAJIANG => [
