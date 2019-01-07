@@ -619,4 +619,73 @@ class DeliveryService
 
     }
 
+    /**
+     * 线下门店发货
+     */
+    public static function xianxiaSend($params)
+    {
+        $goods_model = DeliveryGoods::where([
+            'delivery_no'=>$params['delivery_no'],
+            'goods_no'=>$params['goods_no']
+        ])->first();
+        if (!$goods_model) {
+            throw new NotFoundResourceException('发货商品清单不存在');
+        }
+
+        //修改IMEI
+        $imei_bool = Imei::find($params['imei_id'])->update(['status'=>'2','update_time'=>time()]);
+
+        if (!$imei_bool) {
+            throw new NotFoundResourceException('修改IMEI出库失败');
+        }
+
+        $delivery_model = Delivery::where(['delivery_no'=>$params['delivery_no']])->first();
+        //插入imei日志
+        $imeilog_bool = ImeiLog::insert([
+            'imei'=>$params['imei'],
+            'type'=>ImeiLog::STATUS_OUT,
+            'create_time'=>time(),
+            'order_no'=>$delivery_model->order_no,
+            'imei_id'=>$params['imei_id'],
+            'zuqi'=>$goods_model->zuqi,
+            'zuqi_type'=>$goods_model->zuqi_type,
+        ]);
+        if (!$imeilog_bool) {
+            throw new NotFoundResourceException('插入IMEI出库日志失败');
+        }
+
+        //更新发货单状态
+        $delivery_model->logistics_id = $params['logistics_id']??0;
+        $delivery_model->logistics_no = $params['logistics_no']??0;
+        $delivery_model->status = Delivery::STATUS_SEND;
+        $delivery_model->delivery_time = time();
+        $delivery_model->logistics_note = $params['logistics_note']??0;
+        $delivery_model->status_time = time();
+        if(!$delivery_model->save()){
+            throw new NotFoundResourceException('更新发货单状态失败');
+        }
+
+        $imei_data = [
+            'delivery_no'   => $params['delivery_no'],
+            'goods_no'      => $params['goods_no'],
+            'status'        => DeliveryGoodsImei::STATUS_YES,
+            'imei'          => $params['imei'],
+            'apple_serial'  => $params['apple_serial'],
+            'price'         => $params['price'],
+            'create_time'   => time()
+        ];
+        #goods_imei表添加
+        if(!DeliveryGoodsImei::insert($imei_data)){
+            throw new NotFoundResourceException('goods_imei添加失败');
+        }
+
+        //修改发货商品清单
+        $goods_model->status = DeliveryGoods::STATUS_ALL;
+        $goods_model->status_time = time();
+        if(!$goods_model->save()){
+            throw new NotFoundResourceException('修改发货商品清单失败');
+        }
+
+    }
+
 }

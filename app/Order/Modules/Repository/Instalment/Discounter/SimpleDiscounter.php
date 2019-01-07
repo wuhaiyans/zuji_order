@@ -41,6 +41,7 @@ class SimpleDiscounter implements Discounter {
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 */
 	public function discount( array $params ){
+
 		// 分期数
 		$n = count( $params );
 		// 余数
@@ -48,13 +49,18 @@ class SimpleDiscounter implements Discounter {
 		$remainder_discount = $remainder_discount / 100;
 		// 平均优惠
 		$avg_discount = ($this->discount_amount-$remainder_discount)/$n;
-		
-		foreach( $params as &$item ){
+
+		// 把余数 最小单位 分 顺序分配到 分期中
+		$num = $remainder_discount / 0.01;
+		foreach( $params as $key=>&$item ){
+
 			// 计算实际可优惠的金额
-			$temp = 0;
-			// 全优惠
 			if( $item['amount'] >= $avg_discount ){
-				$temp = $avg_discount;
+				if($key <= ($num - 1)) {
+					$temp = $avg_discount + 0.01;
+				}else{
+					$temp = $avg_discount;
+				}
 			}
 			// 优惠至0元
 			else{
@@ -64,19 +70,8 @@ class SimpleDiscounter implements Discounter {
 			$item['discount_amount'] += $temp;
 			// 应付金额
 			$item['amount'] -= $temp;
+
 		}
-		// 优惠余数，加到首期
-		$temp = 0;
-		// 全优惠
-		if( $params[0]['amount'] > $remainder_discount ){
-			$temp = $remainder_discount;
-		}
-		// 优惠至0元
-		else{
-			$temp = $params[0]['amount'];
-		}
-		$params[0]['discount_amount'] += $temp;
-		$params[0]['amount'] -= $temp;
 
 		return $params;
 	}

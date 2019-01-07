@@ -79,6 +79,7 @@ class Delivery extends Warehouse
         'predict_delivery_time',
         'channel_id',
         'appid',
+        'order_type'
     ];
 
     /**

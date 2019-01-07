@@ -332,6 +332,26 @@ class ReceiveService
 
     /**
      * @param $params
+     * 检测单(线下门店)
+     */
+    public function xianxiacheckItem($params)
+    {
+        //创建检测单
+        if (!ReceiveRepository::xianxiaCheckItem($params)) {
+            throw new \Exception( '检测单:'.$params['receive_no'].'添加失败');
+        }
+        //修改收货单检测状态
+        if (!ReceiveRepository::checkReceive($params)) {
+            throw new \Exception( '收货单'.$params['receive_no'].'检测修改失败');
+        }
+        //修改收货清单检测状态
+        if (!ReceiveRepository::checkReceiveGoods($params)) {
+            throw new \Exception( '收货清单:'.$params['receive_no'].'检测修改失败');
+        }
+    }
+
+    /**
+     * @param $params
      * 检测项
      */
     public function checkItems($params)
