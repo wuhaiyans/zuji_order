@@ -87,7 +87,8 @@ class ReceiveController extends Controller
             'receive_detail' => 'required',
             'channel_id' => 'required',
             'appid' => 'required',
-            'business_no' => 'required'
+            'business_no' => 'required',
+            'order_type' => 'required'
         ];
         $params = $this->_dealParams($rules);
 
@@ -521,6 +522,69 @@ class ReceiveController extends Controller
             'kw_types'    => DeliveryService::searchKws()
         ];
         return apiResponse($data);
+    }
+
+    /**
+     * 线下门店检测完成
+     *
+     * @param receive_no 检测单号
+     * @param check_description 检测备注
+     * @param check_result 检测结果
+     * @param compensate_amount 检测赔偿价格
+     * @param amount 押金之外需要赔偿金额
+     * @param goods_no 商品编号
+     */
+    public function xianxiaCheckItemsFinish()
+    {
+        $rules = [
+            'receive_no' => 'required',
+            'check_description' => 'required',
+            'check_result' => 'required',
+            'compensate_amount' => 'required',
+            'amount' => 'required',
+            'goods_no' => 'required'
+        ];
+
+        $params = $this->_dealParams($rules);
+        $param = request()->input();
+        $userinfo=$param['userinfo'];
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            DB::beginTransaction();
+            $params['create_time'] = time();
+
+            //$items = $this->receive->checkItemsFinish($params['receive_no']);
+            $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
+            //$receive_goods = ReceiveGoods::where(['receive_no','=',$params['receive_no']])->first()->toArray();
+            $items[] = [
+                'goods_no'=>$params['goods_no'],
+                'evaluation_status'=>$params['check_result'],
+                'evaluation_time'=>$params['create_time'],
+                'evaluation_remark'=>$params['check_description'],
+                'compensate_amount'=>$params['compensate_amount'],
+                'amount'=>$params['amount'],
+                'business_no'=>$receive_row['business_no'],
+                //'refund_no'=>$receive_goods['receive_no']?$receive_goods['receive_no']:'',
+            ];
+
+            LogApi::info('checkItemsFinish_info_Receive',$params);
+
+            $this->receive->xianxiacheckItem($params);
+            Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            LogApi::info('checkItemsFinish_info_Receive_error',$e->getMessage());
+            WarehouseWarning::warningWarehouse('[检测完成]失败',[$params,$e]);
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+        return apiResponse();
     }
 
 }
