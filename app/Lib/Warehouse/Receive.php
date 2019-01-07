@@ -223,6 +223,7 @@ class Receive
      *      'evaluation_time' => '',//检测时间（时间戳）【必须】<br/>
      *      'evaluation_remark' => '',//检测备注【可选】【检测不合格时必有】<br/>
      *      'compensate_amount' => '',//赔偿金额【可选】【检测不合格时必有】<br/>
+     *      'amount' => '',//需要单独支付金额【可选】【押金不够赔偿时必有】<br/>
      *  ],
      *  [
      *      'goods_no' => '',//商品编号<br/>
@@ -230,6 +231,7 @@ class Receive
      *      'evaluation_time' => '',//检测时间（时间戳）【必须】<br/>
      *      'evaluation_remark' => '',//检测备注【可选】【检测不合格时必有】<br/>
      *      'compensate_amount' => '',//赔偿金额【可选】【检测不合格时必有】<br/>
+     *      'amount' => '',//需要单独支付金额【可选】【押金不够赔偿时必有】<br/>
      *  ],
      * ]
      * @param string $business_key  业务类型

@@ -219,6 +219,7 @@ class OrderGoodsInstalment
 
         $order_status   = \App\Order\Modules\Inc\OrderStatus::OrderInService;  //在服务中
         $order_type     = \App\Order\Modules\Inc\OrderStatus::orderMiniService;  //去除小程序订单
+        $zuqi_type      = \App\Order\Modules\Inc\OrderStatus::ZUQI_TYPE1;  //去除短租
         $status         = OrderInstalmentStatus::FAIL;  // 扣款失败
         $fileNum        = 2;  // 连续扣款失败次数
 
@@ -240,6 +241,7 @@ class OrderGoodsInstalment
                                 (
                                     `order_info`.`order_status` = " . $order_status . "
                                     AND `order_info`.`order_type` <> " . $order_type . "
+                                    AND `order_info`.`zuqi_type` <> " . $zuqi_type . "
                                     AND `order_goods_instalment`.`status` = " . $status . "
                                     AND `order_overdue_deduction`.`order_no` IS NULL
                                 )

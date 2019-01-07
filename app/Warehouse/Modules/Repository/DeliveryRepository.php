@@ -24,7 +24,7 @@ use Symfony\Component\Translation\Exception\NotFoundResourceException;
  * Class DeliveryRepository
  * @package App\Warehouse\Modules\Repository
  *
- * 发货单仓库层 重数据 轻逻辑
+ * 发货单
  */
 class DeliveryRepository
 {
@@ -67,6 +67,7 @@ class DeliveryRepository
             'predict_delivery_time' => $data['predict_delivery_time'],
             'channel_id' => $data['channel_id'],
             'appid' => $data['appid'],
+            'order_type' => $data['order_type']
         ];
 
         try {
@@ -107,7 +108,10 @@ class DeliveryRepository
                 'status'        =>  DeliveryGoods::STATUS_INIT,
                 'status_time'   =>  $time,
                 'zuqi' => isset($val['zuqi']) ? $val['zuqi'] : 0,
-                'zuqi_type' => isset($val['zuqi_type']) ? $val['zuqi_type'] : 0
+                'zuqi_type' => isset($val['zuqi_type']) ? $val['zuqi_type'] : 0,
+                'specs' => isset($val['specs']) ? $val['specs'] : '',
+                'goods_thumb' => isset($val['goods_thumb']) ? $val['goods_thumb'] : '',
+                'zujin' => isset($val['zujin']) ? $val['zujin'] : 0
             ];
             $goodsModel = new DeliveryGoods();
             $goodsModel->create($row);

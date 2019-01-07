@@ -15,6 +15,7 @@ use App\Order\Models\OrderGoodsInstalment;
 use App\Order\Modules\Inc\CouponStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\Order\Instalment;
 use App\Order\Modules\Service\OrderInstalment;
 use Mockery\Exception;
@@ -193,7 +194,12 @@ class InstalmentComponnet implements OrderCreater
                     if($v['term'] ==1){
                         $amount =$v['amount']+$sku['insurance'];
                     }
-
+                    $status = OrderInstalmentStatus::UNPAID;
+                    $remark = "";
+                    if($amount == 0){
+                        $status = OrderInstalmentStatus::SUCCESS;
+                        $remark = "分期0元";
+                    }
                     $instalmentData = [
                         'order_no' => $schema['order']['order_no'],
                         'goods_no' => $sku['goods_no'],
@@ -204,8 +210,9 @@ class InstalmentComponnet implements OrderCreater
                         'original_amount' => $v['original_amount'],
                         'discount_amount' => $v['discount_amount'],
                         'amount' => $amount,
-                        'status' => 1,
+                        'status' => $status,
                         'withhold_day'=>createWithholdDay($v['term'],$v['day']),
+                        'remark' => $remark,
                     ];
                     $res = OrderGoodsInstalment::create($instalmentData);
                     $id = $res->getQueueableId();

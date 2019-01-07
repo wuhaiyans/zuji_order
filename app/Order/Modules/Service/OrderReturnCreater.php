@@ -441,21 +441,13 @@ class OrderReturnCreater
                     return false;//创建失败
                 }
                 $return_info['refund_no'] = $data['refund_no'];
-               /* if($data['status'] == ReturnStatus::ReturnAgreed){ //审核同意，创建清算
+                if($data['status'] == ReturnStatus::ReturnAgreed){ //审核同意，创建清算
                     $refundResult = self::refundPay($return_info, $userinfo);
                     if( !$refundResult ){
                         DB::rollBack();
                         return false;
                     }
-                }*/
-                //创建清算单
-                $create_clear = self::createClear($return_info) ;
-                if(!$create_clear){
-                    //事务回滚
-                    DB::rollBack();
-                    return false;//创建退款清单失败
                 }
-
                 //通知收发货取消发货
                 if( $order_info['order_status'] == OrderStatus::OrderInStock ){
                     $cancel = Delivery::cancel($params['order_no']);
@@ -467,7 +459,6 @@ class OrderReturnCreater
                     }
                 }
             }
-
 
             //操作日志
             OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","申请退款;"."备注:".$params['reason_text']);
@@ -910,7 +901,7 @@ class OrderReturnCreater
                     }
                 }
                 //插入操作日志
-                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","审核同意");
+                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款审核","审核同意");
 
             }else{
 
@@ -3799,6 +3790,33 @@ class OrderReturnCreater
 
         }
        // OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","退款成功;"."备注:".$return_info['reason_text']);//添加日志
+        return true;
+
+    }
+    /***
+     *
+     * 已确认订单，未配货调用
+     *
+     */
+    public static function confirmRefundPay($return_info, $userinfo){
+        //如果金额都为0，直接关闭订单
+        if (!(
+            $return_info['pay_amount'] > 0
+            || $return_info['auth_unfreeze_amount'] > 0
+            || $return_info['auth_deduction_amount'] > 0
+        )) {
+            $b = self::refundSuccessCallback($return_info, $userinfo);//调用退款处理
+            if (!$b) {
+                return false;
+            }
+        }else{
+            //创建清单
+            $create_clear = self::createClear($return_info);
+            if (!$create_clear) {
+                return false; //创建清单失败
+            }
+        }
+        // OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","退款成功;"."备注:".$return_info['reason_text']);//添加日志
         return true;
 
     }

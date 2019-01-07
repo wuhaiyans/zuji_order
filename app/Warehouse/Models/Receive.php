@@ -75,6 +75,7 @@ class Receive extends Warehouse
         'business_no',
         'channel_id',
         'appid',
+        'order_type'
     ];
 
     /**
