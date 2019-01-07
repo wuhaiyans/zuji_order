@@ -442,7 +442,7 @@ class OrderReturnCreater
                 }
                 $return_info['refund_no'] = $data['refund_no'];
                 if($data['status'] == ReturnStatus::ReturnAgreed){ //审核同意，创建清算
-                    $refundResult = self::refundPay($return_info, $userinfo);
+                    $refundResult = self::confirmRefundPay($return_info, $userinfo);
                     if( !$refundResult ){
                         DB::rollBack();
                         return false;
