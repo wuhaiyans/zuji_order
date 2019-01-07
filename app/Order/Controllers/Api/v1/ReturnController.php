@@ -838,22 +838,12 @@ class ReturnController extends Controller
         }
 
     }
-
-
     //test
     public function refundUpdate(Request $request){
         $orders = $request->all();
         $params = $orders['params'];
         $aa=OrderReturnCreater::refundUpdate($params,$orders['userinfo']);
         p($aa);
-
     }
-
-
-
-
-
-
-
 
 }
