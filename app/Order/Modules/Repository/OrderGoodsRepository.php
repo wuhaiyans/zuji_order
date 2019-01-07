@@ -168,4 +168,16 @@ class OrderGoodsRepository
             ['order_no', '=', $orderNo],
         ])->update(['goods_status'=>OrderGoodStatus::EXCHANGE_REFUND]);
     }
+
+	/**
+	 * 更新商品剩余押金
+	 * @param $goodNo 商品编号
+	 * @param $amount 金额
+	 * @return boolean
+	 */
+	public static function surplusYajinDec($goodNo,$amount){
+		return OrderGoods::where([
+			['goods_no', '=', $goodNo],
+		])->decrement('surplus_yajin',$amount);
+	}
 }
