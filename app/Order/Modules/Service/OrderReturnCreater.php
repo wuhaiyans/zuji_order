@@ -3575,7 +3575,7 @@ class OrderReturnCreater
         $payInfoData = [];
         //代扣+预授权   小程序
         if( $pay_type == PayInc::MiniAlipay ){
-            $payInfoData['data']['auth_unfreeze_amount'] = $goods_info['surplus_yajin'];//应退押金=实付押金
+            $payInfoData['data']['auth_unfreeze_amount'] = $goods_info['yajin'];//应退押金=实付押金
         }
         //获取支付信息
         $payInfo = OrderPayRepository::find($goods_info['order_no']);
@@ -3604,7 +3604,7 @@ class OrderReturnCreater
 
                 if( $payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS ){
 
-                    $payInfoData['data']['auth_unfreeze_amount'] = $goods_info['surplus_yajin'];//应退押金=实付押金
+                    $payInfoData['data']['auth_unfreeze_amount'] = $goods_info['yajin'];//应退押金=实付押金
                 }
             }
 
@@ -3615,7 +3615,7 @@ class OrderReturnCreater
                 if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     $payInfoData['data']['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['insurance'];//实际支付金额=实付租金+意外险
                     $payInfoData['data']['refund_amount'] = $goods_info['amount_after_discount']+$goods_info['insurance'];//应退金额
-                    $payInfoData['data']['auth_unfreeze_amount'] = $goods_info['surplus_yajin'];//应退押金=实付押金
+                    $payInfoData['data']['auth_unfreeze_amount'] = $goods_info['yajin'];//应退押金=实付押金
                 }
             }
         }
@@ -3625,9 +3625,9 @@ class OrderReturnCreater
             if($payInfo){
                 if($payInfo['payment_status'] == PaymentStatus::PAYMENT_SUCCESS){
                     //实际支付金额=实付租金+意外险+实付押金
-                    $payInfoData['data']['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['insurance']+$goods_info['surplus_yajin'];
+                    $payInfoData['data']['pay_amount'] = $goods_info['amount_after_discount']+$goods_info['insurance']+$goods_info['yajin'];
                     //应退金额=实付租金+意外险+实付押金
-                    $payInfoData['data']['refund_amount'] = $goods_info['amount_after_discount']+$goods_info['insurance']+$goods_info['surplus_yajin'];
+                    $payInfoData['data']['refund_amount'] = $goods_info['amount_after_discount']+$goods_info['insurance']+$goods_info['yajin'];
                 }
             }
 
@@ -3637,7 +3637,7 @@ class OrderReturnCreater
             if( $payInfo ){
                 if( $payInfo['fundauth_status'] == PaymentStatus::PAYMENT_SUCCESS ){
                     //应退押金  = 租金+押金+意外险
-                    $payInfoData['data']['auth_unfreeze_amount'] = $goods_info['amount_after_discount']+$goods_info['insurance']+$goods_info['surplus_yajin'];
+                    $payInfoData['data']['auth_unfreeze_amount'] = $goods_info['amount_after_discount']+$goods_info['insurance']+$goods_info['yajin'];
                 }
             }
 
