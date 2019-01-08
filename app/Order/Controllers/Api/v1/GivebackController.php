@@ -458,7 +458,7 @@ class GivebackController extends Controller
 	 * 还机检测
 	 * @param Request $request
 	 */
-	public function confirmEvaluation( ) {
+	public function confirmEvaluation( Request $request ) {
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
