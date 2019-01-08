@@ -1085,7 +1085,7 @@ class WithholdController extends Controller
 			// 租金抵用券
 			$couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id'],$orderInfo['appid']);
 
-            LogApi::info("[repayment]提前还款-优惠券信息",[$couponInfo]);
+			LogApi::info("[repayment]提前还款-优惠券信息",[$couponInfo,'instalmentInfo'=>$instalmentInfo,'orderInfo'=>$orderInfo]);
 
 			if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
 				$youhui = $couponInfo['youhui'] / 100;
