@@ -562,7 +562,6 @@ class GivebackController extends Controller
 		$paramsArr['instalment_amount'] = $instalmentAmount;//需要支付的分期的金额
 		//剩余押金（押金可能被代扣扣除，计算按照剩余押金计算）【2019-01-03马晓雨】
 		$paramsArr['surplus_yajin'] = $orderGoodsInfo['surplus_yajin'];//押金金额
-		p($paramsArr);
 		//开启事务
 		DB::beginTransaction();
 		try{
