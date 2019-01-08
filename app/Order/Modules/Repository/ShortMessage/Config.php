@@ -168,16 +168,16 @@ class Config {
                 SceneConfig::RETURN_APPLY 			 	=> 'SMS_000000000', //申请退货
                 SceneConfig::RETURN_APPLY_AGREE 	 	    => 'SMS_000000000', //退货审核通过
                 SceneConfig::RETURN_APPLY_DISAGREE 		=> 'SMS_000000000', //退货审核不通过
-                SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_113461235', //退货检测合格
-                SceneConfig::RETURN_UNQUALIFIED 	 	=> 'SMS_113461236', //退货检测不合格
-                SceneConfig::RETURN_DELIVERY 		 	=> 'SMS_000000000', //退货收到客户手机
-                SceneConfig::REFUND_SUCCESS 			=> 'SMS_000000000', //退款成功
+                SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_000000000', //退货检测合格
+                SceneConfig::RETURN_UNQUALIFIED 	 	    => 'SMS_000000000', //退货检测不合格
+                SceneConfig::RETURN_DELIVERY 		 	    => 'SMS_000000000', //退货收到客户手机
+                SceneConfig::REFUND_SUCCESS 			    => 'SMS_000000000', //退款成功
 
 
 				// 分期短信
                 SceneConfig::INSTALMENT_WITHHOLD 	 	=> 'SMS_113461231', //代扣扣款短信
                 SceneConfig::WITHHOLD_FAIL 		 		=> 'SMS_000000000', //扣款失败
-                SceneConfig::WITHHOLD_WARMED	 	 	=> 'SMS_000000000', //即将逾期
+                SceneConfig::WITHHOLD_WARMED	 	 	    => 'SMS_000000000', //即将逾期
                 SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_000000000', //扣款失败生成逾期
                 SceneConfig::REPAYMENT 				 	=> 'SMS_113461240', //提前还款短信
                 SceneConfig::WITHHOLD_FAIL_INITIATIVE   => 'SMS_000000000', //扣款失败主动发送短信
@@ -235,15 +235,15 @@ class Config {
                 SceneConfig::RETURN_APPLY 			 	=> 'SMS_000000000', //申请退货
                 SceneConfig::RETURN_APPLY_AGREE 	 	    => 'SMS_000000000', //退货审核通过
                 SceneConfig::RETURN_APPLY_DISAGREE 		=> 'SMS_000000000', //退货审核不通过
-                SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_113461255', //退货检测合格
-                SceneConfig::RETURN_UNQUALIFIED 	 	=> 'SMS_113461256', //退货检测不合格
-                SceneConfig::RETURN_DELIVERY 		 	=> 'SMS_000000000', //退货收到客户手机
-                SceneConfig::REFUND_SUCCESS 			=> 'SMS_000000000', //退款成功
+                SceneConfig::RETURN_CHECK_OUT 		 	=> 'SMS_000000000', //退货检测合格
+                SceneConfig::RETURN_UNQUALIFIED 	 	    => 'SMS_000000000', //退货检测不合格
+                SceneConfig::RETURN_DELIVERY 		 	    => 'SMS_000000000', //退货收到客户手机
+                SceneConfig::REFUND_SUCCESS 			    => 'SMS_000000000', //退款成功
 
 				// 分期短信
                 SceneConfig::INSTALMENT_WITHHOLD 	 	=> 'SMS_113461251', //代扣扣款短信
                 SceneConfig::WITHHOLD_FAIL 		 		=> 'SMS_000000000', //扣款失败
-                SceneConfig::WITHHOLD_WARMED	 	 	=> 'SMS_000000000', //即将逾期
+                SceneConfig::WITHHOLD_WARMED	 	 	    => 'SMS_000000000', //即将逾期
                 SceneConfig::WITHHOLD_OVERDUE 		 	=> 'SMS_000000000', //扣款失败生成逾期
                 SceneConfig::REPAYMENT 				 	=> 'SMS_113461260', //提前还款短信
                 SceneConfig::WITHHOLD_FAIL_INITIATIVE   => 'SMS_000000000', //扣款失败主动发送短信

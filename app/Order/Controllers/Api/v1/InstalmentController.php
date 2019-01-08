@@ -236,7 +236,7 @@ class InstalmentController extends Controller
         }
 
         // 分期金额
-        $instalmentInfo['fenqi_amount']     = $goodInfo['zujin'];//$instalmentInfo['original_amount'];
+        $instalmentInfo['fenqi_amount']     = $instalmentInfo['amount'];
 
         // 租金抵用券
         $couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id'],$orderInfo['appid']);

@@ -71,11 +71,17 @@ class OrderController extends Controller
         $destineNo  = isset($params['params']['destine_no'])?$params['params']['destine_no']:'';
 
         $couponList['coupon_list']=[];
+
+        $zuqi = 0;
+        if(isset($sku[0]['begin_time']) && isset($sku[0]['end_time'])){
+            $zuqi =((strtotime($sku[0]['end_time']) -strtotime($sku[0]['begin_time']))/86400)+1;
+        }
         //自动调用接口查询优惠券
         $couponInfo = \App\Lib\Coupon\Coupon::checkedCoupon([
             'sku_id' => $sku[0]['sku_id'],
             'auth_token' => $params['auth_token'],
             'appid'=>$appid,
+            'zuqi' =>$zuqi,
         ]);
         $coupon =[];
         if(isset($couponInfo[0]) && is_array($couponInfo)){

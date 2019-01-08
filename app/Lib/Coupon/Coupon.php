@@ -201,6 +201,7 @@ class Coupon extends \App\Lib\BaseApi{
      * @param  $arr[
      *      sku_id =>2//【必须】 string skuid
      *      'appid'=>''//【必须】int appid
+     *      'zuqi'=>''//【必须】 int 长租 0 短租 具体租期
      * ]
      * @return string or array
      */
@@ -211,6 +212,7 @@ class Coupon extends \App\Lib\BaseApi{
         $data['params'] = [
             'sku_id'=>$arr['sku_id'],
             'appid'=>$arr['appid'],
+            'zuqi'=>$arr['zuqi'],
         ];;
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data));
         $info =json_decode($info,true);

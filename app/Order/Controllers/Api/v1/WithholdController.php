@@ -1094,22 +1094,19 @@ class WithholdController extends Controller
 			$amount = $instalmentInfo['amount'] - $youhui;
 			$amount = $amount > 0 ? $amount : 0.01;
 
-            // 分期为0元 则不查询优惠券
-            if($instalmentInfo['amount'] > 0){
-                //优惠券信息
-                if($youhui > 0){
-                    // 创建优惠券使用记录
-                    $couponData = [
-                        'coupon_id'         => $couponInfo['coupon_id'],
-                        'discount_amount'   => $youhui,
-                        'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-                        'business_no'       => $business_no,
-                    ];
-                    $couponId = \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
-                    if(!$couponId){
-                        DB::rollBack();
-                        return apiResponse([], ApiStatus::CODE_71001, "创建优惠券使用记录失败");
-                    }
+            // 分期为0元 则不查询优惠券信息
+            if($instalmentInfo['amount'] > 0 && $youhui > 0){
+                // 创建优惠券使用记录
+                $couponData = [
+                    'coupon_id'         => $couponInfo['coupon_id'],
+                    'discount_amount'   => $youhui,
+                    'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
+                    'business_no'       => $business_no,
+                ];
+                $couponId = \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
+                if(!$couponId){
+                    DB::rollBack();
+                    return apiResponse([], ApiStatus::CODE_71001, "创建优惠券使用记录失败");
                 }
             }
 
