@@ -68,6 +68,9 @@ $api->version('v1', [
         //逾期扣款回调接口
         $api->post('deduDepositNotify', 'PayController@deduDepositNotify');
 
+        //还机扣款回调接口
+        $api->post('givebackDeductionDepositNotify', 'PayController@givebackDeductionDepositNotify');
+
         //订单清算退款回调接口
         $api->post('refundClean', 'PayController@refundClean');
 

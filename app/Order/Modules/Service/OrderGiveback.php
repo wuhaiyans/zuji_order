@@ -270,6 +270,7 @@ class OrderGiveback
 			'evaluation_remark' => 'required',
 			'evaluation_time' => 'required',
 			'compensate_amount' => 'required',
+			'dedudeposit_amount' => 'required',
 			'yajin_status' => 'required',
 			'remark' => 'required',
 		]);
@@ -654,5 +655,44 @@ class OrderGiveback
 		$addition['page'] = isset($addition['page']) && $addition['page'] ? $addition['page'] : 1;
 		$addition['size'] = isset($addition['size']) && $addition['size'] ? max($addition['size'],20) : 20;
 		return true;
+	}
+
+
+	/**
+	 * 还机单扣除押金回调接口
+	 * @param array $params 还机单清算完成回调参数<br/>
+	 * $params = [
+	 *		'business_type' => '',//业务类型[必须是还机业务]
+	 *		'business_no' => '',//业务编码[必须是还机单编码]
+	 *		'status' => '',//支付状态  processing：处理中；success：支付完成
+	 * ]
+	 */
+	public static function givebackDeductionDepositNotify( $params ) {
+
+		if($params['status'] == "success"){
+
+			$businessNo = $params['out_trade_no'];
+			\App\Lib\Common\LogApi::info("[deduDepositNotify]逾期扣除押金回调", $params);
+
+
+			//修改 商品表 剩余押金
+			$orderGivebackService = new OrderGiveback();
+			//获取还机单信息
+			$orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($businessNo);
+			if(!$orderGivebackInfo){
+				\App\Lib\Common\LogApi::debug("[deductionDepositNotify]还机单扣除押金-还机单查询错误", $params);
+				return false;
+			}
+
+			//修改商品边剩余押金
+			$result = \App\Order\Modules\Repository\OrderGoodsRepository::surplusYajinDec($orderGivebackInfo['goods_no'],$orderGivebackInfo['dedudeposit_amount']);
+			if(!$result){
+				\App\Lib\Common\LogApi::debug("[deductionDepositNotify]还机单扣除押金-还机单查询错误", $params);
+				return false;
+			}
+		}
+
+		return true;
+
 	}
 }
