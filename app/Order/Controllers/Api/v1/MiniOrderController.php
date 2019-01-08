@@ -256,11 +256,17 @@ class MiniOrderController extends Controller
             $miniData['member_id'] = $_user['uid'];
 
             $couponList['coupon_list']=[];
+            $sku = $data['sku'][0];
+            $zuqi = 0;
+            if(isset($sku['begin_time']) && isset($sku['end_time'])){
+                $zuqi =((strtotime($sku['end_time']) -strtotime($sku['begin_time']))/86400)+1;
+            }
             //自动调用接口查询优惠券
             $couponInfo = \App\Lib\Coupon\Coupon::checkedCoupon([
                 'sku_id' => $data['sku'][0]['sku_id'],
                 'auth_token' => $params['auth_token'],
                 'appid'=>$params['appid'],
+                'zuqi'=>$zuqi,
             ]);
             $coupon =[];
             if(isset($couponInfo[0]) && is_array($couponInfo)){
