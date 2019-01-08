@@ -14,6 +14,8 @@ use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Repository\Order\Goods;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Inc\OrderFreezeStatus;
+use App\Order\Modules\Repository\Pay\PayQuery;
+use App\Lib\Payment\CommonFundAuthApi;
 
 class GivebackController extends Controller
 {
@@ -456,28 +458,39 @@ class GivebackController extends Controller
 	 * 还机检测
 	 * @param Request $request
 	 */
-	public function confirmEvaluation( Request $request ) {
+	public function confirmEvaluation( ) {
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
-		$params = $request->input();
-		\App\Lib\Common\LogApi::notify('还机确认收货结果',[
-			$params,
-		]);
-		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
-		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
-			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
-		}
-		$paramsArr = isset($params['params'])? $params['params'] :'';
-		$rules = [
-			'goods_no'     => 'required',//商品编号
-			'evaluation_status'     => 'required',//检测状态【1：合格；2：不合格】
-			'evaluation_time'     => 'required',//检测时间
+//		$params = $request->input();
+//		\App\Lib\Common\LogApi::notify('还机确认收货结果',[
+//			$params,
+//		]);
+//		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
+//		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+//			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+//		}
+//		$paramsArr = isset($params['params'])? $params['params'] :'';
+//		$rules = [
+//			'goods_no'     => 'required',//商品编号
+//			'evaluation_status'     => 'required',//检测状态【1：合格；2：不合格】
+//			'evaluation_time'     => 'required',//检测时间
+//		];
+//		$validator = app('validator')->make($paramsArr, $rules);
+//		if ($validator->fails()) {
+//			return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
+//		}
+
+		$paramsArr = [
+			'evaluation_status'=>2,
+			'compensate_amount'=>'1',
+			'evaluation_remark'=>'aa',
+			'goods_no'=>'GB10305265697048',
 		];
-		$validator = app('validator')->make($paramsArr, $rules);
-		if ($validator->fails()) {
-			return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
-		}
+
+
+
+
 		if( !in_array($paramsArr['evaluation_status'], [OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED,OrderGivebackStatus::EVALUATION_STATUS_QUALIFIED])  ){
 			return apiResponse([],ApiStatus::CODE_91000,'检测状态参数值错误!');
 		}
@@ -498,7 +511,7 @@ class GivebackController extends Controller
 		// | 业务处理：判断是否需要支付【1有无未完成分期，2检测不合格的赔偿】
 		//-+--------------------------------------------------------------------
 		//获取商品信息
-		$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
+			$orderGoodsInfo = $orderGoodsService->getGoodsInfo($goodsNo);
 		if( !$orderGoodsInfo ) {
 			return apiResponse([], get_code(), get_msg());
 		}
@@ -518,11 +531,11 @@ class GivebackController extends Controller
 			return apiResponse([], ApiStatus::CODE_50001, '订单不存在');
 		}
 		//当为小程序订单则直接调起其他接口进行处理
-		if( $orderInfo['order_type'] ==  \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
-			$MiniGivebackController = new MiniGivebackController();
-			$MiniGivebackController->givebackConfirmEvaluation($params);
-			die;
-		}
+//		if( $orderInfo['order_type'] ==  \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
+//			$MiniGivebackController = new MiniGivebackController();
+//			$MiniGivebackController->givebackConfirmEvaluation($params);
+//			die;
+//		}
 
 
 		//获取当前商品未完成分期列表数据
@@ -549,7 +562,7 @@ class GivebackController extends Controller
 		$paramsArr['instalment_amount'] = $instalmentAmount;//需要支付的分期的金额
 		//剩余押金（押金可能被代扣扣除，计算按照剩余押金计算）【2019-01-03马晓雨】
 		$paramsArr['surplus_yajin'] = $orderGoodsInfo['surplus_yajin'];//押金金额
-
+		p($paramsArr);
 		//开启事务
 		DB::beginTransaction();
 		try{
@@ -1035,6 +1048,7 @@ class GivebackController extends Controller
 	 *		'instalment_num' => '',//剩余分期期数 【必须】【可为0】<br/>
 	 *		'instalment_amount' => '',//剩余分期总金额 【必须】【可为0】<br/>
 	 *		'yajin' => '',//押金金额 【必须】【可为0】<br/>
+	 *		'amount' => '',//需要单独支付赔偿金额 【可选】【检测不合格 押金小于赔偿金时必须】<br/><br/>
 	 * ]
 	 * @param int $status 还机单最新还机单状态
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
@@ -1113,6 +1127,7 @@ class GivebackController extends Controller
 	 *		'instalment_num' => '',//剩余分期期数 【必须】【可为0】<br/>
 	 *		'instalment_amount' => '',//剩余分期总金额 【必须】【可为0】<br/>
 	 *		'yajin' => '',//押金金额 【必须】【可为0】<br/>
+	 *		'amount' => '',//需要单独支付赔偿金额 【可选】【检测不合格 押金小于赔偿金时必须】<br/><br/>
 	 * ]
 	 * @param int $status 还机单最新还机单状态
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
@@ -1157,6 +1172,7 @@ class GivebackController extends Controller
 	 *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
 	 *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/><br/>
 	 *		'==============' => '===============',//传入参数和查询出来参数分割线<br/><br/>
+	 *		'amount' => '',//扣除押金金额 【检测不合格时必须】<br/><br/>
 	 *		'order_no' => '',//订单编号 【必须】<br/>
 	 *		'user_id' => '',//用户id 【必须】<br/>
 	 *		'giveback_no' => '',//还机单编号 【必须】<br/>
@@ -1168,6 +1184,14 @@ class GivebackController extends Controller
 	 * @return boolen 处理结果【true:处理完成;false:处理出错】
 	 */
 	private function __dealEvaNoWitYes( $paramsArr, OrderGiveback $orderGivebackService, &$status ) {
+
+		// 如果存在扣除押金金额  则执行 扣除押金操作
+		if($paramsArr['amount'] > 0){
+			$this->deductionDeposit($paramsArr);
+			// 剩余押金 等于 减去赔偿金
+			$paramsArr['surplus_yajin'] = $paramsArr['surplus_yajin'] - $paramsArr['amount'] > 0 ? $paramsArr['surplus_yajin'] - $paramsArr['amount'] : 0;
+		}
+
 		//初始化更新还机单的数据
 		$data = $this->__givebackUpdateDataInit($paramsArr);
 
@@ -1231,6 +1255,7 @@ class GivebackController extends Controller
 	 *		'evaluation_remark' => '',//检测备注 【可选】【检测不合格时必须】<br/>
 	 *		'compensate_amount' => '',//赔偿金额 【可选】【检测不合格时必须】<br/><br/>
 	 *		'==============' => '===============',//传入参数和查询出来参数分割线<br/><br/>
+	 *		'amount' => '',//扣除押金金额 【检测不合格时必须】<br/><br/>
 	 *		'order_no' => '',//订单编号 【必须】<br/>
 	 *		'user_id' => '',//用户id 【必须】<br/>
 	 *		'giveback_no' => '',//还机单编号 【必须】<br/>
@@ -1393,5 +1418,59 @@ class GivebackController extends Controller
 			'instalment_num' => isset($paramsArr['instalment_num']) ? $paramsArr['instalment_num'] : 0,
 		];
 	}
+
+	/**
+	 * 扣除押金
+	 * @param array $paramsArr
+	 * $paramsArr = [<br/>
+	 * 		'goods_no'	=> '' //商品编号 【必须】<br/>
+	 *		'order_no' 	=> '',//检测结果 【必须】<br/>
+	 *		'amount' => '',//扣除押金金额 【必须】<br/>
+	 * ]
+	 * @return boolen 处理结果【true:处理完成;false:处理出错】
+	 */
+	private function deductionDeposit( $paramsArr ) {
+		try{
+			/**
+			 * 查询用户下单时 预授权信息 获取支付系统授权码
+			 */
+			$orderAuthInfo = PayQuery::getPayByBusiness(\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI, $paramsArr['order_no']);
+			$fundauthNo = $orderAuthInfo->getFundauthNo();
+
+			$authInfo = PayQuery::getAuthInfoByAuthNo($fundauthNo);
+			if(!$authInfo){
+				\App\Lib\Common\LogApi::error('[deductionDeposit]还机扣除押金-预授权信息错误', $paramsArr);
+				return false;
+			}
+
+			// 价格
+			$dedudeposit_amount = bcmul($paramsArr['amount'], 100 );
+
+			$unfreezeAndPayData = [
+				'name'			=> $paramsArr['order_no'] . "还机扣除押金",   //交易名称
+				'out_trade_no'	=> $paramsArr['giveback_no'],            	//还机单业务系统授权码
+				'fundauth_no'	=> $authInfo['out_fundauth_no'], 			//支付系统授权码
+				'amount'		=> $dedudeposit_amount,                 	//交易金额；单位：分
+				'back_url'		=> config('ordersystem.ORDER_API')."/givebackDeductionDepositNotify",//后台通知地址
+				'user_id'		=> $paramsArr['user_id'],   				//用户id
+				'remark'		=> $paramsArr['remark'], 					//业务描述
+			];
+			\App\Lib\Common\LogApi::info("[deductionDeposit]还机扣除押金参数为：", $unfreezeAndPayData);
+
+			$succss = CommonFundAuthApi::unfreezeAndPay($unfreezeAndPayData);
+
+			\App\Lib\Common\LogApi::info('[deductionDeposit]还机扣除押金，返回的结果：', $succss);
+
+		}catch(\App\Lib\ApiException $exc){
+
+			\App\Lib\Common\LogApi::error('[deductionDeposit]还机扣除押金', [$exc->getMessage()]);
+
+			return false;
+		}
+
+		return true;
+	}
+
+
 }
 ?>

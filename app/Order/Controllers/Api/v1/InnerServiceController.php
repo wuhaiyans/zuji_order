@@ -13,6 +13,8 @@ use App\Lib\PublicInc;
 use App\Order\Modules\Service\OrderBuyout;
 use App\Order\Modules\Service\OrderOperate;
 use Illuminate\Http\Request;
+use App\Order\Modules\Repository\OrderRepository;
+use App\Order\Modules\Inc\OrderFreezeStatus;
 class InnerServiceController extends Controller
 {
 
@@ -188,6 +190,14 @@ class InnerServiceController extends Controller
             'type'=>PublicInc::Type_System,
         ];
 
+        //查询订单是否在冻结状态
+        $orderObj = new OrderRepository();
+        $orderInfo = $orderObj->get_order_info(['order_no'=>$validateParams['data']['order_no']]);
+        if( !$orderInfo || $orderInfo[0]['freeze_type'] ){
+            $msg = '订单处于'.OrderFreezeStatus::getStatusName($orderInfo[0]['freeze_type']) . '中，禁止取消！';
+            return apiResponse([],ApiStatus::CODE_35024,$msg);
+        }
+
         $success =   \App\Order\Modules\Service\OrderOperate::cancelOrder($validateParams['data']['order_no'],$userinfo);
         if ($success) {
 
@@ -259,6 +269,15 @@ class InnerServiceController extends Controller
 
             return apiResponse([],$validateParams['code']);
         }
+
+        //查询订单是否在冻结状态
+        $orderObj = new OrderRepository();
+        $orderInfo = $orderObj->get_order_info(['order_no'=>$validateParams['data']['order_no']]);
+        if( !$orderInfo || $orderInfo[0]['freeze_type'] ){
+            $msg = '订单处于'.OrderFreezeStatus::getStatusName($orderInfo[0]['freeze_type']) . '中，禁止取消！';
+            return apiResponse([],ApiStatus::CODE_35024,$msg);
+        }
+
         //调用小程序取消订单接口
         //查询芝麻订单
         $result = \App\Order\Modules\Repository\OrderMiniRepository::getMiniOrderInfo($validateParams['data']['order_no']);

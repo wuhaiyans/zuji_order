@@ -35,6 +35,7 @@ class OrderGiveback extends Model
 		'evaluation_time', //检测时间
 		'yajin_status', //押金状态
 		'compensate_amount', //赔偿金额
+		'dedudeposit_amount', //扣除押金金额
 		'create_time', //创建时间
 		'update_time', //更新时间
 		'remark', //备注
