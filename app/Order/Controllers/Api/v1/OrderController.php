@@ -74,7 +74,7 @@ class OrderController extends Controller
 
         $zuqi = 0;
         if(isset($sku[0]['begin_time']) && isset($sku[0]['end_time'])){
-            $zuqi =((strtotime($sku['end_time']) -strtotime($sku['begin_time']))/86400)+1;
+            $zuqi =((strtotime($sku[0]['end_time']) -strtotime($sku[0]['begin_time']))/86400)+1;
         }
         //自动调用接口查询优惠券
         $couponInfo = \App\Lib\Coupon\Coupon::checkedCoupon([
