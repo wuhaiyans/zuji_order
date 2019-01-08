@@ -462,34 +462,24 @@ class GivebackController extends Controller
 		//-+--------------------------------------------------------------------
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
-//		$params = $request->input();
-//		\App\Lib\Common\LogApi::notify('还机确认收货结果',[
-//			$params,
-//		]);
-//		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
-//		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
-//			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
-//		}
-//		$paramsArr = isset($params['params'])? $params['params'] :'';
-//		$rules = [
-//			'goods_no'     => 'required',//商品编号
-//			'evaluation_status'     => 'required',//检测状态【1：合格；2：不合格】
-//			'evaluation_time'     => 'required',//检测时间
-//		];
-//		$validator = app('validator')->make($paramsArr, $rules);
-//		if ($validator->fails()) {
-//			return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
-//		}
-
-		$paramsArr = [
-			'evaluation_status'=>2,
-			'compensate_amount'=>'1',
-			'evaluation_remark'=>'aa',
-			'goods_no'=>'GB10305265697048',
+		$params = $request->input();
+		\App\Lib\Common\LogApi::notify('还机确认收货结果',[
+			$params,
+		]);
+		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
+		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
+			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
+		}
+		$paramsArr = isset($params['params'])? $params['params'] :'';
+		$rules = [
+			'goods_no'     => 'required',//商品编号
+			'evaluation_status'     => 'required',//检测状态【1：合格；2：不合格】
+			'evaluation_time'     => 'required',//检测时间
 		];
-
-
-
+		$validator = app('validator')->make($paramsArr, $rules);
+		if ($validator->fails()) {
+			return apiResponse([],ApiStatus::CODE_91000,$validator->errors()->first());
+		}
 
 		if( !in_array($paramsArr['evaluation_status'], [OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED,OrderGivebackStatus::EVALUATION_STATUS_QUALIFIED])  ){
 			return apiResponse([],ApiStatus::CODE_91000,'检测状态参数值错误!');
@@ -531,11 +521,11 @@ class GivebackController extends Controller
 			return apiResponse([], ApiStatus::CODE_50001, '订单不存在');
 		}
 		//当为小程序订单则直接调起其他接口进行处理
-//		if( $orderInfo['order_type'] ==  \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
-//			$MiniGivebackController = new MiniGivebackController();
-//			$MiniGivebackController->givebackConfirmEvaluation($params);
-//			die;
-//		}
+		if( $orderInfo['order_type'] ==  \App\Order\Modules\Inc\OrderStatus::orderMiniService ){
+			$MiniGivebackController = new MiniGivebackController();
+			$MiniGivebackController->givebackConfirmEvaluation($params);
+			die;
+		}
 
 
 		//获取当前商品未完成分期列表数据
