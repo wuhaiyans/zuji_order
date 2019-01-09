@@ -41,43 +41,77 @@ class SimpleDiscounter implements Discounter {
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 */
 	public function discount( array $params ){
+		$totalAmount = 0;
+
+		foreach($params as $v){
+			$totalAmount += $v['amount'];
+		}
+
+		$totalAmount -= $this->discount_amount;
+		$totalAmount = max($totalAmount , 0);
+
 		// 分期数
 		$n = count( $params );
 		// 余数
-		$remainder_discount = ($this->discount_amount * 100) % ($n);
-		$remainder_discount = $remainder_discount / 100;
+		$remainderAmount = ($totalAmount * 100) % ($n);
+		$remainderAmount = $remainderAmount / 100;
+
 		// 平均优惠
-		$avg_discount = ($this->discount_amount-$remainder_discount)/$n;
+		$avgDiscount = ($totalAmount - $remainderAmount)/$n;
 
 		foreach( $params as &$item ){
-			// 计算实际可优惠的金额
-			$temp = 0;
-			// 全优惠
-			if( $item['amount'] >= $avg_discount ){
-				$temp = $avg_discount;
-			}
-			// 优惠至0元
-			else{
-				$temp = $item['amount'];
-			}
-			// 优惠金额
-			$item['discount_amount'] += $temp;
 			// 应付金额
-			$item['amount'] -= $temp;
+			if($avgDiscount > 0){
+				$item['discount_amount'] = $item['amount'] - $avgDiscount;
+			}else{
+				$item['discount_amount'] = $item['amount'];
+			}
+
+			$item['amount'] = $avgDiscount;
 		}
-		// 优惠余数，加到首期
-		$temp = 0;
-		// 全优惠
-		if( $params[0]['amount'] > $remainder_discount ){
-			$temp = $remainder_discount;
-		}
-		// 优惠至0元
-		else{
-			$temp = $params[0]['amount'];
-		}
-		$params[0]['discount_amount'] += $temp;
-		$params[0]['amount'] -= $temp;
+
+		$params[0]['discount_amount'] -= $remainderAmount;
+		$params[0]['amount'] += $remainderAmount;
 
 		return $params;
+//
+//		// 分期数
+//		$n = count( $params );
+//		// 余数
+//		$remainder_discount = ($this->discount_amount * 100) % ($n);
+//		$remainder_discount = $remainder_discount / 100;
+//		// 平均优惠
+//		$avg_discount = ($this->discount_amount-$remainder_discount)/$n;
+//
+//		foreach( $params as &$item ){
+//			// 计算实际可优惠的金额
+//			$temp = 0;
+//			// 全优惠
+//			if( $item['amount'] >= $avg_discount ){
+//				$temp = $avg_discount;
+//			}
+//			// 优惠至0元
+//			else{
+//				$temp = $item['amount'];
+//			}
+//			// 优惠金额
+//			$item['discount_amount'] += $temp;
+//			// 应付金额
+//			$item['amount'] -= $temp;
+//		}
+//		// 优惠余数，加到首期
+//		$temp = 0;
+//		// 全优惠
+//		if( $params[0]['amount'] > $remainder_discount ){
+//			$temp = $remainder_discount;
+//		}
+//		// 优惠至0元
+//		else{
+//			$temp = $params[0]['amount'];
+//		}
+//		$params[0]['discount_amount'] += $temp;
+//		$params[0]['amount'] -= $temp;
+//
+//		return $params;
 	}
 }
