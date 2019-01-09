@@ -2,6 +2,7 @@
 
 namespace App\Order\Modules\Repository\ShortMessage;
 
+use App\Common\LogApi;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Repository\Pay\Channel;
 
@@ -47,6 +48,12 @@ class OrderCreate implements ShortMessage {
 		if( !$code ){
 			return false;
 		}
+        $class =basename(str_replace('\\', '/', __CLASS__));
+        \App\Lib\Common\LogApi::info('message-orderCreate',[
+            'channel_id'=>$orderInfo['channel_id'],
+            'code'=>$code,
+            'class'=>$class,
+            ]);
         $goods = OrderRepository::getGoodsListByOrderId($this->business_no);
 		if(!$goods){
 		    return false;
@@ -55,6 +62,8 @@ class OrderCreate implements ShortMessage {
         foreach ($goods as $k=>$v){
             $goodsName.=$v['goods_name']." ";
         }
+
+
 
 		// 发送短息
 		return \App\Lib\Common\SmsApi::sendMessage($orderInfo['mobile'], $code, [
