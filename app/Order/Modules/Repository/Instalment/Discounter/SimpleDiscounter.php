@@ -71,7 +71,8 @@ class SimpleDiscounter implements Discounter {
 		}
 
 		$params[0]['amount'] += $remainderAmount;
-		$params[0]['discount_amount'] = floor($params[0]['original_amount']) - floor($params[0]['amount']);
+		// 两位小数精度
+		$params[0]['discount_amount'] = number_format($params[0]['original_amount'],2) - number_format($params[0]['amount'],2);
 
 		return $params;
 //
