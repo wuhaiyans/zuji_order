@@ -70,8 +70,8 @@ class SimpleDiscounter implements Discounter {
 			$item['amount'] = $avgDiscount;
 		}
 
-		$params[0]['discount_amount'] -= $remainderAmount;
 		$params[0]['amount'] += $remainderAmount;
+		$params[0]['discount_amount'] = floor($params[0]['original_amount']) - floor($params[0]['amount']);
 
 		return $params;
 //
