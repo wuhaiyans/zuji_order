@@ -365,6 +365,22 @@ class OrderReturnCreater
             $return_info['pay_type']                = $order_info['pay_type'];      //支付类型
 
             LogApi::debug("[createRefund]内部逻辑参数",$return_info);
+            //冻结订单
+            $orderFreeze = $order->refundOpen();
+            if( !$orderFreeze ){
+                LogApi::debug("[createRefund]冻结订单失败");
+                //事务回滚
+                DB::rollBack();
+                return false;//订单冻结失败
+            }
+            //更新商品状态为退款中
+            $goodsRefund = $goods->orderRefund();
+            if( !$goodsRefund ){
+                LogApi::debug("[createRefund]更新商品状态为退款中失败");
+                //事务回滚
+                DB::rollBack();
+                return false;//商品状态修改为退款中失败
+            }
             //已支付，直接退款
             if( $order_info['order_status'] == OrderStatus::OrderPayed ){
                 $return_info['refund_no'] = $params['order_no'];
@@ -379,6 +395,8 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false;
                     }
+                    //事务提交
+                    DB::commit();
                 }else{
                     //创建清单
                     $create_clear = self::createClear($return_info);
@@ -386,6 +404,8 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false; //创建清单失败
                     }
+                    //事务提交
+                    DB::commit();
                     //设置出账参数变量
                     $cleanAccount = [];
                     $cleanAccount['params']['clean_no'] = $create_clear;
@@ -394,7 +414,19 @@ class OrderReturnCreater
                     //调用出账
                     $accountRes = OrderCleaning::orderCleanOperate($cleanAccount);
                     if ($accountRes['code']!=0){
-                        DB::rollBack();
+                        //订单状态变为未冻结
+                        $orderFreezeNon = $order->returnClose();
+                        if( !$orderFreezeNon ){
+                            LogApi::debug("[createRefund]订单状态变为未冻结失败");
+                            return false;
+                        }
+                        //商品状态初始化
+                        $goodsRefundInit = $goods->refundRefuse();
+                        if( !$goodsRefundInit ){
+                            LogApi::debug("[createRefund]商品状态初始化失败");
+                            return false;
+                        }
+
                         return false;
                     }
 
@@ -404,22 +436,6 @@ class OrderReturnCreater
                 //如果订单是支付中，备货中状态，获取发货状态，如果是已配货，则需要审核，如果是待配货，则不需要审核直接走清算，通知收发货系统取消发货
                 //退货单状态默认值为审核同意
                 $returnStatus = ReturnStatus::ReturnAgreed;
-                //冻结订单
-                $orderFreeze = $order->refundOpen();
-                if( !$orderFreeze ){
-                    LogApi::debug("[createRefund]冻结订单失败");
-                    //事务回滚
-                    DB::rollBack();
-                    return false;//订单冻结失败
-                }
-                //更新商品状态为退款中
-                $goodsRefund = $goods->orderRefund();
-                if( !$goodsRefund ){
-                    LogApi::debug("[createRefund]更新商品状态为退款中失败");
-                    //事务回滚
-                    DB::rollBack();
-                    return false;//商品状态修改为退款中失败
-                }
                 //获取收发货状态
                 $deliveryStatus = Delivery::getDeliveryInfo($params['order_no']);
                 $response =json_decode($deliveryStatus,true);
@@ -458,12 +474,12 @@ class OrderReturnCreater
                         return false;//取消发货失败
                     }
                 }
+                //事务提交
+                DB::commit();
             }
 
             //操作日志
             OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$params['order_no'],"退款","申请退款;"."备注:".$params['reason_text']);
-            //事务提交
-            DB::commit();
             if( $userinfo['type'] == PublicInc::Type_Admin){
                 //根据订单风控审核状态 申请发送短信
                 if($return_info['risk_check'] == OrderRiskCheckStatus::ReviewReject){
