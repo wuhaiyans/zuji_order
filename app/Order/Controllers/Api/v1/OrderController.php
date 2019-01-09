@@ -173,7 +173,10 @@ class OrderController extends Controller
         $userInfo   = isset($params['userinfo'])?$params['userinfo']:[];
         $userType   = isset($params['userinfo']['type'])?$params['userinfo']['type']:0;
         $destineNo  = isset($params['params']['destine_no'])?$params['params']['destine_no']:'';
-
+        $zuqi = 0;
+        if(isset($sku[0]['begin_time']) && isset($sku[0]['end_time'])){
+            $zuqi =((strtotime($sku[0]['end_time']) -strtotime($sku[0]['begin_time']))/86400)+1;
+        }
 
         if( isset($params['params']['coupon']) ){
             $coupon = $params['params']['coupon'];
@@ -183,6 +186,7 @@ class OrderController extends Controller
                 'sku_id' => $sku[0]['sku_id'],
                 'auth_token' => $params['auth_token'],
                 'appid'=>$appid,
+                'zuqi'=>$zuqi,
             ]);
             if(isset($coupon[0])){
                 $coupon = $coupon[0];

@@ -491,7 +491,6 @@ class CronOperate
             $whereArray[] = ['order_info.zuqi_type', '=', Inc\OrderStatus::ZUQI_TYPE_MONTH];    //长租订单
             $whereArray[] = ['term', '=', $term];
             $whereArray[] = ['day', '=', intval($day)];
-            $whereArray[] = ['order_goods_instalment.order_no', '=', 'AB07175752759085'];
             // 查询总数
             $total =  \App\Order\Models\OrderGoodsInstalment::query()
                 ->where($whereArray)
@@ -571,7 +570,6 @@ class CronOperate
             $whereArray[] = ['status', '=', Inc\OrderInstalmentStatus::FAIL];
             $whereArray[] = ['term', '=', $term];
             $whereArray[] = ['day', '=', intval($day)];
-            $whereArray[] = ['order_goods_instalment.order_no', '=', 'AB07175752759085'];
 
             // 查询总数
             $total =  \App\Order\Models\OrderGoodsInstalment::query()

@@ -571,7 +571,7 @@ class ReceiveController extends Controller
                 //'refund_no'=>$receive_goods['receive_no']?$receive_goods['receive_no']:'',
             ];
 
-            LogApi::info('checkItemsFinish_info_Receive',$params);
+            LogApi::info('xianxiaCheckItemsFinish_info_Receive',$params);
 
             $this->receive->xianxiacheckItem($params);
             Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
@@ -580,8 +580,8 @@ class ReceiveController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            LogApi::info('checkItemsFinish_info_Receive_error',$e->getMessage());
-            WarehouseWarning::warningWarehouse('[检测完成]失败',[$params,$e]);
+            LogApi::info('xianxiaCheckItemsFinish_info_Receive_error',$e->getMessage());
+            WarehouseWarning::warningWarehouse('[线下门店检测完成]失败',[$params,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
         return apiResponse();
