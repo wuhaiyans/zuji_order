@@ -55,7 +55,7 @@ class ReceiveGoodsRepository
 
         if (isset($params['status']) && $params['status']!='') {
             if($params['status']==ReceiveGoods::STATUS_ALL_CHECK || $params['status']==ReceiveGoods::STATUS_CONFIRM_RECEIVE || $params['status']==ReceiveGoods::STATUS_IN){
-                $query->where('status', 'in', [ReceiveGoods::STATUS_ALL_CHECK,ReceiveGoods::STATUS_CONFIRM_RECEIVE,ReceiveGoods::STATUS_IN]);
+                $query->where(['status', ['in', [ReceiveGoods::STATUS_ALL_CHECK,ReceiveGoods::STATUS_CONFIRM_RECEIVE,ReceiveGoods::STATUS_IN]]]);
             }else{
                 $query->where('status', '=', $params['status']);
             }
