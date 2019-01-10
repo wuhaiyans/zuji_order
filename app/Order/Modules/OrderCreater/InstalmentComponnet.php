@@ -191,9 +191,6 @@ class InstalmentComponnet implements OrderCreater
             for($i=0;$i<$sku['sku_num'];$i++) {
                 foreach ($sku['instalment'] as $k => $v) {
                     $amount =$v['amount'];
-                    if($v['term'] ==1){
-                        $amount =$v['amount']+$sku['insurance'];
-                    }
                     $status = OrderInstalmentStatus::UNPAID;
                     $remark = "";
                     if($amount == 0){
