@@ -41,6 +41,10 @@ class SimpleDiscounter implements Discounter {
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 */
 	public function discount( array $params ){
+		if($this->discount_amount == 0){
+			return $params;
+		}
+
 		$totalAmount = 0;
 
 		foreach($params as $v){
