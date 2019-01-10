@@ -41,6 +41,10 @@ class SimpleDiscounter implements Discounter {
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 */
 	public function discount( array $params ){
+		if($this->discount_amount == 0){
+			return $params;
+		}
+
 		$totalAmount = 0;
 
 		foreach($params as $v){
@@ -73,7 +77,7 @@ class SimpleDiscounter implements Discounter {
 		$params[0]['amount'] += $remainderAmount;
 		// 两位小数精度
 		$params[0]['discount_amount'] = number_format($params[0]['original_amount'],2) - number_format($params[0]['amount'],2);
-
+		$params[0]['discount_amount'] = max($params[0]['discount_amount'],0);
 		return $params;
 //
 //		// 分期数
