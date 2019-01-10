@@ -112,6 +112,8 @@ class OrderOperate
                         DB::rollBack();
                         return false;
                     }
+                    //插入操作日志
+                    OrderLogRepository::add(1,'system',\App\Lib\PublicInc::Type_System,$orderDetail['order_no'],"延迟发货",'短租延迟发货');
                 }
                 //如果是线下订单 自动确认收货 - 调用确认收货操作
                 if($orderInfo['order_type'] == Inc\OrderStatus::orderStoreService){
