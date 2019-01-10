@@ -35,7 +35,9 @@ class FirstDiscounter implements Discounter {
 	 * @author liuhongxing <liuhongxing@huishoubao.com.cn>
 	 */
 	public function discount( array $params ){
-
+		if($this->discount_amount == 0){
+			return $params;
+		}
 		// 优惠首期
 		$temp_discount = 0;
 		if( $params[0]['amount'] > $this->discount_amount ){
