@@ -64,8 +64,8 @@ class OverDueDeductionController extends Controller
         $abc = 1;
 
         // excel头信息
-        $headers = ['订单编号', '下单时间', '订单来源','商品名称','用户名','手机号','累计未缴纳租金(单位:元)','押金(单位:元)','扣款状态', '回访标识及记录',
-            '扣款时间','扣款金额(单位:元)'];
+        $headers = ['订单编号','用户名','手机号','扣款状态', '扣款时间',
+            '扣款金额(单位:元)','下单时间', '订单来源','商品名称','累计未缴纳租金(单位:元)','押金(单位:元)', '回访标识','回访备注'];
 
         $overdueExcel = array();
         while(true) {
@@ -84,17 +84,18 @@ class OverDueDeductionController extends Controller
 
                     $data[] = [
                         $item['order_no'],
+                        $item['user_name'],
+                        $item['mobile'],
+                        $item['deduction_name'],
+                        $item['d_time'],
+                        $item['d_amount'],
                         date('Y-m-d H:i:s', $item['order_time']),
                         $item['appid_name'],
                         $item['goods_name'],
-                        $item['user_name'],
-                        $item['mobile'],
                         $item['unpaid_amount'],
                         $item['overdue_amount'],
-                        $item['deduction_name'],
                         $item['visit_name'],
-                        $item['d_time'],
-                        $item['d_amount'],
+                        $item['visit_text'],
 
                     ];
 

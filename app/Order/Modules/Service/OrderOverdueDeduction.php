@@ -61,7 +61,7 @@ class OrderOverdueDeduction
                 $overdueInfo[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
 
                 //回访标识
-                $overdueInfo[$keys]['visit_name'] = !empty($values['visit_id'])? OrderStatus::getVisitName($values['visit_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
+                $overdueInfo[$keys]['visit_name'] = !empty($values['v_id'])? OrderStatus::getVisitName($values['v_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
                 if($values['d_status']){
                     //扣款状态
                     $overdueInfo[$keys]['deduction_name'] = OrderOverdueStatus::getStatusName($values['d_status']);

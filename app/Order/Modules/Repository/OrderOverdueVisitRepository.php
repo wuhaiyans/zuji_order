@@ -39,19 +39,16 @@ class OrderOverdueVisitRepository
             'visit_text'=>$params['visit_text'],
             'create_time'=>time()
         ];
-        $createResult = OrderOverdueVisit::query()->insert($data);//插入回访记录
+        $createResult = OrderOverdueVisit::query()->insertGetId($data);//插入回访记录
         if( !$createResult ){
             return false;
         }
-        //获取逾期扣款记录
-        $overDueInfo = OrderOverdueDeduction::where('order_no','=',$params['order_no'])->first()->toArray();
-        if($overDueInfo['visit_id'] != $params['visit_id']){
-            //修改订单的记录的回访id
-            $updateResult = OrderOverdueDeduction::where('order_no','=',$params['order_no'])->update(['visit_id'=>$params['visit_id']]);
-            if( !$updateResult ){
-                return false;
-            }
+        //修改订单的记录的回访id
+        $updateResult = OrderOverdueDeduction::where('order_no','=',$params['order_no'])->update(['visit_id'=>$createResult]);
+        if( !$updateResult ){
+            return false;
         }
+
         return true;
     }
 }
