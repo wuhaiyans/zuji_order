@@ -291,7 +291,7 @@ class OrderReturnCreater
                 'userinfo'  => $userinfo
             ]);
             //如果订单已关闭，已退款，直接返回true
-            if( $order_info['order_status'] == OrderStatus::OrderClosedRefunded && $order_info['freeze_type'] != OrderFreezeStatus::Non){
+            if( $order_info['order_status'] == OrderStatus::OrderClosedRefunded || $order_info['freeze_type'] != OrderFreezeStatus::Non){
                 LogApi::debug("[createRefund]订单状态：",[
                         'order_status'=>$order_info['order_status'],
                         'freeze_type'=>$order_info['freeze_type']
