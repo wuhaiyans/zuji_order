@@ -672,7 +672,7 @@ class OrderGiveback
 		if($params['status'] == "success"){
 
 			$businessNo = $params['out_trade_no'];
-			\App\Lib\Common\LogApi::info("[deduDepositNotify]逾期扣除押金回调", $params);
+			\App\Lib\Common\LogApi::info("[givebackDeductionDepositNotify]逾期扣除押金回调", $params);
 
 
 			//修改 商品表 剩余押金
@@ -680,14 +680,14 @@ class OrderGiveback
 			//获取还机单信息
 			$orderGivebackInfo = $orderGivebackService->getInfoByGivabackNo($businessNo);
 			if(!$orderGivebackInfo){
-				\App\Lib\Common\LogApi::debug("[deductionDepositNotify]还机单扣除押金-还机单查询错误", $params);
+				\App\Lib\Common\LogApi::debug("[givebackDeductionDepositNotify]还机单扣除押金-还机单查询错误", $params);
 				return false;
 			}
 
 			//修改商品边剩余押金
 			$result = \App\Order\Modules\Repository\OrderGoodsRepository::surplusYajinDec($orderGivebackInfo['goods_no'],$orderGivebackInfo['dedudeposit_amount']);
 			if(!$result){
-				\App\Lib\Common\LogApi::debug("[deductionDepositNotify]还机单扣除押金-还机单查询错误", $params);
+				\App\Lib\Common\LogApi::debug("[givebackDeductionDepositNotify]还机单扣除押金-还机单查询错误", $params);
 				return false;
 			}
 		}
