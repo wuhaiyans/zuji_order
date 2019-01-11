@@ -165,7 +165,7 @@ class OrderOverdueDeductionRepository
      */
     public static function getOverdueInfo(){
         $result =  DB::table('order_overdue_deduction')
-            ->select('order_no')->get();
+            ->select('order_no,status')->get();
         if (!$result) return false;
         $resultArray = objectToArray($result);
 
