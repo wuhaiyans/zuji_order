@@ -1084,16 +1084,15 @@ class WithholdController extends Controller
 			$youhui = 0;
 			// 租金抵用券
 			$couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id'],$orderInfo['appid']);
-
+           
 			LogApi::info("[repayment]提前还款-优惠券信息",[$couponInfo,'instalmentInfo'=>$instalmentInfo,'orderInfo'=>$orderInfo]);
 
 			if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
 				$youhui = $couponInfo['youhui'] / 100;
 			}
 			// 最小支付一分钱
-			$amount = $instalmentInfo['amount'] - $youhui;
-			$amount = $amount > 0 ? $amount : 0.01;
-
+			$amount = bcmul($instalmentInfo['amount'],100) - bcmul($youhui,100);
+			$amount = $amount > 0 ? $amount / 100 : 0.01;
             // 分期为0元 则不查询优惠券信息
             if($instalmentInfo['amount'] > 0 && $youhui > 0){
                 // 创建优惠券使用记录
