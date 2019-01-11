@@ -1032,7 +1032,7 @@ class WithholdController extends Controller
 
         $instalmentKey = "instalmentWithhold_" . $instalmentId;
         // 频次限制计数
-        redisIncr($instalmentKey, 300);
+//        redisIncr($instalmentKey, 300);
 
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
@@ -1076,24 +1076,27 @@ class WithholdController extends Controller
 			}
 
 			// 订单状态
-			if($orderInfo['order_status'] != OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non){
-				DB::rollBack();
-				return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 或 订单冻结 不允许提前还款");
-			}
+//			if($orderInfo['order_status'] != OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non){
+//				DB::rollBack();
+//				return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 或 订单冻结 不允许提前还款");
+//			}
 
 			$youhui = 0;
 			// 租金抵用券
 			$couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon($instalmentInfo['user_id'],$orderInfo['appid']);
-
+            $couponInfo = [
+                "youhui"=>"1832",
+                "coupon_id"=>2089,
+                "coupon_name"=>"租金抵用18.32"
+            ];
 			LogApi::info("[repayment]提前还款-优惠券信息",[$couponInfo,'instalmentInfo'=>$instalmentInfo,'orderInfo'=>$orderInfo]);
 
 			if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
 				$youhui = $couponInfo['youhui'] / 100;
 			}
 			// 最小支付一分钱
-			$amount = $instalmentInfo['amount'] - $youhui;
-			$amount = $amount > 0 ? $amount : 0.01;
-
+			$amount = bcmul($instalmentInfo['amount'],100) - bcmul($youhui,100);
+			$amount = $amount > 0 ? $amount / 100 : 0.01;
             // 分期为0元 则不查询优惠券信息
             if($instalmentInfo['amount'] > 0 && $youhui > 0){
                 // 创建优惠券使用记录
