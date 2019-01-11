@@ -243,7 +243,7 @@ class OrderGoodsInstalment
                                     AND `order_info`.`order_type` <> " . $order_type . "
                                     AND `order_info`.`zuqi_type` <> " . $zuqi_type . "
                                     AND `order_goods_instalment`.`status` = " . $status . "
-//                                    AND `order_overdue_deduction`.`order_no` IS NULL
+//                                  AND `order_overdue_deduction`.`order_no` IS NULL
                                 )
                             GROUP BY
                                 `order_goods_instalment`.`order_no`
