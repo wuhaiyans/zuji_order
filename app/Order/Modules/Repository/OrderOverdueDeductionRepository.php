@@ -68,9 +68,10 @@ class OrderOverdueDeductionRepository
         }
 
         $orderList = DB::table('order_overdue_deduction')
+            ->leftJoin('order_overdue_visit','order_overdue_deduction.visit_id', '=', 'order_overdue_visit.id')
             ->leftJoin('order_info','order_overdue_deduction.order_no', '=', 'order_info.order_no')
             ->where($whereArray)
-            ->select('order_overdue_deduction.*','order_info.order_status')
+            ->select('order_overdue_deduction.*','order_info.order_status','order_overdue_visit.visit_id as v_id','order_overdue_visit.visit_text')
             ->orderBy('order_overdue_deduction.create_time', 'DESC')
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $page);
         if( !$orderList ){
