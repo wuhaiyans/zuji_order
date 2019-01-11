@@ -639,11 +639,11 @@ class CronOperate
             //获取连续两个月，总共三个月未缴租金的逾期数据
             $orderNoArray = \App\Order\Modules\Service\OrderGoodsInstalment::instalmentOverdue();
             LogApi::debug('[cronOverdueDeductionMessage获取连续两个月，总共三个月未缴租金的逾期数据]', ['data'=>$orderNoArray]);
+            $data = [];
             if( $orderNoArray ){
                 $getData=[];
                 foreach($orderNoArray as $item){
                     $getData[] = $item['order_no'];
-                    $data = [];
                     //获取连续两个月，总共三个月未缴租金的逾期数据 不在表中，则添加逾期数据
                     if(!in_array($item['order_no'],$overdueData,true)){
                         //获取订单信息
