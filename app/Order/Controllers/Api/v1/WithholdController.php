@@ -1032,7 +1032,7 @@ class WithholdController extends Controller
 
         $instalmentKey = "instalmentWithhold_" . $instalmentId;
         // 频次限制计数
-//        redisIncr($instalmentKey, 300);
+        redisIncr($instalmentKey, 300);
 
         // 查询分期信息
         $instalmentInfo = OrderGoodsInstalment::queryByInstalmentId($instalmentId);
@@ -1076,10 +1076,10 @@ class WithholdController extends Controller
 			}
 
 			// 订单状态
-//			if($orderInfo['order_status'] != OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non){
-//				DB::rollBack();
-//				return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 或 订单冻结 不允许提前还款");
-//			}
+			if($orderInfo['order_status'] != OrderStatus::OrderInService || $orderInfo['freeze_type'] != OrderFreezeStatus::Non){
+				DB::rollBack();
+				return apiResponse([], ApiStatus::CODE_71000, "该订单不在服务中 或 订单冻结 不允许提前还款");
+			}
 
 			$youhui = 0;
 			// 租金抵用券
