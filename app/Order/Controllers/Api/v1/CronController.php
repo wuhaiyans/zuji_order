@@ -14,18 +14,18 @@ class CronController extends Controller
      * 定时任务取消订单
      */
     public function cronCancelOrder(){
-		self::addLog('[cronCancelOrder]定时任务取消订单-start-');
-      Service\CronOperate::cronCancelOrder();
-		self::addLog('[cronCancelOrder]定时任务取消订单-end-');
+//		self::addLog('[cronCancelOrder]定时任务取消订单-start-');
+//      Service\CronOperate::cronCancelOrder();
+//		self::addLog('[cronCancelOrder]定时任务取消订单-end-');
       echo "complete";die;
     }
     /**
      * 定时任务确认收货
      */
     public function cronDeliveryReceive(){
-		self::addLog('[cronDeliveryReceive]定时任务确认收货-start-');
-        Service\CronOperate::cronDeliveryReceive();
-		self::addLog('[cronDeliveryReceive]定时任务确认收货-end-');
+		//self::addLog('[cronDeliveryReceive]定时任务确认收货-start-');
+        //Service\CronOperate::cronDeliveryReceive();
+		//self::addLog('[cronDeliveryReceive]定时任务确认收货-end-');
         echo "complete";die;
     }
     /**
