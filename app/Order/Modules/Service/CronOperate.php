@@ -657,18 +657,20 @@ class CronOperate
                                 $surplus_yajin = $orderInfo['surplus_yajin'];
                             }
                             $data = [
-                                'order_no'        =>$item['order_no'],
-                                'order_time'     =>$orderInfo['create_time'],
-                                'channel_id'     =>$orderInfo['channel_id'],
-                                'app_id'          =>$orderInfo['appid'],
-                                'goods_name'     =>$orderInfo['goods_name'],
-                                'zuqi_type'      =>$orderInfo['zuqi_type'],
-                                'user_name'      =>empty($orderInfo['realname'])?'':$orderInfo['realname'],
-                                'mobile'         =>$orderInfo['mobile'],
-                                'unpaid_amount' =>$item['amount'],
-                                'overdue_amount'=>$surplus_yajin,
-                                'user_id'        =>$orderInfo['user_id'],
-                                'create_time'   =>time()
+                                'order_no'        => $item['order_no'],
+                                'order_time'     => $orderInfo['create_time'],
+                                'channel_id'     => $orderInfo['channel_id'],
+                                'app_id'          => $orderInfo['appid'],
+                                'goods_name'     => $orderInfo['goods_name'],
+                                'zuqi_type'      => $orderInfo['zuqi_type'],
+                                'user_name'      => empty($orderInfo['realname'])?'':$orderInfo['realname'],
+                                'mobile'         => $orderInfo['mobile'],
+                                'unpaid_amount' => $item['amount'],
+                                'overdue_amount'=> $surplus_yajin,
+                                'user_id'        => $orderInfo['user_id'],
+                                'create_time'   => time(),
+                                'status'         => Inc\OrderOverdueStatus::EFFECTIVE//有效状态
+
 
                             ];
 
@@ -682,6 +684,7 @@ class CronOperate
                     }
 
                 }
+                LogApi::debug('[cronOverdueDeductionMessage获取连续两个月，总共三个月未缴租金的逾期数据转化为一维数组数据]',['data'=>$getData]);
                 //如果逾期扣款表数据不在连续两个月，总共三个月未缴租金的逾期数据中，则更改状态为无效
                 if( $getOverdueDeductionInfo ){
                     foreach ($getOverdueDeductionInfo as $item){
