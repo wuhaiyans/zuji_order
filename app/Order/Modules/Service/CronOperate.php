@@ -629,12 +629,13 @@ class CronOperate
                 foreach ($getOverdueDeductionInfo as $item){
                     $overdueData[] = $item['order_no'];
                     //判断数组中是否含有有效数据
-                    $status = false;
+                    $status = "false";
                     if($item['status'] == Inc\OrderOverdueStatus::EFFECTIVE){
-                        $status = true;
+                        $status = "true";
                     }
                 }
             }
+            LogApi::debug('[cronOverdueDeductionMessage获取逾期扣款表已存在的数据]', ['data'=>$overdueData]);
             //获取连续两个月，总共三个月未缴租金的逾期数据
             $orderNoArray = \App\Order\Modules\Service\OrderGoodsInstalment::instalmentOverdue();
             LogApi::debug('[cronOverdueDeductionMessage获取连续两个月，总共三个月未缴租金的逾期数据]', ['data'=>$orderNoArray]);
@@ -709,7 +710,7 @@ class CronOperate
                 }
             }else{
                 //获取逾期表中的有效数据，如果存在有效数据，全部更新为无效
-                if( isset( $status ) && $status){
+                if( isset( $status ) && $status == "true"){
                     $data = ['status' => Inc\OrderOverdueStatus::INVALID];//无效状态
                     $upResult = \App\Order\Models\OrderOverdueDeduction::query()->update($data);
                     if( !$upResult){
