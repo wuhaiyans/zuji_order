@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Repository;
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Inc\OrderOverdueStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use Illuminate\Support\Facades\DB;
 use App\Order\Models\OrderOverdueDeduction;
@@ -51,7 +52,10 @@ class OrderOverdueDeductionRepository
         if (isset($param['zuqi_type'])) {
             $whereArray[] = ['order_overdue_deduction.zuqi_type', '=', $param['zuqi_type']];
         }
+        //订单租用中
         $whereArray[] = ['order_info.order_status', '=', OrderStatus::OrderInService];
+        //有效记录
+        $whereArray[] = ['order_overdue_deduction.status', '=', OrderOverdueStatus::EFFECTIVE];
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
@@ -108,6 +112,8 @@ class OrderOverdueDeductionRepository
         }
         //订单状态租用中
         $whereArray[] = ['order_info.order_status', '=', OrderStatus::OrderInService];
+        //有效记录
+        $whereArray[] = ['order_overdue_deduction.status', '=', OrderOverdueStatus::EFFECTIVE];
         //回访标识
         if (isset($param['visit_id'])) {
             $whereArray[] = ['order_overdue_deduction.visit_id', '=', $param['visit_id']];
@@ -213,10 +219,30 @@ class OrderOverdueDeductionRepository
      * @param array $data
      */
     public static function createOverdue(array $data){
+        if(!isset( $data )){
+            return false;
+        }
         $createResult = OrderOverdueDeduction::query()->insert($data);
         if( !$createResult ){
             return false;
         }
         return $createResult;
+    }
+    /**
+     * 修改逾期扣款记录为无效
+     * @param array $data
+     */
+    public static function upOverdueStatus($order_no,array $data){
+        if(!isset( $order_no )){
+            return false;
+        }
+        if(!isset( $data )){
+            return false;
+        }
+        $upResult = OrderOverdueDeduction::where('order_no','=',$order_no)->update($data);
+        if( !$upResult ){
+            return false;
+        }
+        return $upResult;
     }
 }
