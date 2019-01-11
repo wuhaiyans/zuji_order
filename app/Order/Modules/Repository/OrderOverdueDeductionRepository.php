@@ -230,7 +230,7 @@ class OrderOverdueDeductionRepository
         return $createResult;
     }
     /**
-     * 修改逾期扣款记录为无效
+     * 修改逾期扣款记录状态
      * @param array $data
      */
     public static function upOverdueStatus($order_no,array $data){

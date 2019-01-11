@@ -628,6 +628,11 @@ class CronOperate
             if( $getOverdueDeductionInfo ){
                 foreach ($getOverdueDeductionInfo as $item){
                     $overdueData[] = $item['order_no'];
+                    //判断数组中是否含有有效数据
+                    $status = false;
+                    if($item['status'] == Inc\OrderOverdueStatus::EFFECTIVE){
+                        $status = true;
+                    }
                 }
             }
             //获取连续两个月，总共三个月未缴租金的逾期数据
@@ -638,6 +643,7 @@ class CronOperate
                 foreach($orderNoArray as $item){
                     $getData[] = $item['order_no'];
                     $data = [];
+                    //获取连续两个月，总共三个月未缴租金的逾期数据 不在表中，则添加逾期数据
                     if(!in_array($item['order_no'],$overdueData,true)){
                         //获取订单信息
                         $orderInfo = OrderOverdueDeductionRepository::getOverdueOrderDetail($item['order_no']);
@@ -673,8 +679,9 @@ class CronOperate
                         }
 
                     }
+
                 }
-                //如果连续两个月，总共三个月未缴租金的逾期数据不在逾期扣款表中，则更改状态为无效
+                //如果逾期扣款表数据不在连续两个月，总共三个月未缴租金的逾期数据中，则更改状态为无效
                 if( $getOverdueDeductionInfo ){
                     foreach ($getOverdueDeductionInfo as $item){
                         if(!in_array($item['order_no'],$getData,true)){
@@ -688,8 +695,27 @@ class CronOperate
                                 }
                             }
                         }
+                        //获取连续两个月，总共三个月未缴租金的逾期数据 在表中并且无效状态，则更新为有效
+                        if(in_array($item['order_no'],$getData,true) && $item['status'] == Inc\OrderOverdueStatus::INVALID){
+                            $data = ['status' => Inc\OrderOverdueStatus::EFFECTIVE];//有效状态
+                            $upResult = OrderOverdueDeductionRepository::upOverdueStatus($item['order_no'],$data);
+                            if( !$upResult){
+                                LogApi::debug('[cronOverdueDeductionMessage更改为有效失败]');
+                                return false;
+                            }
+                        }
                     }
 
+                }
+            }else{
+                //获取逾期表中的有效数据，如果存在有效数据，全部更新为无效
+                if( isset( $status ) && $status){
+                    $data = ['status' => Inc\OrderOverdueStatus::INVALID];//无效状态
+                    $upResult = \App\Order\Models\OrderOverdueDeduction::query()->update($data);
+                    if( !$upResult){
+                        LogApi::debug('[cronOverdueDeductionMessage更改为无效失败]');
+                        return false;
+                    }
                 }
             }
 
