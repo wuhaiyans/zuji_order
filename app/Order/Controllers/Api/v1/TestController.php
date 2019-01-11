@@ -19,38 +19,38 @@ class TestController extends Controller
 	}
 
 	public function sendSms() {
-		$youhui = 0;
-		// 租金抵用券
-		$couponInfo = \App\Lib\Coupon\Coupon::getUserCoupon(3209,1);
-		p($couponInfo);
 
-		// 创建优惠券使用记录
-		$couponData = [
-			'coupon_id'         => 19,
-			'discount_amount'   => '0.01',
-			'business_type'     => \App\Order\Modules\Inc\OrderStatus::BUSINESS_FENQI,
-			'business_no'       => 'FB10489812984066',
-		];
-		$couponId = \App\Order\Modules\Repository\OrderCouponRepository::add($couponData);
-		if(!$couponId){
-			return apiResponse([], ApiStatus::CODE_71001, "创建优惠券使用记录失败");
-		}
+		$a = 18.33;
+		$b = 18.32;
 
+		$amount = bcsub($a, $b, 2);
+		$amount = max($amount , 0.01);
+		p($amount);
+		v($a,1);
+		v($b,1);
 
+		v(bcsub($b,$a,2));
+		$amount = bcmul($a,100) - bcmul($b,100);
+//			$amount = $amount > 0 ? $amount : 0.01;
+		p($amount);
 
 		die;
-
 		$_data = [
-			'zujin'		    => '159.00',	//【必选】price 每期租金
+			'zujin'		    => '0.5',	//【必选】price 每期租金
 			'zuqi'		    => 12,	    //【必选】int 租期（必选保证大于0）
-			'insurance'    	=> '199.00',	//【必选】price 保险金额
+			'insurance'    	=> '0.01',	//【必选】price 保险金额
 		];
 
 		$sku = [
+
 				[
-					'discount_amount' => '1717.20',
+					'discount_amount' => '0.01',
 					'zuqi_policy' => 'avg',// 分期类型根据优惠券类型来进行分期 serialize 分期顺序优惠 （递减）
-				]
+				],
+//				[
+//					'discount_amount' => '0.1',
+//					'zuqi_policy' => 'first',// 分期类型根据优惠券类型来进行分期 serialize 分期顺序优惠 （递减）
+//				]
 		];
 
 
@@ -63,6 +63,11 @@ class TestController extends Controller
 				$discounter_simple = new \App\Order\Modules\Repository\Instalment\Discounter\SimpleDiscounter( $dis_info['discount_amount'] );
 				$computer->addDiscounter( $discounter_simple );
 			}
+//			else if($dis_info['zuqi_policy'] == 'first'){
+//				$discounter_first = new \App\Order\Modules\Repository\Instalment\Discounter\FirstDiscounter( $dis_info['discount_amount'] );
+//				$computer->addDiscounter( $discounter_first );
+//			}
+
 
 		}
 		$a =  $computer->compute();
