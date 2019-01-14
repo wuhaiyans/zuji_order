@@ -16,9 +16,9 @@ class ActiveController extends Controller
         ini_set('max_execution_time', '0');
 
         try{
-            $limit  = 1;
+            $limit  = 50;
             $page   = 1;
-            $sleep  = 10;
+            $sleep  = 5;
             $code   = "SMS_113461290";
 
 
