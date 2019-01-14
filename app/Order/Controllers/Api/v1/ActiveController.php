@@ -18,8 +18,8 @@ class ActiveController extends Controller
         try{
             $limit  = 50;
             $page   = 1;
-            $sleep  = 10;
-            $code   = "SMS_113461197";
+            $sleep  = 5;
+            $code   = "SMS_113461290";
 
 
             // 查询总数
@@ -48,26 +48,12 @@ class ActiveController extends Controller
 
                     $mobile         = trim($item['mobile']);
 
-                    $url = 'https://h5.nqyong.com/myBillDetail?';
-
-                    $urlData = [
-                        'orderNo'       => trim($item['order_no']),     //  订单号
-                        'zuqi_type'     => trim($item['zuqi_type']),    //  租期类型
-                        'id'            => trim($item['instalment_id']),//  分期ID
-                        'appid'         => trim($item['appid']),        //  商品编号
-                        'goodsNo'       => trim($item['goods_no']),     //  商品编号
-                    ];
-
-                    $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
-
+                    $url = 'http://a.app.qq.com/o/simple.jsp?pkgname=com.huishoubao.nqy';
 
                     // 短信参数
                     $dataSms =[
-                        'realName'      => trim($item['realname']),
-                        'goodsName'     => trim($item['goods_name']),
-                        'zuJin'         => trim($item['amount']),
-                        'zhifuLianjie'  => createShortUrl($zhifuLianjie),
-                        'serviceTel'    => config('tripartite.Customer_Service_Phone'),
+                        'realName' => trim($item['realname']),
+                        'lianjie'  => createShortUrl($url),
                     ];
 
 
