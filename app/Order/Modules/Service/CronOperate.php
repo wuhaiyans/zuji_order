@@ -641,8 +641,6 @@ class CronOperate
             LogApi::debug('[cronOverdueDeductionMessage获取连续两个月，总共三个月未缴租金的逾期数据]', ['data'=>$orderNoArray]);
             $data = [];
             if( $orderNoArray ){
-               $amount = array_column($orderNoArray,'20180212000338');
-                LogApi::debug('[cronOverdueDeductionMessage获取订单对应金额]', ['data'=>$amount]);
                 $getData=[];
                 foreach($orderNoArray as $item){
                     $getData[] = (string)$item['order_no'];
@@ -733,8 +731,14 @@ class CronOperate
         }
 
     }
+
+    /**
+     * /获取订单的剩余未缴租金
+     * @param $order_no
+     * @return mixed
+     */
     public static function getUnpaidAmount($order_no){
-        //获取连续两个月，总共三个月未缴租金的逾期数据
+
         $orderNoArray = \App\Order\Modules\Service\OrderGoodsInstalment::instalmentOverdue();
         foreach ($orderNoArray as $item){
             if($item['order_no'] == $order_no){
