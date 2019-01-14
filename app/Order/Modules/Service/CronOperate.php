@@ -688,26 +688,32 @@ class CronOperate
                 //如果逾期扣款表数据不在连续两个月，总共三个月未缴租金的逾期数据中，则更改状态为无效
                 if( $getOverdueDeductionInfo ){
                     foreach ($getOverdueDeductionInfo as $item){
-                        if(!in_array((string)$item['order_no'],$getData,true)){
+                        //累计未缴金额
+                        $unpaid_amount = self::getUnpaidAmount($item['order_no']);
+                        if(!in_array((string)$item['order_no'],$getData,true) && $item['status'] == Inc\OrderOverdueStatus::EFFECTIVE){
                             //如果数据状态是有效，则更改为无效
-                            if($item['status'] == Inc\OrderOverdueStatus::EFFECTIVE){
-                                $data = ['status' => Inc\OrderOverdueStatus::INVALID];//无效状态
-                                $upResult = OrderOverdueDeductionRepository::upOverdueStatus((string)$item['order_no'],$data);
-                                if( !$upResult){
-                                    LogApi::debug('[cronOverdueDeductionMessage更改为无效失败]');
-                                    return false;
-                                }
-                            }
+                            $data = [
+                                'status' => Inc\OrderOverdueStatus::INVALID,//无效状态
+                            ];
+
                         }
                         //获取连续两个月，总共三个月未缴租金的逾期数据 在表中并且无效状态，则更新为有效
                         if(in_array((string)$item['order_no'],$getData,true) && $item['status'] == Inc\OrderOverdueStatus::INVALID){
                             $data = [
                                 'status'         => Inc\OrderOverdueStatus::EFFECTIVE,//有效状态
+                                'unpaid_amount' => $unpaid_amount//获取订单未缴金额总和
+                            ];
+                        }
+                        //获取连续两个月，总共三个月未缴租金的逾期数据 在表中未缴金额与获取未缴金额不一致，则修改金额
+                        if(in_array((string)$item['order_no'],$getData,true) && $item['status'] == Inc\OrderOverdueStatus::EFFECTIVE && $item['unpaid_amount'] != $unpaid_amount){
+                            $data = [
                                 'unpaid_amount' => self::getUnpaidAmount($item['order_no'])//获取订单未缴金额总和
                             ];
+                        }
+                        if(isset($data) && !empty($data)){
                             $upResult = OrderOverdueDeductionRepository::upOverdueStatus((string)$item['order_no'],$data);
                             if( !$upResult){
-                                LogApi::debug('[cronOverdueDeductionMessage更改为有效失败]');
+                                LogApi::debug('[cronOverdueDeductionMessage修改逾期数据失败]');
                                 return false;
                             }
                         }
