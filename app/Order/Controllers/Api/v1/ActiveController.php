@@ -22,18 +22,12 @@ class ActiveController extends Controller
 
         // 查询总数
         $total = OrderActive::query()
-            ->where([
-                ['status', '=', 0]
-            ])
             ->count();
         $totalpage = ceil($total/$limit);
 
         \App\Lib\Common\LogApi::debug('[sendMessage:发送短信总数为:' . $total);
         do {
             $result = OrderActive::query()
-                ->where([
-                    ['status', '=', 0]
-                ])
                 ->orderby('id','ASC')
                 ->forPage($page,$limit)
                 ->get()
@@ -46,7 +40,7 @@ class ActiveController extends Controller
 
                 $mobile         = trim($item['mobile']);
 
-                $url = 'http://a.app.qq.com/o/simple.jsp?pkgname=com.huishoubao.nqy';
+//                $url = 'http://a.app.qq.com/o/simple.jsp?pkgname=com.huishoubao.nqy';
 
                 // 短信参数
                 $dataSms =[
@@ -57,9 +51,6 @@ class ActiveController extends Controller
                  //发送短信
 				\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
 
-                \App\Order\Models\OrderActive::where(
-                    ['id'=>$item['id']]
-                )->update(['status' => 1]);
             }
             \App\Lib\Common\LogApi::debug('[sendMessage:发送短信页数为:' . $page);
             $page++;
