@@ -16,10 +16,10 @@ class ActiveController extends Controller
         ini_set('max_execution_time', '0');
 
         try{
-            $limit  = 50;
+            $limit  = 1;
             $page   = 1;
             $sleep  = 10;
-            $code   = "SMS_113461197";
+            $code   = "SMS_113461290";
 
 
             // 查询总数
@@ -31,7 +31,7 @@ class ActiveController extends Controller
             $totalpage = ceil($total/$limit);
 
             \App\Lib\Common\LogApi::debug('[sendMessage:发送短信总数为:' . $total);
-            do {
+//            do {
                 $result = OrderActive::query()
                     ->where([
                         ['status', '=', 0]
@@ -40,36 +40,23 @@ class ActiveController extends Controller
                     ->forPage($page,$limit)
                     ->get()
                     ->toArray();
-                if(empty($result)){
-					break;
-                }
+//                if(empty($result)){
+//					break;
+//                }
+//            p($result);
 
                 foreach($result as $item){
 
                     $mobile         = trim($item['mobile']);
 
-                    $url = 'https://h5.nqyong.com/myBillDetail?';
-
-                    $urlData = [
-                        'orderNo'       => trim($item['order_no']),     //  订单号
-                        'zuqi_type'     => trim($item['zuqi_type']),    //  租期类型
-                        'id'            => trim($item['instalment_id']),//  分期ID
-                        'appid'         => trim($item['appid']),        //  商品编号
-                        'goodsNo'       => trim($item['goods_no']),     //  商品编号
-                    ];
-
-                    $zhifuLianjie = $url . createLinkstringUrlencode($urlData);
-
+                    $url = 'http://a.app.qq.com/o/simple.jsp?pkgname=com.huishoubao.nqy';
 
                     // 短信参数
                     $dataSms =[
-                        'realName'      => trim($item['realname']),
-                        'goodsName'     => trim($item['goods_name']),
-                        'zuJin'         => trim($item['amount']),
-                        'zhifuLianjie'  => createShortUrl($zhifuLianjie),
-                        'serviceTel'    => config('tripartite.Customer_Service_Phone'),
+                        'realName' => trim($item['realname']),
+                        'lianjie'  => createShortUrl($url),
                     ];
-
+                    p($dataSms);
 
 					// 发送短信
 					\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
@@ -81,7 +68,7 @@ class ActiveController extends Controller
                 \App\Lib\Common\LogApi::debug('[sendMessage:发送短信页数为:' . $page);
                 $page++;
                 sleep($sleep);
-            } while ($page <= $totalpage);
+//            } while ($page <= $totalpage);
 
             \App\Lib\Common\LogApi::debug('[sendMessage发送短信总数为:' . $total);
 
