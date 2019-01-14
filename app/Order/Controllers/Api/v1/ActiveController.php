@@ -13,52 +13,50 @@ class ActiveController extends Controller
      * @return bool
      */
     public function sendMessage(){
-        ini_set('max_execution_time', '0');
+        try{
+            $limit  = 50;
+            $page   = 1;
+            $code   = "SMS_113461292";
 
-        $limit  = 50;
-        $page   = 1;
-        $code   = "SMS_113461292";
+            do {
+                $result = OrderActive::query()
+                    ->where([
+                        ['status', '=', 0]
+                    ])
+                    ->orderby('id','ASC')
+                    ->forPage($page,$limit)
+                    ->get()
+                    ->toArray();
+                if(empty($result)){
+                    break;
+                }
 
-
-        // 查询总数
-        $total = OrderActive::query()
-            ->count();
-        $totalpage = ceil($total/$limit);
-
-        \App\Lib\Common\LogApi::debug('[sendMessage:发送短信总数为:' . $total);
-        do {
-            $result = OrderActive::query()
-                ->orderby('id','ASC')
-                ->forPage($page,$limit)
-                ->get()
-                ->toArray();
-            if(empty($result)){
-                break;
-            }
-
-            foreach($result as $item){
-
-                $mobile         = trim($item['mobile']);
-
-//                $url = 'http://a.app.qq.com/o/simple.jsp?pkgname=com.huishoubao.nqy';
-
-                // 短信参数
-                $dataSms =[
-                    'realName' => trim($item['realname']),
-                ];
+                $url = 'https://h5.nqyong.com/login?appid=1&backUrl=%2Fcards';
 
 
-                 //发送短信
-				\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
-
-            }
-            \App\Lib\Common\LogApi::debug('[sendMessage:发送短信页数为:' . $page);
-            $page++;
-        } while ($page <= $totalpage);
-
-        \App\Lib\Common\LogApi::debug('[sendMessage发送短信总数为:' . $total);
+                foreach($result as $item){
 
 
+                    $dataSms = [
+                        'realName'      => $item['realname'],
+                        'zhifuLianjie'  => createShortUrl($url),
+
+                    ];
+                    // 发送短信
+                    \App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
+
+                    \App\Order\Models\OrderActive::where(
+                        ['id'=>$item['id']]
+                    )->update(['status' => 1]);
+                }
+                // sleep($sleep);
+
+            } while (true);
+
+
+        }catch(\Exception $exc){
+            \App\Lib\Common\LogApi::debug('[sendMessage:活动短信发送失败]', ['msg'=>$exc->getMessage()]);
+        }
     }
 
 
