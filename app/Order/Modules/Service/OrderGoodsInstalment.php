@@ -236,14 +236,14 @@ class OrderGoodsInstalment
                             FROM
                                 `order_goods_instalment`
                             LEFT JOIN `order_info` ON `order_info`.`order_no` = `order_goods_instalment`.`order_no`
-                            LEFT JOIN `order_overdue_deduction` ON `order_overdue_deduction`.`order_no` = `order_goods_instalment`.`order_no`
+                            LEFT JOIN `order_goods` ON `order_goods`.`order_no` = `order_goods_instalment`.`order_no`
                             WHERE
                                 (
                                     `order_info`.`order_status` = " . $order_status . "
                                     AND `order_info`.`order_type` <> " . $order_type . "
                                     AND `order_info`.`zuqi_type` <> " . $zuqi_type . "
                                     AND `order_goods_instalment`.`status` = " . $status . "
-                                    AND `order_overdue_deduction`.`order_no` IS NULL
+                                    AND `order_goods`.`yajin` > 0
                                 )
                             GROUP BY
                                 `order_goods_instalment`.`order_no`
@@ -259,32 +259,6 @@ class OrderGoodsInstalment
 
         // 以订单为维度 分组
         $instalmentList = array_group_by($instalmentList, 'order_no');
-
-//
-//        $whereArray = [
-//            ['order_info.order_status', '=', \App\Order\Modules\Inc\OrderStatus::OrderInService],   //在服务中
-//            ['order_info.order_type', '<>', \App\Order\Modules\Inc\OrderStatus::orderMiniService],  //去除小程序订单
-//            ['order_goods_instalment.status', '=', OrderInstalmentStatus::FAIL],   // 扣款失败
-//        ];
-//
-//        /**
-//         * 订单在服务中 分期连续两个月 未扣款成功
-//         */
-//        $result =  \App\Order\Models\OrderGoodsInstalment::select(
-//            DB::raw("count(*) as num,order_goods_instalment.order_no"))
-//            ->where($whereArray)
-//            ->whereNull('order_overdue_deduction.order_no')
-//            ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods_instalment.order_no')
-//            ->leftJoin('order_overdue_deduction', 'order_overdue_deduction.order_no', '=', 'order_goods_instalment.order_no')
-//            ->groupBy('order_goods_instalment.order_no')
-//            ->orderBy('order_info.id','DESC')
-//            ->having('num', '>=', 2)
-//            ->get();
-//        if (!$result) return false;
-//        $instalmentList =  $result->toArray();
-//        if(!$instalmentList){
-//            return [];
-//        }
 
         $array = [];
         // 循环查询

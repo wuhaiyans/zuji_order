@@ -57,7 +57,7 @@ class SimpleDiscounter implements Discounter {
 		// 分期数
 		$n = count( $params );
 		// 余数
-		$remainderAmount = ($totalAmount * 100) % ($n);
+		$remainderAmount = bcmod($totalAmount * 100,$n);
 		$remainderAmount = $remainderAmount / 100;
 
 		// 平均优惠

@@ -627,51 +627,106 @@ class CronOperate
             $overdueData = [];
             if( $getOverdueDeductionInfo ){
                 foreach ($getOverdueDeductionInfo as $item){
-                    $overdueData[] = $item['order_no'];
+                    $overdueData[] = (string)$item['order_no'];
+                    //判断数组中是否含有有效数据
+                    $status = "false";
+                    if($item['status'] == Inc\OrderOverdueStatus::EFFECTIVE){
+                        $status = "true";
+                    }
                 }
             }
+            LogApi::debug('[cronOverdueDeductionMessage获取逾期扣款表已存在的数据]', ['data'=>$overdueData]);
             //获取连续两个月，总共三个月未缴租金的逾期数据
             $orderNoArray = \App\Order\Modules\Service\OrderGoodsInstalment::instalmentOverdue();
             LogApi::debug('[cronOverdueDeductionMessage获取连续两个月，总共三个月未缴租金的逾期数据]', ['data'=>$orderNoArray]);
+            $data = [];
             if( $orderNoArray ){
-                    foreach($orderNoArray as $item){
-                        if(!in_array($item['order_no'],$overdueData,true)){
-                            //获取订单信息
-                            $orderInfo = OrderOverdueDeductionRepository::getOverdueOrderDetail($item['order_no']);
-                            $data = [];
-                            //添加数据
-                            if($orderInfo){
-                                if( $orderInfo['surplus_yajin'] == 0){
-                                    $surplus_yajin = $orderInfo['yajin'];
-                                }else{
-                                    $surplus_yajin = $orderInfo['surplus_yajin'];
-                                }
-                                $data = [
-                                    'order_no'        =>$item['order_no'],
-                                    'order_time'     =>$orderInfo['create_time'],
-                                    'channel_id'     =>$orderInfo['channel_id'],
-                                    'app_id'          =>$orderInfo['appid'],
-                                    'goods_name'     =>$orderInfo['goods_name'],
-                                    'zuqi_type'      =>$orderInfo['zuqi_type'],
-                                    'user_name'      =>empty($orderInfo['realname'])?'':$orderInfo['realname'],
-                                    'mobile'         =>$orderInfo['mobile'],
-                                    'unpaid_amount' =>$item['amount'],
-                                    'overdue_amount'=>$surplus_yajin,
-                                    'user_id'        =>$orderInfo['user_id'],
-                                    'create_time'   =>time()
+               $amount = array_column($orderNoArray,'20180212000338');
+                LogApi::debug('[cronOverdueDeductionMessage获取订单对应金额]', ['data'=>$amount]);
+                $getData=[];
+                foreach($orderNoArray as $item){
+                    $getData[] = (string)$item['order_no'];
+                    //获取连续两个月，总共三个月未缴租金的逾期数据 不在表中，则添加逾期数据
+                    if(!in_array((string)$item['order_no'],$overdueData,true)){
+                        //获取订单信息
+                        $orderInfo = OrderOverdueDeductionRepository::getOverdueOrderDetail((string)$item['order_no']);
 
-                                ];
+                        //添加数据
+                        if($orderInfo){
+                            if( $orderInfo['surplus_yajin'] == 0){
+                                $surplus_yajin = $orderInfo['yajin'];
+                            }else{
+                                $surplus_yajin = $orderInfo['surplus_yajin'];
+                            }
+                            $data = [
+                                'order_no'        => (string)$item['order_no'],
+                                'order_time'     => $orderInfo['create_time'],
+                                'channel_id'     => $orderInfo['channel_id'],
+                                'app_id'          => $orderInfo['appid'],
+                                'goods_name'     => $orderInfo['goods_name'],
+                                'zuqi_type'      => $orderInfo['zuqi_type'],
+                                'user_name'      => empty($orderInfo['realname'])?'':$orderInfo['realname'],
+                                'mobile'         => $orderInfo['mobile'],
+                                'unpaid_amount' => $item['amount'],
+                                'overdue_amount'=> $surplus_yajin,
+                                'user_id'        => $orderInfo['user_id'],
+                                'create_time'   => time(),
+                                'status'         => Inc\OrderOverdueStatus::EFFECTIVE//有效状态
 
-                                $createResult = OrderOverdueDeductionRepository::createOverdue($data);//创建符合要求的数据
-                                if( !$createResult){
-                                    LogApi::debug('[cronOverdueDeductionMessage创建符合要求的数据失败]');
+
+                            ];
+
+                            $createResult = OrderOverdueDeductionRepository::createOverdue($data);//创建符合要求的数据
+                            if( !$createResult){
+                                LogApi::debug('[cronOverdueDeductionMessage创建符合要求的数据失败]');
+                                return false;
+                            }
+                        }
+
+                    }
+
+                }
+                LogApi::debug('[cronOverdueDeductionMessage获取连续两个月，总共三个月未缴租金的逾期数据转化为一维数组数据]',['data'=>$getData]);
+                //如果逾期扣款表数据不在连续两个月，总共三个月未缴租金的逾期数据中，则更改状态为无效
+                if( $getOverdueDeductionInfo ){
+                    foreach ($getOverdueDeductionInfo as $item){
+                        if(!in_array((string)$item['order_no'],$getData,true)){
+                            //如果数据状态是有效，则更改为无效
+                            if($item['status'] == Inc\OrderOverdueStatus::EFFECTIVE){
+                                $data = ['status' => Inc\OrderOverdueStatus::INVALID];//无效状态
+                                $upResult = OrderOverdueDeductionRepository::upOverdueStatus((string)$item['order_no'],$data);
+                                if( !$upResult){
+                                    LogApi::debug('[cronOverdueDeductionMessage更改为无效失败]');
                                     return false;
                                 }
                             }
+                        }
+                        //获取连续两个月，总共三个月未缴租金的逾期数据 在表中并且无效状态，则更新为有效
+                        if(in_array((string)$item['order_no'],$getData,true) && $item['status'] == Inc\OrderOverdueStatus::INVALID){
+                            $data = ['status' => Inc\OrderOverdueStatus::EFFECTIVE];//有效状态
+                            //获取订单未缴金额总和
 
+                            $upResult = OrderOverdueDeductionRepository::upOverdueStatus((string)$item['order_no'],$data);
+                            if( !$upResult){
+                                LogApi::debug('[cronOverdueDeductionMessage更改为有效失败]');
+                                return false;
+                            }
                         }
                     }
+
                 }
+            }else{
+                //获取逾期表中的有效数据，如果存在有效数据，全部更新为无效
+                if( isset( $status ) && $status == "true"){
+                    $data = ['status' => Inc\OrderOverdueStatus::INVALID];//无效状态
+                    $upResult = \App\Order\Models\OrderOverdueDeduction::query()->update($data);
+                    if( !$upResult){
+                        LogApi::debug('[cronOverdueDeductionMessage更改为无效失败]');
+                        return false;
+                    }
+                }
+            }
+
         }catch (\Exception $exc){
             LogApi::debug('[cronOverdueDeductionMessage程序异常]', ['msg'=>$exc->getMessage()]);
         }

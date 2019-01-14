@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Modules\Repository;
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Inc\OrderOverdueStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use Illuminate\Support\Facades\DB;
 use App\Order\Models\OrderOverdueDeduction;
@@ -51,7 +52,10 @@ class OrderOverdueDeductionRepository
         if (isset($param['zuqi_type'])) {
             $whereArray[] = ['order_overdue_deduction.zuqi_type', '=', $param['zuqi_type']];
         }
+        //订单租用中
         $whereArray[] = ['order_info.order_status', '=', OrderStatus::OrderInService];
+        //有效记录
+        $whereArray[] = ['order_overdue_deduction.status', '=', OrderOverdueStatus::EFFECTIVE];
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
@@ -64,9 +68,10 @@ class OrderOverdueDeductionRepository
         }
 
         $orderList = DB::table('order_overdue_deduction')
+            ->leftJoin('order_overdue_visit','order_overdue_deduction.visit_id', '=', 'order_overdue_visit.id')
             ->leftJoin('order_info','order_overdue_deduction.order_no', '=', 'order_info.order_no')
             ->where($whereArray)
-            ->select('order_overdue_deduction.*','order_info.order_status')
+            ->select('order_overdue_deduction.*','order_info.order_status','order_overdue_visit.visit_id as v_id','order_overdue_visit.visit_text')
             ->orderBy('order_overdue_deduction.create_time', 'DESC')
             ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $page);
         if( !$orderList ){
@@ -108,6 +113,8 @@ class OrderOverdueDeductionRepository
         }
         //订单状态租用中
         $whereArray[] = ['order_info.order_status', '=', OrderStatus::OrderInService];
+        //有效记录
+        $whereArray[] = ['order_overdue_deduction.status', '=', OrderOverdueStatus::EFFECTIVE];
         //回访标识
         if (isset($param['visit_id'])) {
             $whereArray[] = ['order_overdue_deduction.visit_id', '=', $param['visit_id']];
@@ -120,10 +127,11 @@ class OrderOverdueDeductionRepository
         }
 
         $overdueList = DB::table('order_overdue_deduction')
+            ->leftJoin('order_overdue_visit','order_overdue_deduction.visit_id', '=', 'order_overdue_visit.id')
             ->leftJoin('order_overdue_record','order_overdue_deduction.id', '=', 'order_overdue_record.overdue_id')
             ->leftJoin('order_info','order_overdue_deduction.order_no', '=', 'order_info.order_no')
             ->where($whereArray)
-            ->select('order_overdue_deduction.*','order_overdue_record.deduction_amount as d_amount','order_overdue_record.status as d_status','order_overdue_record.create_time as d_time','order_info.order_status')
+            ->select('order_overdue_deduction.*','order_overdue_record.deduction_amount as d_amount','order_overdue_record.status as d_status','order_overdue_record.create_time as d_time','order_info.order_status','order_overdue_visit.visit_id as v_id','order_overdue_visit.visit_text')
             ->orderBy('order_overdue_deduction.create_time', 'DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();
@@ -157,7 +165,7 @@ class OrderOverdueDeductionRepository
      */
     public static function getOverdueInfo(){
         $result =  DB::table('order_overdue_deduction')
-            ->select('order_no')->get();
+            ->select('order_no','status')->get();
         if (!$result) return false;
         $resultArray = objectToArray($result);
 
@@ -212,10 +220,30 @@ class OrderOverdueDeductionRepository
      * @param array $data
      */
     public static function createOverdue(array $data){
+        if(!isset( $data )){
+            return false;
+        }
         $createResult = OrderOverdueDeduction::query()->insert($data);
         if( !$createResult ){
             return false;
         }
         return $createResult;
+    }
+    /**
+     * 修改逾期扣款记录状态
+     * @param array $data
+     */
+    public static function upOverdueStatus($order_no,array $data){
+        if(!isset( $order_no )){
+            return false;
+        }
+        if(!isset( $data )){
+            return false;
+        }
+        $upResult = OrderOverdueDeduction::where('order_no','=',$order_no)->update($data);
+        if( !$upResult ){
+            return false;
+        }
+        return $upResult;
     }
 }

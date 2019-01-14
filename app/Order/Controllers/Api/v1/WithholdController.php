@@ -1090,10 +1090,10 @@ class WithholdController extends Controller
 			if(is_array($couponInfo) && $couponInfo['youhui'] > 0){
 				$youhui = $couponInfo['youhui'] / 100;
 			}
-			// 最小支付一分钱
-			$amount = $instalmentInfo['amount'] - $youhui;
-			$amount = $amount > 0 ? $amount : 0.01;
 
+			// 最小支付一分钱
+			$amount = bcsub($instalmentInfo['amount'], $youhui, 2);
+			$amount = max($amount, 0.01);
             // 分期为0元 则不查询优惠券信息
             if($instalmentInfo['amount'] > 0 && $youhui > 0){
                 // 创建优惠券使用记录
