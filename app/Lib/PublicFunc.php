@@ -673,7 +673,7 @@ function createShortUrl($url){
     $info = \App\Lib\Curl::post($shortUrl, json_encode($data), $header);
     $info = json_decode($info,true);
 
-    \App\Lib\Common\LogApi::info('[activesendMessage]生成短连接：' , ['url'=>$url,'info'=>$shortUrl,'data'=>$info?$info:'']);
+    \App\Lib\Common\LogApi::info('[sendMessage]生成短连接：' , ['url'=>$url,'info'=>$shortUrl,'data'=>$info?$info:'']);
 
     if(!is_array($info)){
         return false;

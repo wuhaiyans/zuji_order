@@ -31,7 +31,7 @@ class ActiveController extends Controller
             $totalpage = ceil($total/$limit);
 
             \App\Lib\Common\LogApi::debug('[sendMessage:发送短信总数为:' . $total);
-//            do {
+            do {
                 $result = OrderActive::query()
                     ->where([
                         ['status', '=', 0]
@@ -40,10 +40,9 @@ class ActiveController extends Controller
                     ->forPage($page,$limit)
                     ->get()
                     ->toArray();
-//                if(empty($result)){
-//					break;
-//                }
-//            p($result);
+                if(empty($result)){
+					break;
+                }
 
                 foreach($result as $item){
 
@@ -56,7 +55,7 @@ class ActiveController extends Controller
                         'realName' => trim($item['realname']),
                         'lianjie'  => createShortUrl($url),
                     ];
-                    p($dataSms);
+
 
 					// 发送短信
 					\App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
@@ -68,7 +67,7 @@ class ActiveController extends Controller
                 \App\Lib\Common\LogApi::debug('[sendMessage:发送短信页数为:' . $page);
                 $page++;
                 sleep($sleep);
-//            } while ($page <= $totalpage);
+            } while ($page <= $totalpage);
 
             \App\Lib\Common\LogApi::debug('[sendMessage发送短信总数为:' . $total);
 
