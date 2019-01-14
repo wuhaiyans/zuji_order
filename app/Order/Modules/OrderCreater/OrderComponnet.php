@@ -180,12 +180,11 @@ class OrderComponnet implements OrderCreater
     public function filter(): bool
     {
         //判断是否有其他活跃 未完成订单
-
-        $mobile = $this->getOrderCreater()->getUserComponnet()->getMobile();
-
-        $whiteUser = Redis::set("whiteListUser".$mobile,$mobile);
-        $res = Redis::get("whiteListUser".$mobile);
-        if(empty($res)){
+//        $mobile = $this->getOrderCreater()->getUserComponnet()->getMobile();
+//
+//        $whiteUser = Redis::set("whiteListUser".$mobile,$mobile);
+//        $res = Redis::get("whiteListUser".$mobile);
+//        if(empty($res)){
             $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
             $b =OrderRepository::unCompledOrder($this->userId);
             if($b) {
@@ -193,7 +192,7 @@ class OrderComponnet implements OrderCreater
                 $this->getOrderCreater()->setError('有未完成订单');
                 return false;
             }
-        }
+        //}
 
         $b = $this->userComponnet->filter();
         if( !$b ){
