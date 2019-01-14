@@ -93,7 +93,7 @@ class OverDueDeductionController extends Controller
                         $item['appid_name'],
                         $item['goods_name'],
                         $item['unpaid_amount'],
-                        $item['overdue_amount'],
+                        $item['o_amount'],
                         $item['visit_name'],
                         $item['visit_text'],
 
