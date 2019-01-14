@@ -731,8 +731,14 @@ class CronOperate
         }
 
     }
+
+    /**
+     * /获取订单的剩余未缴租金
+     * @param $order_no
+     * @return mixed
+     */
     public static function getUnpaidAmount($order_no){
-        //获取连续两个月，总共三个月未缴租金的逾期数据
+
         $orderNoArray = \App\Order\Modules\Service\OrderGoodsInstalment::instalmentOverdue();
         foreach ($orderNoArray as $item){
             if($item['order_no'] == $order_no){
