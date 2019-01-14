@@ -185,7 +185,7 @@ class OrderComponnet implements OrderCreater
        // $res =Redis::set("OrderWhiteList",json_encode([$mobile]));
         $res = Redis::get("OrderWhiteList");
         $whiteList = json_decode($res,true);
-        if(!in_array($mobile,$whiteList) && !empty($res)){
+        if(is_array($whiteList) && !in_array($mobile,$whiteList) && !empty($res)){
             $b =OrderRepository::unCompledOrder($this->userId);
             if($b) {
                 set_code(ApiStatus::CODE_30006);
