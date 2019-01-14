@@ -641,8 +641,6 @@ class CronOperate
             LogApi::debug('[cronOverdueDeductionMessage获取连续两个月，总共三个月未缴租金的逾期数据]', ['data'=>$orderNoArray]);
             $data = [];
             if( $orderNoArray ){
-               $amount = array_column($orderNoArray,'20180212000338');
-                LogApi::debug('[cronOverdueDeductionMessage获取订单对应金额]', ['data'=>$amount]);
                 $getData=[];
                 foreach($orderNoArray as $item){
                     $getData[] = (string)$item['order_no'];
@@ -696,22 +694,37 @@ class CronOperate
                                 $data = ['status' => Inc\OrderOverdueStatus::INVALID];//无效状态
                                 $upResult = OrderOverdueDeductionRepository::upOverdueStatus((string)$item['order_no'],$data);
                                 if( !$upResult){
-                                    LogApi::debug('[cronOverdueDeductionMessage更改为无效失败]');
+                                    LogApi::debug('[cronOverdueDeductionMessage更改逾期未缴金额失败]');
                                     return false;
                                 }
                             }
                         }
                         //获取连续两个月，总共三个月未缴租金的逾期数据 在表中并且无效状态，则更新为有效
                         if(in_array((string)$item['order_no'],$getData,true) && $item['status'] == Inc\OrderOverdueStatus::INVALID){
-                            $data = ['status' => Inc\OrderOverdueStatus::EFFECTIVE];//有效状态
-                            //获取订单未缴金额总和
-
+                            $data = [
+                                'status'         => Inc\OrderOverdueStatus::EFFECTIVE,//有效状态
+                                'unpaid_amount' => self::getUnpaidAmount((string)$item['order_no'])//获取订单未缴金额总和
+                            ];
                             $upResult = OrderOverdueDeductionRepository::upOverdueStatus((string)$item['order_no'],$data);
                             if( !$upResult){
-                                LogApi::debug('[cronOverdueDeductionMessage更改为有效失败]');
+                                LogApi::debug('[cronOverdueDeductionMessage更改逾期未缴金额失败]');
                                 return false;
                             }
                         }
+                        //获取连续两个月，总共三个月未缴租金的逾期数据 在表中未缴金额与获取未缴金额不一致，则修改金额
+                        if(in_array((string)$item['order_no'],$getData,true) && $item['status'] == Inc\OrderOverdueStatus::EFFECTIVE && $item['unpaid_amount'] != self::getUnpaidAmount((string)$item['order_no'])){
+
+                            $data = [
+                                'unpaid_amount' => self::getUnpaidAmount((string)$item['order_no'])//获取订单未缴金额总和
+                            ];
+                            $upResult = OrderOverdueDeductionRepository::upOverdueStatus((string)$item['order_no'],$data);
+                            if( !$upResult){
+                                LogApi::debug('[cronOverdueDeductionMessage更改逾期未缴金额失败]');
+                                return false;
+                            }
+
+                        }
+
                     }
 
                 }
@@ -733,5 +746,19 @@ class CronOperate
 
     }
 
+    /**
+     * /获取订单的剩余未缴租金
+     * @param $order_no
+     * @return mixed
+     */
+    public static function getUnpaidAmount($order_no){
+
+        $orderNoArray = \App\Order\Modules\Service\OrderGoodsInstalment::instalmentOverdue();
+        foreach ($orderNoArray as $item){
+            if($item['order_no'] == $order_no){
+                return $item['amount'];
+            }
+        }
+    }
 
 }

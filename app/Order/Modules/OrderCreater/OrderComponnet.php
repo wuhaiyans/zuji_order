@@ -16,6 +16,7 @@ use App\Order\Modules\Inc\OrderRiskCheckStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderRepository;
+use Illuminate\Support\Facades\Redis;
 use Mockery\Exception;
 
 class OrderComponnet implements OrderCreater
@@ -179,12 +180,19 @@ class OrderComponnet implements OrderCreater
     public function filter(): bool
     {
         //判断是否有其他活跃 未完成订单
+        $mobile = $this->getOrderCreater()->getUserComponnet()->getMobile();
         $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
-        $b =OrderRepository::unCompledOrder($this->userId);
-        if($b) {
-            set_code(ApiStatus::CODE_30006);
-            $this->getOrderCreater()->setError('有未完成订单');
-            return false;
+       // $res =Redis::set("OrderWhiteList",json_encode([$mobile]));
+        $res = Redis::get("OrderWhiteList");
+        $whiteList = json_decode($res,true);
+
+        if(!in_array($mobile,$whiteList)){
+            $b =OrderRepository::unCompledOrder($this->userId);
+            if($b) {
+                set_code(ApiStatus::CODE_30006);
+                $this->getOrderCreater()->setError('有未完成订单');
+                return false;
+            }
         }
 
         $b = $this->userComponnet->filter();
