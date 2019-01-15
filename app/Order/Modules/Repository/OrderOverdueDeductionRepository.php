@@ -125,10 +125,6 @@ LEFT JOIN `order_overdue_record` ON `order_overdue_deduction`.`id` = `order_over
         if (isset($param['deduction_status']) && !empty($param['deduction_status'])) {
             $whereArray[] = ['order_overdue_deduction.deduction_status', '=', $param['deduction_status']];
         }
-        //订单状态租用中
-        $whereArray[] = ['order_info.order_status', '=', OrderStatus::OrderInService];
-        //有效记录
-        $whereArray[] = ['order_overdue_deduction.status', '=', OrderOverdueStatus::EFFECTIVE];
         //回访标识
         if (isset($param['visit_id'])) {
             $whereArray[] = ['order_overdue_deduction.visit_id', '=', $param['visit_id']];
