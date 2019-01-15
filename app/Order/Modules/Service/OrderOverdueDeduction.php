@@ -64,8 +64,7 @@ class OrderOverdueDeduction
         $overdue_info=[];
         if (!empty($overdueInfo)) {
             foreach ($overdueInfo as $keys=>$values) {
-
-                $overdue_info[$keys] = $overdueInfo[$keys];
+                
                 //应用来源
                 $overdue_info[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
 

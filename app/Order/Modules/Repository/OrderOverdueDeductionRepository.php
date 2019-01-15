@@ -135,9 +135,6 @@ LEFT JOIN `order_overdue_record` ON `order_overdue_deduction`.`id` = `order_over
             $where .= ' AND  order_overdue_deduction.zuqi_type= '.$param['zuqi_type'];
         }
         $where .= ' AND  (`order_overdue_deduction`.`status`='.OrderOverdueStatus::EFFECTIVE .' '.'or'.' `order_overdue_deduction`.`id`=`order_overdue_record`.`overdue_id`)';
-        if (isset($param['size'])) {
-            $pagesize = $param['size'];
-        }
 
         if (isset($param['page'])) {
             $page = $param['page'];
