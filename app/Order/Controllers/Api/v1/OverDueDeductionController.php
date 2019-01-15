@@ -100,8 +100,7 @@ class OverDueDeductionController extends Controller
                     ];
 
                 }
-
-                $overdueExcel =  Excel::csvWrite1($data,  $headers, '逾期扣款列表',$abc);
+                $overdueExcel =  Excel::write($data,  $headers, '逾期扣款列表',$abc);
 
             } else {
                 break;
