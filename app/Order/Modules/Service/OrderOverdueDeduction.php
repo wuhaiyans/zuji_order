@@ -5,6 +5,7 @@
 namespace App\Order\Modules\Service;
 
 use App\Lib\Order\OrderInfo;
+use App\Order\Models\OrderOverdueRecord;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\OrderOverdueStatus;
 use App\Order\Modules\Inc\OrderStatus;
@@ -61,39 +62,44 @@ class OrderOverdueDeduction
      */
     public static function OverdueDeductionExport($params = array(),$pagesize = 5){
         $overdueInfo = OrderOverdueDeductionRepository::overdueDeductionListExport( $params,$pagesize );//获取逾期扣款列表
-
+        $overdue_info = [];
         if (!empty($overdueInfo)) {
             foreach ($overdueInfo as $keys=>$values) {
+                $where =array();
+                $where[] = ['id','=',$overdueInfo[$keys]['overdue_id']];
+                $overdueRecord = OrderOverdueRecordRepository::getOverdueDeductionList($where);
 
-                //应用来源
-                $overdueInfo[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
+                if( $overdueInfo[$keys]['status'] == OrderOverdueStatus::EFFECTIVE || $overdueRecord){
+                    $overdue_info[$keys] = $overdueInfo[$keys];
+                    //应用来源
+                    $overdue_info[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
 
-                //回访标识
-                $overdueInfo[$keys]['visit_name'] = !empty($values['v_id']) ? OrderStatus::getVisitName($values['v_id']) : OrderStatus::getVisitName(OrderStatus::visitUnContact);
-                if ($values['d_status']) {
-                    //扣款状态
-                    $overdueInfo[$keys]['deduction_name'] = OrderOverdueStatus::getStatusName($values['d_status']);
-                } else {
-                    //扣款状态
-                    $overdueInfo[$keys]['deduction_name'] = OrderOverdueStatus::getStatusName(OrderOverdueStatus::UNPAID);
+                    //回访标识
+                    $overdue_info[$keys]['visit_name'] = !empty($values['v_id']) ? OrderStatus::getVisitName($values['v_id']) : OrderStatus::getVisitName(OrderStatus::visitUnContact);
+                    if ($values['d_status']) {
+                        //扣款状态
+                        $overdue_info[$keys]['deduction_name'] = OrderOverdueStatus::getStatusName($values['d_status']);
+                    } else {
+                        //扣款状态
+                        $overdue_info[$keys]['deduction_name'] = OrderOverdueStatus::getStatusName(OrderOverdueStatus::UNPAID);
+                    }
+                    //扣款金额
+                    if (empty($values['d_amount'])) {
+                        $overdue_info[$keys]['d_amount'] = 0;
+                    }
+                    //扣款时间
+                    if (empty($values['d_time'])) {
+                        $overdue_info[$keys]['d_time'] = 0;
+                    } else {
+                        $overdue_info[$keys]['d_time'] = date('Y-m-d H:i:s', $values['d_time']);
+                    }
                 }
-                //扣款金额
-                if (empty($values['d_amount'])) {
-                    $overdueInfo[$keys]['d_amount'] = 0;
-                }
-                //扣款时间
-                if (empty($values['d_time'])) {
-                    $overdueInfo[$keys]['d_time'] = 0;
-                } else {
-                    $overdueInfo[$keys]['d_time'] = date('Y-m-d H:i:s', $values['d_time']);
-                }
-
 
             }
 
         }
 
-        return $overdueInfo;
+        return $overdue_info;
     }
 
     /**
