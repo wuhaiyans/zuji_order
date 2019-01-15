@@ -66,7 +66,7 @@ class SimpleDiscounter implements Discounter {
 		foreach( $params as &$item ){
 			// 应付金额
 			if($avgDiscount > 0){
-				$item['discount_amount'] = $item['amount'] - $avgDiscount;
+				$item['discount_amount'] = bcsub($item['amount'], $avgDiscount, 2);
 			}else{
 				$item['discount_amount'] = $item['amount'];
 			}
@@ -76,7 +76,7 @@ class SimpleDiscounter implements Discounter {
 
 		$params[0]['amount'] += $remainderAmount;
 		// 两位小数精度
-		$params[0]['discount_amount'] = number_format($params[0]['original_amount'],2) - number_format($params[0]['amount'],2);
+		$params[0]['discount_amount'] = bcsub($params[0]['original_amount'], $params[0]['amount'],2);
 		$params[0]['discount_amount'] = max($params[0]['discount_amount'],0);
 		return $params;
 //

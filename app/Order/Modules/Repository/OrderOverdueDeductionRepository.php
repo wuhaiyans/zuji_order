@@ -162,7 +162,7 @@ LEFT JOIN `order_info` ON `order_overdue_deduction`.`order_no` = `order_info`.`o
 LEFT JOIN `order_overdue_record` ON `order_overdue_deduction`.`id` = `order_overdue_record`.`overdue_id`";
         $sql .= $where;
         $sql .= 'order by `order_overdue_deduction`.`create_time` DESC';
-        $sql .= ' limit '.'.'.$page.','.$pagesize;
+        $sql .= ' limit '.$page.','.$pagesize;
         $orderList = DB::select($sql);
 
         $overdueListArray  = objectToArray($orderList);
