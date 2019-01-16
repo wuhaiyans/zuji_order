@@ -25,7 +25,7 @@ class StoreAddressComponnet implements OrderCreater
     private $orderType;
 
     //收货地址
-    private $address;
+    private $address='';
     public function __construct(OrderCreater $componnet,string $address)
     {
         $this->componnet = $componnet;
@@ -60,6 +60,8 @@ class StoreAddressComponnet implements OrderCreater
                 $this->getOrderCreater()->setError('店面地址配置不允许为空');
                 $this->flag = false;
             }
+        }else{
+            $this->address='';
         }
         if($this->orderType == OrderStatus::orderActivityService){
             $data = $this->componnet->getDataSchema();
@@ -78,7 +80,13 @@ class StoreAddressComponnet implements OrderCreater
      */
     public function getDataSchema(): array
     {
-        return $this->componnet->getDataSchema();
+
+        $schema = $this->componnet->getDataSchema();
+        $store['store'] =[
+            'store_address'=>$this->address,
+        ];
+        return array_merge($schema,$store);
+
     }
 
     /**

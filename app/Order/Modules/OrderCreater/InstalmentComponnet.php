@@ -156,7 +156,8 @@ class InstalmentComponnet implements OrderCreater
             return $computer->compute();
 
         }catch( \Exception $exc ){
-            LogApi::error("OrderCreate-GetInstalmentInfo-error");
+            LogApi::alert("OrderCreate:GetInstalmentInfo-error:".$exc->getMessage(),['data'=>$_data,'sku'=>$sku],[config('web.order_warning_user')]);
+            LogApi::error("OrderCreate-GetInstalmentInfo-error",['data'=>$_data,'sku'=>$sku]);
             throw new Exception("OrderCreate-GetInstalmentInfo-error");
         }
     }
