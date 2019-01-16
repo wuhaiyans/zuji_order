@@ -18,6 +18,7 @@ use App\Lib\Warehouse\Delivery;
 use App\Order\Controllers\Api\v1\ReturnController;
 use App\Order\Models\OrderDelivery;
 use App\Order\Models\OrderExtend;
+use App\Order\Models\OrderGoodsExtend;
 use App\Order\Models\OrderInsurance;
 use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc;
@@ -61,6 +62,10 @@ class OrderOperate
      *  'order_no'=>'',         //【必须】string 订单编号
      *  'logistics_id'=>''      //【必须】int 物流渠道ID
      *  'logistics_no'=>''      //【必须】string 物流单号
+     *  'return_address_type'=>false,//【非必须】 类型：bool 回寄地址标识(true修改,false不修改)
+     *  'return_address_value'=>'',//【非必须】 类型：String 回寄地址
+     *  'return_name'=>'',//【非必须】 类型：String 回寄姓名
+     *  'return_phone'=>'',//【非必须】 类型：String 回寄电话
      * ]
      * @param $goods_info       //【必须】 array 商品信息 参数内容如下
      * [
@@ -204,6 +209,22 @@ class OrderOperate
         if(!$b){
             set_msg("增加发货详情失败");
             return false;
+        }
+        //如果回寄地址发生改变 需要更新地址
+        $returnType = $orderDetail['return_address_type'] ?? false;
+        if($orderDetail['return_address_type']){
+            $GoodsExtend =  OrderGoodsExtend::where('order_no', '=', $orderDetail['order_no'])->first();
+            if($GoodsExtend){
+                $orderGoodsExtend = $GoodsExtend->toArray();
+                $GoodsExtend->return_address_value =$returnInfo['return_address_value']?? $orderGoodsExtend['return_address_value'];
+                $GoodsExtend->return_name =$returnInfo['return_name']?? $orderGoodsExtend['return_name'];
+                $GoodsExtend->return_phone =$returnInfo['return_phone']?? $orderGoodsExtend['return_phone'];
+                $b = $GoodsExtend->save();
+                if(!$b){
+                    set_msg("修改还机回寄地址失败");
+                    return false;
+                }
+            }
         }
 //        //增加发货时生成合同 -- 走队列
 //        $b = DeliveryDetail::addDeliveryContract($orderDetail['order_no'],$goodsInfo);
