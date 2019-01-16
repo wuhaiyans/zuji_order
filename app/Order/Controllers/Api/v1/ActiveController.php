@@ -31,19 +31,14 @@ class ActiveController extends Controller
                     break;
                 }
 
-                $url = 'https://h5.nqyong.com/login?appid=1&backUrl=%2Fcards';
-
-
                 foreach($result as $item){
-
 
                     $dataSms = [
                         'realName'      => $item['realname'],
-                        'zhifuLianjie'  => createShortUrl($url),
-
                     ];
+
                     // 发送短信
-                    \App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
+                     \App\Lib\Common\SmsApi::sendMessage($item['mobile'], $code, $dataSms);
 
                     \App\Order\Models\OrderActive::where(
                         ['id'=>$item['id']]
@@ -53,9 +48,8 @@ class ActiveController extends Controller
 
             } while (true);
 
-
         }catch(\Exception $exc){
-            \App\Lib\Common\LogApi::debug('[sendMessage:活动短信发送失败]', ['msg'=>$exc->getMessage()]);
+            \App\Lib\Common\LogApi::debug('[activeSsendMessage:活动短信发送失败]', ['msg'=>$exc->getMessage()]);
         }
     }
 
