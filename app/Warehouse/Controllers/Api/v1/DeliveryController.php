@@ -272,6 +272,8 @@ class DeliveryController extends Controller
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
+        //回寄地址
+        $result['return_address_info']=Delivery::RETURN_ADDRESS;
 
         return \apiResponse($result);
     }
@@ -315,6 +317,7 @@ class DeliveryController extends Controller
             'user_id' => 'required',
             'user_name' => 'required',
             'type'=> 'required',
+            'return_address_type'=> 'required',
         ];
         $params = $this->_dealParams($rules);
 
@@ -331,8 +334,16 @@ class DeliveryController extends Controller
                 'order_no' => $result['order_no'],
                 'logistics_id' => $params['logistics_id'],
                 'logistics_no' => $params['logistics_no'],
-                'logistics_note'=>$params['logistics_note']
+                'logistics_note'=>$params['logistics_note'],
+                'return_address_type'=>false
             ];
+            if($params['return_address_type']){
+                $orderDetail['return_address_type']=true;
+                $orderDetail['return_address_value']=Delivery::RETURN_ADDRESS[$params['return_address_type']]['return_address_value'];
+                $orderDetail['return_name']=Delivery::RETURN_ADDRESS[$params['return_address_type']]['return_name'];
+                $orderDetail['return_phone']=Delivery::RETURN_ADDRESS[$params['return_address_type']]['return_phone'];
+
+            }
 
             LogApi::info('delivery_send_info:',$params);
 
