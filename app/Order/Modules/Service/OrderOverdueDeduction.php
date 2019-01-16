@@ -66,7 +66,7 @@ class OrderOverdueDeduction
         if (!empty($overdueInfo)) {
             foreach ($overdueInfo as $keys=>$values) {
                 $where =array();
-                $where[] = ['id','=',$overdueInfo[$keys]['overdue_id']];
+                $where[] = ['overdue_id','=',$overdueInfo[$keys]['id']];
                 $overdueRecord = OrderOverdueRecordRepository::getOverdueDeductionList($where);
 
                 if( $overdueInfo[$keys]['status'] == OrderOverdueStatus::EFFECTIVE || $overdueRecord){
