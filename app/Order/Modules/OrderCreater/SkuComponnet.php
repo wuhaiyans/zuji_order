@@ -11,6 +11,7 @@ namespace App\Order\Modules\OrderCreater;
 
 use App\Lib\Common\LogApi;
 use App\Lib\Goods\Goods;
+use App\Order\Models\OrderGoodsExtend;
 use App\Order\Modules\Inc\CouponStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
@@ -554,6 +555,30 @@ class SkuComponnet implements OrderCreater
                     LogApi::alert("OrderCreate:增加商品失败",$goodsData,[config('web.order_warning_user')]);
                     LogApi::error(config('app.env')."OrderCreate-AddGoods-error",$goodsData);
                     $this->getOrderCreater()->setError("OrderCreate-AddGoods-error");
+                    return false;
+                }
+
+                /**
+                 * 保存商品的还机回寄地址
+                 */
+                $returnAddressValue = $this->goodsArr[$v['sku_id']]['return_address_info']['return_address_value']??'';//还机回寄地址
+                $returnName = $this->goodsArr[$v['sku_id']]['return_address_info']['return_name']??'';//还机回寄收货人姓名
+                $returnPhone = $this->goodsArr[$v['sku_id']]['return_address_info']['return_phone']??'';//还机回寄收货人电话
+
+                $returnInfo =[
+                    'order_no'=>$orderNo,
+                    'goods_no'=>$v['goods_no'],
+                    'return_name'=>$returnName,
+                    'return_phone'=>$returnPhone,
+                    'return_address_value'=>$returnAddressValue,
+                    'create_time'=>time()
+                ];
+                $info = OrderGoodsExtend::create($returnInfo);
+                $b= $info->getQueueableId();
+                if(!$b){
+                    LogApi::alert("OrderCreate:保存商品还机回寄地址失败",$returnInfo,[config('web.order_warning_user')]);
+                    LogApi::error(config('app.env')."OrderCreate:保存商品还机回寄地址失败",$returnInfo);
+                    $this->getOrderCreater()->setError("OrderCreate-saveReturnAddress-error");
                     return false;
                 }
 
