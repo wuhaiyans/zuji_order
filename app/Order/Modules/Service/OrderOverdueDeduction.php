@@ -5,6 +5,7 @@
 namespace App\Order\Modules\Service;
 
 use App\Lib\Order\OrderInfo;
+use App\Order\Models\OrderOverdueRecord;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\OrderOverdueStatus;
 use App\Order\Modules\Inc\OrderStatus;
@@ -25,42 +26,32 @@ class OrderOverdueDeduction
     public static function getOverdueDeductionInfo($params = array()){
         $overdueInfo = OrderOverdueDeductionRepository::getOverdueDeductionList( $params );//获取逾期扣款列表
         $overdueInfoArray = objectToArray($overdueInfo);
-        $overdue_info=[];
         if (!empty($overdueInfoArray['data'])) {
             foreach ($overdueInfoArray['data'] as $keys=>$values) {
 
-                //查询是否有扣款记录
-                 $whereArray = array();
-                 $whereArray[] = ['overdue_id', '=', $overdueInfoArray['data'][$keys]['id']];
-                 $overdueRecord = OrderOverdueRecordRepository::getOverdueDeductionList($whereArray);
-                 if( $overdueRecord  || $overdueInfoArray['data'][$keys]['status'] == OrderOverdueStatus::EFFECTIVE){
+                 //应用来源
+                $overdueInfoArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
 
-                     $overdue_info['data'][$keys] = $overdueInfoArray['data'][$keys];
-                     //应用来源
-                     $overdue_info['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
+                 //回访标识
+                $overdueInfoArray['data'][$keys]['visit_name'] = !empty($values['v_id'])? OrderStatus::getVisitName($values['v_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
 
-                     //回访标识
-                     $overdue_info['data'][$keys]['visit_name'] = !empty($values['v_id'])? OrderStatus::getVisitName($values['v_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
+                 //租期类型
+                $overdueInfoArray['data'][$keys]['zuqi_name'] =  OrderStatus::getZuqiTypeName($values['zuqi_type']);
 
-                     //租期类型
-                     $overdue_info['data'][$keys]['zuqi_name'] =  OrderStatus::getZuqiTypeName($values['zuqi_type']);
-
-                     //扣款状态
-                     $overdue_info['data'][$keys]['deduction_name'] = OrderOverdueStatus::getStatusName($values['deduction_status']);
-                     //状态
-                     $overdue_info['data'][$keys]['status_name'] = OrderOverdueStatus::getOverdueStatusName($values['status']);
-                     //默认显示扣款按钮
-                     $overdue_info['data'][$keys]['operate_status'] = true;
-                     if( $overdueInfoArray['data'][$keys]['status'] == OrderOverdueStatus::INVALID){
-                         $overdue_info['data'][$keys]['operate_status'] = false;
-                     }
+                 //扣款状态
+                $overdueInfoArray['data'][$keys]['deduction_name'] = OrderOverdueStatus::getStatusName($values['deduction_status']);
+                 //状态
+                $overdueInfoArray['data'][$keys]['status_name'] = OrderOverdueStatus::getOverdueStatusName($values['status']);
+                 //默认显示扣款按钮
+                $overdueInfoArray['data'][$keys]['operate_status'] = true;
+                 if( $overdueInfoArray['data'][$keys]['status'] == OrderOverdueStatus::INVALID ||  $overdueInfoArray['data'][$keys]['overdue_amount'] == 0){
+                     $overdueInfoArray['data'][$keys]['operate_status'] = false;
                  }
-
             }
 
         }
 
-        return $overdue_info;
+        return $overdueInfoArray;
     }
 
     /**
@@ -71,14 +62,14 @@ class OrderOverdueDeduction
      */
     public static function OverdueDeductionExport($params = array(),$pagesize = 5){
         $overdueInfo = OrderOverdueDeductionRepository::overdueDeductionListExport( $params,$pagesize );//获取逾期扣款列表
-        $overdue_info=[];
+        $overdue_info = [];
         if (!empty($overdueInfo)) {
             foreach ($overdueInfo as $keys=>$values) {
-                //查询是否有扣款记录
-                $whereArray = array();
-                $whereArray[] = ['overdue_id', '=', $overdueInfo[$keys]['id']];
-                $overdueRecord = OrderOverdueRecordRepository::getOverdueDeductionList($whereArray);
-                if( $overdueRecord  || $overdueInfo[$keys]['status'] == OrderOverdueStatus::EFFECTIVE) {
+                $where =array();
+                $where[] = ['overdue_id','=',$overdueInfo[$keys]['id']];
+                $overdueRecord = OrderOverdueRecordRepository::getOverdueDeductionList($where);
+
+                if( $overdueInfo[$keys]['status'] == OrderOverdueStatus::EFFECTIVE || $overdueRecord){
                     $overdue_info[$keys] = $overdueInfo[$keys];
                     //应用来源
                     $overdue_info[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);

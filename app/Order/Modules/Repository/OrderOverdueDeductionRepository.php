@@ -3,6 +3,8 @@ namespace App\Order\Modules\Repository;
 use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\OrderOverdueStatus;
 use App\Order\Modules\Inc\OrderStatus;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use App\Order\Models\OrderOverdueDeduction;
 
@@ -20,38 +22,43 @@ class OrderOverdueDeductionRepository
      */
     public static function getOverdueDeductionList($param = array(), $pagesize=5)
     {
-        $whereArray = array();
-
+        $where = ' where 1=1';
         //根据手机号
         if (isset($param['kw_type']) && $param['kw_type']=='mobile' && !empty($param['keywords']))
         {
-            $whereArray[] = ['order_overdue_deduction.mobile', '=', $param['keywords']];
+            $where .= ' AND  order_overdue_deduction.mobile= '.$param['keywords'];
         }
         //根据订单号
         elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
         {
-            $whereArray[] = ['order_overdue_deduction.order_no', '=', $param['keywords']];
+            $where .= ' AND  order_overdue_deduction.order_no= '.'"'.(string)$param['keywords'].'"';
         }
 
         //渠道
         if (isset($param['app_id']) && !empty($param['app_id'])) {
-            $whereArray[] = ['order_overdue_deduction.channel_id', '=', $param['app_id']];
+            $where .= ' AND  order_overdue_deduction.channel_id= '.$param['app_id'];
         }
 
 
         //扣款状态
         if (isset($param['deduction_status']) && !empty($param['deduction_status'])) {
-            $whereArray[] = ['order_overdue_deduction.deduction_status', '=', $param['deduction_status']];
+            $where .= ' AND  order_overdue_deduction.deduction_status= '.$param['deduction_status'];
         }
 
         //回访标识
-        if (isset($param['visit_id'])) {
-           $whereArray[] = ['order_overdue_deduction.visit_id', '=', $param['visit_id']];
+        if (isset($param['visit_id']) && $param['visit_id'] != 0) {
+            $where .= ' AND  order_overdue_visit.visit_id= '.$param['visit_id'];
+        }
+        //回访标识
+        if (isset($param['visit_id']) && $param['visit_id'] == 0) {
+            $where .= ' AND  order_overdue_deduction.visit_id= '.$param['visit_id'];
         }
         //长短租类型
         if (isset($param['zuqi_type'])) {
-            $whereArray[] = ['order_overdue_deduction.zuqi_type', '=', $param['zuqi_type']];
+            $where .= ' AND  order_overdue_deduction.zuqi_type= '.$param['zuqi_type'];
         }
+        $where .= ' AND  (`order_overdue_deduction`.`status`='.OrderOverdueStatus::EFFECTIVE .' '.'or'.' `order_overdue_deduction`.`id`=`order_overdue_record`.`overdue_id`)';
+
         if (isset($param['size'])) {
             $pagesize = $param['size'];
         }
@@ -63,18 +70,34 @@ class OrderOverdueDeductionRepository
             $page = 1;
         }
 
-        $orderList = DB::table('order_overdue_deduction')
-            ->leftJoin('order_overdue_visit','order_overdue_deduction.visit_id', '=', 'order_overdue_visit.id')
-            ->leftJoin('order_info','order_overdue_deduction.order_no', '=', 'order_info.order_no')
-            ->where($whereArray)
-            ->select('order_overdue_deduction.*','order_info.order_status','order_overdue_visit.visit_id as v_id','order_overdue_visit.visit_text')
-            ->orderBy('order_overdue_deduction.create_time', 'DESC')
-            ->paginate($pagesize,$columns = ['*'], $pageName = 'page', $page);
-        if( !$orderList ){
+        $sql = "SELECT
+    distinct 
+	`order_overdue_deduction`.*, `order_info`.`order_status`,
+	`order_overdue_visit`.`visit_id` AS `v_id`,
+	`order_overdue_visit`.`visit_text`
+FROM
+	`order_overdue_deduction`
+LEFT JOIN `order_overdue_visit` ON `order_overdue_deduction`.`visit_id` = `order_overdue_visit`.`id`
+LEFT JOIN `order_info` ON `order_overdue_deduction`.`order_no` = `order_info`.`order_no`
+LEFT JOIN `order_overdue_record` ON `order_overdue_deduction`.`id` = `order_overdue_record`.`overdue_id`";
+        $sql .= $where;
+        $sql .= ' order by `order_overdue_deduction`.`create_time` DESC';
+        $orderList = DB::select($sql);
+        $perPage = $pagesize;  //每页数量
+        $current_page = $page <= 0 ? 1 :$page;  //当前请求页数
+        $item = array_slice($orderList, ($current_page-1)*$perPage, $perPage);
+        $total = count($orderList);  //总条数
+
+        $list = new LengthAwarePaginator($item, $total, $perPage, $current_page, [
+            'path' => Paginator::resolveCurrentPath(),
+            'pageName' => 'page',
+        ]);
+
+        if( !$list ){
             return [];
 
         }
-        return $orderList;
+        return $list;
     }
 
     /**
@@ -94,7 +117,7 @@ class OrderOverdueDeductionRepository
         //根据订单号
         elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
         {
-            $whereArray[] = ['order_overdue_deduction.order_no', '=', $param['keywords']];
+            $whereArray[] = ['order_overdue_deduction.order_no', '=', '"'.(string)$param['keywords'].'"'];
         }
 
         //订单来源
@@ -108,9 +131,14 @@ class OrderOverdueDeductionRepository
             $whereArray[] = ['order_overdue_deduction.deduction_status', '=', $param['deduction_status']];
         }
         //回访标识
-        if (isset($param['visit_id'])) {
+        if (isset($param['visit_id'])&& $param['visit_id'] != 0) {
+            $whereArray[] = ['order_overdue_visit.visit_id', '=', $param['visit_id']];
+        }
+        //回访标识
+        if (isset($param['visit_id'])&& $param['visit_id'] == 0) {
             $whereArray[] = ['order_overdue_deduction.visit_id', '=', $param['visit_id']];
         }
+
         if (isset($param['page'])) {
             $page = $param['page'];
         } else {
@@ -123,7 +151,7 @@ class OrderOverdueDeductionRepository
             ->leftJoin('order_overdue_record','order_overdue_deduction.id', '=', 'order_overdue_record.overdue_id')
             ->leftJoin('order_info','order_overdue_deduction.order_no', '=', 'order_info.order_no')
             ->where($whereArray)
-            ->select('order_overdue_deduction.*','order_overdue_record.deduction_amount as d_amount','order_overdue_record.status as d_status','order_overdue_record.create_time as d_time','order_overdue_record.overdue_amount as o_amount','order_info.order_status','order_overdue_visit.visit_id as v_id','order_overdue_visit.visit_text')
+            ->select('order_overdue_deduction.*','order_overdue_record.deduction_amount as d_amount','order_overdue_record.status as d_status','order_overdue_record.overdue_id','order_overdue_record.create_time as d_time','order_info.order_status','order_overdue_visit.visit_id as v_id','order_overdue_visit.visit_text','order_overdue_record.overdue_amount as o_amount')
             ->orderBy('order_overdue_deduction.create_time', 'DESC')
             ->skip(($page - 1) * $pagesize)->take($pagesize)
             ->get();
