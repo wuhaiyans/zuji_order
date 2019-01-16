@@ -29,6 +29,17 @@ class OrderOverdueDeduction
         if (!empty($overdueInfoArray['data'])) {
             foreach ($overdueInfoArray['data'] as $keys=>$values) {
                 if($values['order_status'] == OrderStatus::OrderClosedRefunded || $values['order_status'] == OrderStatus::OrderCompleted){
+                    if($overdueInfoArray['data'][$keys]['overdue_amount'] != 0 || $overdueInfoArray['data'][$keys]['unpaid_amount'] != 0){
+                        $where = [];
+                        $where[] = ['order_no','=',$values['order_no']];
+                        $data = [
+                            'overdue_amount'=> 0,
+                            'unpaid_amount'=>  0
+                        ];
+                        //修改未缴租金和押金为0
+                        OrderOverdueDeductionRepository::where($where)->update($data);
+                    }
+
                     $overdueInfoArray['data'][$keys]['overdue_amount'] = 0;
                     $overdueInfoArray['data'][$keys]['unpaid_amount'] = 0;
                 }
@@ -73,9 +84,6 @@ class OrderOverdueDeduction
                 $overdueRecord = OrderOverdueRecordRepository::getOverdueDeductionList($where);
 
                 if( $overdueInfo[$keys]['status'] == OrderOverdueStatus::EFFECTIVE || $overdueRecord){
-                    if($values['order_status'] == OrderStatus::OrderClosedRefunded || $values['order_status'] == OrderStatus::OrderCompleted){
-                        $overdueInfoArray[$keys]['unpaid_amount'] = 0;
-                    }
                     $overdue_info[$keys] = $overdueInfo[$keys];
                     //应用来源
                     $overdue_info[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
