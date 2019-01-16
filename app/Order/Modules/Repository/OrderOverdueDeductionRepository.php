@@ -80,7 +80,7 @@ LEFT JOIN `order_overdue_visit` ON `order_overdue_deduction`.`visit_id` = `order
 LEFT JOIN `order_info` ON `order_overdue_deduction`.`order_no` = `order_info`.`order_no`
 LEFT JOIN `order_overdue_record` ON `order_overdue_deduction`.`id` = `order_overdue_record`.`overdue_id`";
         $sql .= $where;
-        $sql .= 'order by `order_overdue_deduction`.`create_time` DESC';
+        $sql .= ' group by `order_overdue_deduction`.`order_no` order by `order_overdue_deduction`.`create_time` DESC';
         $orderList = DB::select($sql);
         $perPage = $pagesize;  //每页数量
         $current_page = $page <= 0 ? 1 :$page;  //当前请求页数
