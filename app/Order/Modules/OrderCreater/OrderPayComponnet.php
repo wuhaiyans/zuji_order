@@ -17,6 +17,7 @@ use App\Order\Modules\Inc\CouponStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\Order\Instalment;
+use App\Order\Modules\Repository\Order\OrderScheduleOnce;
 use App\Order\Modules\Repository\Pay\WithholdQuery;
 use App\Order\Modules\Service\OrderInstalment;
 use Mockery\Exception;
@@ -180,6 +181,14 @@ class OrderPayComponnet implements OrderCreater
                 return false;
             }
             //不需要支付则不生成支付单，退出
+            //已支付的 调用风控看板
+            //发送订单消息队列
+            $appid = $this->getOrderCreater()->getAppid();
+            $orderType =$this->getOrderCreater()->getOrderType();
+            if($appid ==139 || $orderType == OrderStatus::orderMiniService){
+                $schedule = new OrderScheduleOnce(['user_id'=>$this->userId,'order_no'=>$this->orderNo]);
+                $schedule->OrderRisk();
+            }
             return true;
         }
 
