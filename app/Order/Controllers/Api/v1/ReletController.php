@@ -109,6 +109,17 @@ class ReletController extends Controller
             'return_url'    => 'required'//前端回调地址
 
         ]);
+		
+        //支付 扩展参数
+        $extended_params = isset($params['extended_params'])?$params['extended_params']:[];
+        // 支付宝支付扩展参数
+        if( $params['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Alipay ){
+            if( isset($extended_params['alipay_params']['trade_type']) && $extended_params['alipay_params']['trade_type']=='MINI' ){
+                
+				$extended_params['alipay_params']['alipay_user_id'] = session()->get('alipay_user_id');
+            }
+        }
+		
         if(count($params) < 7){
             return apiResponse([], ApiStatus::CODE_20001, "参数错误");
         }
