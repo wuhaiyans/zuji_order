@@ -98,6 +98,7 @@ class ReletController extends Controller
 
         //整理参数
         $params = filter_array($params, [
+            'pay_channel_id'=> 'required',// 支付渠道标识
             'user_id'       => 'required', //用户ID
             'goods_id'      => 'required', //设备ID
             'zuqi'          => 'required', //租期
