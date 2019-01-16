@@ -432,6 +432,9 @@ class OrderCreater
             //优惠券
             $orderCreater = new CouponComponnet($orderCreater,$schema['receive_coupon']['coupon'],$data['user_id']);
 
+            //门店地址
+            $orderCreater = new StoreAddressComponnet($orderCreater,$channelInfo['appid']['address']);
+
             //押金
             $orderCreater = new DepositComponnet($orderCreater);
 
@@ -459,6 +462,7 @@ class OrderCreater
                 'b' => $b,
                 '_error' => $orderCreater->getOrderCreater()->getError(),
                 '_error_code' =>get_code(),
+                'store_address'=>$schemaData['store']['store_address'],
             ];
             $result['_order_info']['order']=[
                 'pay_type'=>$schemaData['order']['pay_type'],
