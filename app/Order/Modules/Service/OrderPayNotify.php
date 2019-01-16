@@ -65,6 +65,9 @@ class OrderPayNotify
             //发送支付成功短信
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_PAY);
             $orderNoticeObj->notify();
+            //发送订单消息队列
+            $schedule = new OrderScheduleOnce(['user_id'=>$orderInfo['user_id'],'order_no'=>$orderNo]);
+            $schedule->OrderRisk();
 
             //推送到区块链
             $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderPayed);
@@ -77,8 +80,6 @@ class OrderPayNotify
             OrderLogRepository::add($orderInfo['user_id'],$orderInfo['mobile'],\App\Lib\PublicInc::Type_User,$orderInfo['order_no'],"支付","支付成功");
             //如果线下订单 订单状态直接转为 已确认待发货状态
             if($orderInfo['order_type'] == OrderStatus::orderStoreService){
-                //发送订单消息队列
-                $schedule = new OrderScheduleOnce(['user_id'=>$orderInfo['user_id'],'order_no'=>$orderNo]);
                 //发送申请发货队列
                 $schedule->DeliveryApply();
             }

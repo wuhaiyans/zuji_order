@@ -163,8 +163,8 @@ class OrderCreater
 
             //发送订单消息队列
             $schedule = new OrderScheduleOnce(['user_id'=>$data['user_id'],'order_no'=>$orderNo]);
-            //发送订单风控信息保存队列
-            $schedule->OrderRisk();
+            //发送订单风控信息保存队列 -放到已支付中
+           // $schedule->OrderRisk();
             //发送取消订单队列
             $schedule->CancelOrder();
             //发送订单押金信息返回风控系统
@@ -264,8 +264,8 @@ class OrderCreater
 
             //发送订单消息队列
             $schedule = new OrderScheduleOnce(['user_id'=>$data['user_id'],'order_no'=>$data['order_no']]);
-            //发送订单风控信息保存队列
-            $schedule->OrderRisk();
+            //发送订单风控信息保存队列 -已支付时调用
+            //$schedule->OrderRisk();
             //发送取消订单队列
             $schedule->miniCancelOrder();
             //发送订单押金信息返回风控系统
