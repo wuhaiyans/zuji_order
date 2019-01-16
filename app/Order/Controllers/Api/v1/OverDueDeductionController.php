@@ -153,6 +153,7 @@ class OverDueDeductionController extends Controller
         $rules = [
             'overdue_id'    => 'required|int',
             'amount'        => 'required',
+            'remark'        => 'required',
         ];
         $validateParams = $this->validateParams($rules,$params);
         if ($validateParams['code'] != 0) {
