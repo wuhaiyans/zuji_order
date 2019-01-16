@@ -83,7 +83,7 @@ class OverDueDeductionController extends Controller
                     //获取订单的所有逾期扣款记录
 
                     $data[] = [
-                        $item['order_no'],
+                        (string)$item['order_no'],
                         $item['user_name'],
                         $item['mobile'],
                         $item['deduction_name'],

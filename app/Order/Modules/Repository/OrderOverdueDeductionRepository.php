@@ -31,7 +31,7 @@ class OrderOverdueDeductionRepository
         //根据订单号
         elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
         {
-            $where .= ' AND  order_overdue_deduction.order_no= '.$param['keywords'];
+            $where .= ' AND  order_overdue_deduction.order_no= '.'"'.(string)$param['keywords'].'"';
         }
 
         //渠道
@@ -47,7 +47,7 @@ class OrderOverdueDeductionRepository
 
         //回访标识
         if (isset($param['visit_id'])) {
-            $where .= ' AND  order_overdue_deduction.visit_id= '.$param['visit_id'];
+            $where .= ' AND  order_overdue_visit.visit_id= '.$param['visit_id'];
         }
         //长短租类型
         if (isset($param['zuqi_type'])) {
@@ -112,7 +112,7 @@ LEFT JOIN `order_overdue_record` ON `order_overdue_deduction`.`id` = `order_over
         //根据订单号
         elseif (isset($param['kw_type']) && $param['kw_type']=='order_no' && !empty($param['keywords']))
         {
-            $whereArray[] = ['order_overdue_deduction.order_no', '=', $param['keywords']];
+            $whereArray[] = ['order_overdue_deduction.order_no', '=', '"'.(string)$param['keywords'].'"'];
         }
 
         //订单来源
@@ -127,7 +127,7 @@ LEFT JOIN `order_overdue_record` ON `order_overdue_deduction`.`id` = `order_over
         }
         //回访标识
         if (isset($param['visit_id'])) {
-            $whereArray[] = ['order_overdue_deduction.visit_id', '=', $param['visit_id']];
+            $whereArray[] = ['order_overdue_visit.visit_id', '=', $param['visit_id']];
         }
         if (isset($param['page'])) {
             $page = $param['page'];
