@@ -3,6 +3,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\Excel;
+use App\Order\Modules\Inc\OrderOverdueStatus;
 use Illuminate\Support\Facades\DB;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Service\OrderOverdueDeduction;
@@ -93,7 +94,8 @@ class OverDueDeductionController extends Controller
                         $item['appid_name'],
                         $item['goods_name'],
                         $item['unpaid_amount'],
-                        $item['o_amount'],
+                        $item['deduction_status'] == OrderOverdueStatus::UNPAID?$item['overdue_amount']: $item['o_amount'],
+                      //  $item['o_amount'],
                         $item['visit_name'],
                         $item['visit_text'],
 

@@ -28,7 +28,10 @@ class OrderOverdueDeduction
         $overdueInfoArray = objectToArray($overdueInfo);
         if (!empty($overdueInfoArray['data'])) {
             foreach ($overdueInfoArray['data'] as $keys=>$values) {
-
+                if($values['order_status'] == OrderStatus::OrderClosedRefunded || $values['order_status'] == OrderStatus::OrderCompleted){
+                    $overdueInfoArray['data'][$keys]['overdue_amount'] = 0;
+                    $overdueInfoArray['data'][$keys]['unpaid_amount'] = 0;
+                }
                  //应用来源
                 $overdueInfoArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
 
@@ -70,6 +73,9 @@ class OrderOverdueDeduction
                 $overdueRecord = OrderOverdueRecordRepository::getOverdueDeductionList($where);
 
                 if( $overdueInfo[$keys]['status'] == OrderOverdueStatus::EFFECTIVE || $overdueRecord){
+                    if($values['order_status'] == OrderStatus::OrderClosedRefunded || $values['order_status'] == OrderStatus::OrderCompleted){
+                        $overdueInfoArray[$keys]['unpaid_amount'] = 0;
+                    }
                     $overdue_info[$keys] = $overdueInfo[$keys];
                     //应用来源
                     $overdue_info[$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
