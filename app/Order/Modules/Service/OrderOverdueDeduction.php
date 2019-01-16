@@ -37,7 +37,7 @@ class OrderOverdueDeduction
                             'unpaid_amount'=>  0
                         ];
                         //修改未缴租金和押金为0
-                        OrderOverdueDeductionRepository::where($where)->update($data);
+                        \App\Order\Models\OrderOverdueDeduction::where($where)->update($data);
                     }
 
                     $overdueInfoArray['data'][$keys]['overdue_amount'] = 0;
