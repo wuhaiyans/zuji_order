@@ -46,8 +46,12 @@ class OrderOverdueDeductionRepository
         }
 
         //回访标识
-        if (isset($param['visit_id'])) {
+        if (isset($param['visit_id']) && $param['visit_id'] != 0) {
             $where .= ' AND  order_overdue_visit.visit_id= '.$param['visit_id'];
+        }
+        //回访标识
+        if (isset($param['visit_id']) && $param['visit_id'] == 0) {
+            $where .= ' AND  order_overdue_deduction.visit_id= '.$param['visit_id'];
         }
         //长短租类型
         if (isset($param['zuqi_type'])) {
@@ -126,9 +130,14 @@ LEFT JOIN `order_overdue_record` ON `order_overdue_deduction`.`id` = `order_over
             $whereArray[] = ['order_overdue_deduction.deduction_status', '=', $param['deduction_status']];
         }
         //回访标识
-        if (isset($param['visit_id'])) {
+        if (isset($param['visit_id'])&& $param['visit_id'] != 0) {
             $whereArray[] = ['order_overdue_visit.visit_id', '=', $param['visit_id']];
         }
+        //回访标识
+        if (isset($param['visit_id'])&& $param['visit_id'] == 0) {
+            $whereArray[] = ['order_overdue_deduction.visit_id', '=', $param['visit_id']];
+        }
+
         if (isset($param['page'])) {
             $page = $param['page'];
         } else {
