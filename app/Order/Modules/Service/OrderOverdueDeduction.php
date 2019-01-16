@@ -44,7 +44,7 @@ class OrderOverdueDeduction
                 $overdueInfoArray['data'][$keys]['status_name'] = OrderOverdueStatus::getOverdueStatusName($values['status']);
                  //默认显示扣款按钮
                 $overdueInfoArray['data'][$keys]['operate_status'] = true;
-                 if( $overdueInfoArray['data'][$keys]['status'] == OrderOverdueStatus::INVALID){
+                 if( $overdueInfoArray['data'][$keys]['status'] == OrderOverdueStatus::INVALID ||  $overdueInfoArray['data'][$keys]['overdue_amount'] == 0){
                      $overdueInfoArray['data'][$keys]['operate_status'] = false;
                  }
             }
