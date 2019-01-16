@@ -117,7 +117,7 @@ class ReletController extends Controller
         if( $params['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Alipay ){
             if( isset($extended_params['alipay_params']['trade_type']) && $extended_params['alipay_params']['trade_type']=='MINI' ){
                 
-				$extended_params['alipay_params']['alipay_user_id'] = session()->get('alipay_user_id');
+				$params['extended_params']['alipay_params']['alipay_user_id'] = session()->get('alipay_user_id');
             }
         }
 		
