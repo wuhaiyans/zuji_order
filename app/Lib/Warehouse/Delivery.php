@@ -321,6 +321,11 @@ class Delivery
      *  'order_no'=>'',//【必须】 类型：String 订单编号
      *  'logistics_id'=>'',//【必须】 类型：String 物流渠道ID
      *  'logistics_no'=>'',//【必须】 类型：String 物流单号
+     *  'logistics_note'=>'',//【非必须】 类型：String 备注
+     *  'return_address_type'=>false,//【非必须】 类型：bool 回寄地址标识(true修改,false不修改)
+     *  'return_address_value'=>'',//【非必须】 类型：String 回寄地址
+     *  'return_name'=>'',//【非必须】 类型：String 回寄姓名
+     *  'return_phone'=>'',//【非必须】 类型：String 回寄电话
      * ]
      * @param $goods_info array 商品信息 【必须】 参数内容如下
      * [
