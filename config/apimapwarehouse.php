@@ -76,7 +76,7 @@ return [
 
     'warehouse.checkitem.getDetails'=> 'CheckItemController@getDetails', //查看检测详情
     'warehouse.checkitem.receiveNum'=> 'CheckItemController@receiveNum', //线下门店待检测数量
-    'warehouse.checkitem.reviewButton'=> 'CheckItemController@reviewButton', //线下门店根据订单号查询是否显示检测,发货,检测结果按钮
+    'warehouse.checkitem.reviewButton'=> 'CheckItemController@reviewButton', //线下门店根据订单号查询是否显示检测,检测结果按钮
 
 
 
