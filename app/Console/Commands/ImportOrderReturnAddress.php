@@ -14,6 +14,7 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Service\OrderCreater;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use Mockery\Exception;
 
 class ImportOrderReturnAddress extends Command
 {
@@ -67,10 +68,18 @@ class ImportOrderReturnAddress extends Command
                     if(isset(GivebackAddressStatus::SPU_ADDRDSS_TYPE[$v['prod_id']])){
                         $returnInfo = GivebackAddressStatus::getGivebackAddress($v['prod_id']);
                     }else{
-                        $goodsArr = Goods::getSkuList( [$v['zuji_goods_id']] ,'17600224881');
-                        $returnInfo['giveback_address'] = $goodsArr[$v['zuji_goods_id']]['return_address_info']['return_address_value']??'';//还机回寄地址
-                        $returnInfo['giveback_username'] = $goodsArr[$v['zuji_goods_id']]['return_address_info']['return_name']??'';//还机回寄收货人姓名
-                        $returnInfo['giveback_tel'] = $goodsArr[$v['zuji_goods_id']]['return_address_info']['return_phone']??'';//还机回寄收货人电话
+                        try{
+                            $goodsArr = Goods::getSkuList( [$v['zuji_goods_id']] ,'17600224881');
+                            $returnInfo['giveback_address']=$goodsArr[$v['zuji_goods_id']]['return_address_info']['return_address_value']??'';//还机回寄地址
+                            $returnInfo['giveback_username']=$goodsArr[$v['zuji_goods_id']]['return_address_info']['return_name']??'';//还机回寄收货人姓名
+                            $returnInfo['giveback_tel'] = $goodsArr[$v['zuji_goods_id']]['return_address_info']['return_phone']??'';//还机回寄收货人电话'
+                            if($returnInfo['giveback_address'] =='' || $returnInfo['giveback_username'] =='' || $returnInfo['giveback_tel']){
+                                $returnInfo = GivebackAddressStatus::getGivebackAddress($v['prod_id']);
+                            }
+                        }catch (\Exception $e){
+                            $arr ['exception'][] = $v['prod_id'];
+                            $returnInfo = GivebackAddressStatus::getGivebackAddress($v['prod_id']);
+                        }
                     }
                     $GoodsExtend = OrderGoodsExtend::where('order_no', '=', $v['order_no'])->first();
                     if ($GoodsExtend) {
@@ -87,9 +96,9 @@ class ImportOrderReturnAddress extends Command
                         $returnInfo = [
                             'order_no' => $v['order_no'],
                             'goods_no' => $v['goods_no'],
-                            'return_name' => $returnInfo['giveback_address'] ?? '',
-                            'return_phone' => $returnInfo['giveback_username'] ?? '',
-                            'return_address_value' => $returnInfo['giveback_tel'] ?? '',
+                            'return_name' => $returnInfo['giveback_username'] ?? '',
+                            'return_phone' => $returnInfo['giveback_tel'] ?? '',
+                            'return_address_value' => $returnInfo['giveback_address'] ?? '',
                             'create_time' => time()
                         ];
                         $info = OrderGoodsExtend::create($returnInfo);
