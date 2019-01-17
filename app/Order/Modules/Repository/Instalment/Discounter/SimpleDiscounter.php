@@ -61,8 +61,9 @@ class SimpleDiscounter implements Discounter {
 		$remainderAmount = $remainderAmount / 100;
 
 		// 平均优惠
-		$avgDiscount = ($totalAmount - $remainderAmount)/$n;
 
+		$avgDiscount = bcsub($totalAmount, $remainderAmount, 2)/$n;
+		
 		foreach( $params as &$item ){
 			// 应付金额
 			if($avgDiscount > 0){
