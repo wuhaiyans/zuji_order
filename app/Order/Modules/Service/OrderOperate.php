@@ -219,6 +219,7 @@ class OrderOperate
                 $GoodsExtend->return_address_value =$returnInfo['return_address_value']?? $orderGoodsExtend['return_address_value'];
                 $GoodsExtend->return_name =$returnInfo['return_name']?? $orderGoodsExtend['return_name'];
                 $GoodsExtend->return_phone =$returnInfo['return_phone']?? $orderGoodsExtend['return_phone'];
+                $GoodsExtend->update_time =time();
                 $b = $GoodsExtend->save();
                 if(!$b){
                     set_msg("修改还机回寄地址失败");
