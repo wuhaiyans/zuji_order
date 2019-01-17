@@ -216,9 +216,9 @@ class OrderOperate
             $GoodsExtend =  OrderGoodsExtend::where('order_no', '=', $orderDetail['order_no'])->first();
             if($GoodsExtend){
                 $orderGoodsExtend = $GoodsExtend->toArray();
-                $GoodsExtend->return_address_value =$returnInfo['return_address_value']?? $orderGoodsExtend['return_address_value'];
-                $GoodsExtend->return_name =$returnInfo['return_name']?? $orderGoodsExtend['return_name'];
-                $GoodsExtend->return_phone =$returnInfo['return_phone']?? $orderGoodsExtend['return_phone'];
+                $GoodsExtend->return_address_value =$orderDetail['return_address_value']?? $orderGoodsExtend['return_address_value'];
+                $GoodsExtend->return_name =$orderDetail['return_name']?? $orderGoodsExtend['return_name'];
+                $GoodsExtend->return_phone =$orderDetail['return_phone']?? $orderGoodsExtend['return_phone'];
                 $GoodsExtend->update_time =time();
                 $b = $GoodsExtend->save();
                 if(!$b){
