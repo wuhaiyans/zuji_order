@@ -75,30 +75,33 @@ class Receive
                 if (!$d['goods_no']) continue;
                 
                 $receive_detail[] = [
-                    'serial_no' => isset($d['serial_no']) ? $d['serial_no'] : '',//可以不传
-                    'goods_no'  => $d['goods_no'],
-                    'refund_no'  => isset($d['refund_no'])? $d['refund_no'] : '',
-                    'goods_name'  => $d['goods_name'],
-                    'quantity'  => isset($d['quantity']) ? $d['quantity'] : 1,
-                    'imei'      => isset($d['imei']) ? $d['imei'] : ''
+                    'serial_no'     => isset($d['serial_no']) ? $d['serial_no'] : '',//可以不传
+                    'goods_no'      => $d['goods_no'],
+                    'refund_no'     => isset($d['refund_no'])? $d['refund_no'] : '',
+                    'goods_name'    => $d['goods_name'],
+                    'quantity'      => isset($d['quantity']) ? $d['quantity'] : 1,
+                    'imei'          => isset($d['imei']) ? $d['imei'] : '',
+                    'specs'         => $d['specs'] ? $d['specs'] : '',
+                    'goods_thumb'   => $d['goods_thumb'] ? $d['goods_thumb'] : '',
+                    'zujin'         => $d['zujin'] ? $d['zujin'] : '',
                 ];
             }
         }
         //转发给创建收货单接口的参数
         $result = [
-            'order_no' => $order_no,
-            'receive_detail' => $receive_detail,
-            'logistics_id' => $logistics_id,
-            'logistics_no' => $logistics_no,
-            'type' => $type,
-            'business_key' => $data['business_key'],
-            'customer' => $data['customer'],
-            'customer_mobile' => $data['customer_mobile'],
-            'customer_address' => $data['customer_address'],
-            'channel_id' => $data['channel_id'],
-            'appid' => $data['appid'],
-            'order_type' => $orderInfo['order_type'],
-            'business_no'      =>isset($goods_info[0]['business_no'])?$goods_info[0]['business_no']:'',
+            'order_no'          => $order_no,
+            'receive_detail'    => $receive_detail,
+            'logistics_id'      => $logistics_id,
+            'logistics_no'      => $logistics_no,
+            'type'              => $type,
+            'business_key'      => $data['business_key'],
+            'customer'          => $data['customer'],
+            'customer_mobile'   => $data['customer_mobile'],
+            'customer_address'  => $data['customer_address'],
+            'channel_id'        => $data['channel_id'],
+            'appid'             => $data['appid'],
+            'order_type'        => $orderInfo['order_type'],
+            'business_no'       => isset($goods_info[0]['business_no'])?$goods_info[0]['business_no']:'',
         ];
 
         $base_api = config('tripartite.warehouse_api_uri');
