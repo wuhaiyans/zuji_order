@@ -143,7 +143,7 @@ class Config {
 
 
 				//逾期
-				SceneConfig::OVERDUEDEDUCTION           => 'SMS_113461214  ',//逾期扣除押金
+				SceneConfig::OVERDUEDEDUCTION           => 'SMS_113461296  ',//逾期扣除押金
 
 			],
 
