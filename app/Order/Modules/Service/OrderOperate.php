@@ -2119,7 +2119,7 @@ class OrderOperate
     {
 
         $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderListArray['orderIds'], array('goods_yajin','yajin','discount_amount','amount_after_discount',
-            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no','surplus_yajin'));
+            'goods_status','coupon_amount','goods_name','goods_no','specs','goods_thumb','zuqi','zuqi_type','order_no','surplus_yajin'));
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');
         //到期时间多于1个月不出现到期处理
