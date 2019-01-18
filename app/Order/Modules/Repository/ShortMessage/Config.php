@@ -141,6 +141,10 @@ class Config {
 				// 续租
 				SceneConfig::RELETSUCCESS               => 'SMS_113461214  ',//续租成功
 
+
+				//逾期
+				SceneConfig::OVERDUEDEDUCTION           => 'SMS_113461296  ',//逾期扣除押金
+
 			],
 
 			// 小程序

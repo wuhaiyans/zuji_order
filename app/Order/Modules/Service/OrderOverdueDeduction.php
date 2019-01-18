@@ -28,7 +28,21 @@ class OrderOverdueDeduction
         $overdueInfoArray = objectToArray($overdueInfo);
         if (!empty($overdueInfoArray['data'])) {
             foreach ($overdueInfoArray['data'] as $keys=>$values) {
+                if($values['order_status'] == OrderStatus::OrderClosedRefunded || $values['order_status'] == OrderStatus::OrderCompleted){
+                    if($overdueInfoArray['data'][$keys]['overdue_amount'] != 0 || $overdueInfoArray['data'][$keys]['unpaid_amount'] != 0){
+                        $where = [];
+                        $where[] = ['order_no','=',$values['order_no']];
+                        $data = [
+                            'overdue_amount'=> 0,
+                            'unpaid_amount'=>  0
+                        ];
+                        //修改未缴租金和押金为0
+                        \App\Order\Models\OrderOverdueDeduction::where($where)->update($data);
+                    }
 
+                    $overdueInfoArray['data'][$keys]['overdue_amount'] = 0;
+                    $overdueInfoArray['data'][$keys]['unpaid_amount'] = 0;
+                }
                  //应用来源
                 $overdueInfoArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
 
@@ -166,7 +180,7 @@ class OrderOverdueDeduction
             }
 
             $goodsData = [
-                'surplus_yajin'             => $goodsInfo['surplus_yajin'] - $overdueDeductionInfo['deduction_amount'],// 剩余押金
+                'surplus_yajin'  => bcsub($goodsInfo['surplus_yajin'], $overdueDeductionInfo['deduction_amount'], 2),// 剩余押金
             ];
             $orderGoods = new \App\Order\Modules\Repository\OrderGoodsRepository();
             $result = $orderGoods->update(['order_no' => $overdueDeductionInfo['order_no']], $goodsData);
@@ -174,6 +188,46 @@ class OrderOverdueDeduction
                 \App\Lib\Common\LogApi::error('[deduDepositNotify]修改商品剩余押金失败');
                 return false;
             }
+
+            /**
+             * 增加入账记录
+             */
+
+            // 查询订单
+            $orderInfo = \App\Order\Modules\Repository\OrderRepository::getInfoById($overdueDeductionInfo['order_no']);
+            if( !$orderInfo ){
+                \App\Lib\Common\LogApi::error('[deduDepositNotify]逾期扣款回调-订单信息错误');
+                return false;
+            }
+
+            $incomeData = [
+                'name'           => $overdueDeductionInfo['order_no'] . "逾期扣除押金",
+                'order_no'       => $overdueDeductionInfo['order_no'],
+                'business_type'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,
+                'business_no'    => $param['out_trade_no'],
+                'appid'          => $orderInfo['appid'],
+                'channel'        => \App\Order\Modules\Repository\Pay\Channel::Alipay,
+                'amount'         => $overdueDeductionInfo['deduction_amount'],
+                'create_time'    => time(),
+                'trade_no'       => $param['out_trade_no'],
+                'out_trade_no'   => isset($param['trade_no'])?$param['trade_no']:'',
+            ];
+            $incomeB = \App\Order\Modules\Repository\OrderPayIncomeRepository::create($incomeData);
+            if(!$incomeB){
+                \App\Lib\Common\LogApi::error('[OverdueDeductionNotify]创建收支明细失败');
+                return false;
+            }
+
+            /**
+             * 发送短信
+             */
+            $notice = new \App\Order\Modules\Service\OrderNotice(
+                \App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,
+                $param['out_trade_no'],
+                "OverdueDeduction");
+            $notice->notify();
+
+
         }
 
         return true;

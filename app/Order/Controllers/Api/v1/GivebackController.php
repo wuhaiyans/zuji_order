@@ -16,6 +16,7 @@ use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Inc\OrderFreezeStatus;
 use App\Order\Modules\Repository\Pay\PayQuery;
 use App\Lib\Payment\CommonFundAuthApi;
+use App\Order\Models\OrderGoodsExtend;
 
 class GivebackController extends Controller
 {
@@ -252,13 +253,16 @@ class GivebackController extends Controller
 				//推送到收发货系统
 				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], 1, [
 					[
-						'goods_no'=>$goodsNo,
-						'goods_name'=>$orderGoodsInfo['goods_name'],
-						'business_no' => $giveback_no,
-						'zuqi' => $orderGoodsInfo['zuqi'],
-						'zuqi_type' => $orderGoodsInfo['zuqi_type'],
-						'channel_id' => $orderInfo[0]['channel_id'],
-						'appid' => $orderInfo[0]['appid'],
+						'goods_no'		=> $goodsNo,
+						'goods_name'	=> $orderGoodsInfo['goods_name'],
+						'business_no' 	=> $giveback_no,
+						'zuqi' 			=> $orderGoodsInfo['zuqi'],
+						'zuqi_type' 	=> $orderGoodsInfo['zuqi_type'],
+						'channel_id' 	=> $orderInfo[0]['channel_id'],
+						'appid' 		=> $orderInfo[0]['appid'],
+						'specs' 		=> $orderGoodsInfo['specs'],
+						'goods_thumb' 	=> $orderGoodsInfo['goods_thumb'],
+						'zujin' 		=> $orderGoodsInfo['zujin'],
 					],
 				],[
 					'logistics_id' => $paramsArr['logistics_id'],
@@ -897,17 +901,21 @@ class GivebackController extends Controller
 		//获取还机单基本信息
 		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo( $goodsNo );
 		//还机地址 jinlin 2018-9-29 改
-		$giveback = GivebackAddressStatus::getGivebackAddress($orderGoodsInfo['prod_id']);
+		// $giveback = GivebackAddressStatus::getGivebackAddress($orderGoodsInfo['prod_id']);
+		//还机地址 maxiaoyu 2019-1-16 改
+		$giveback = OrderGoodsExtend::query()
+			->where(['goods_no'=>$goodsNo])
+			->first()
+			->toArray();
 		if($giveback){
-			$data['giveback_address'] = $giveback['giveback_address'];
-			$data['giveback_username'] = $giveback['giveback_username'];
-			$data['giveback_tel'] = $giveback['giveback_tel'];
+			$data['giveback_address'] = $giveback['return_address_value'];
+			$data['giveback_username'] = $giveback['return_name'];
+			$data['giveback_tel'] = $giveback['return_phone'];
 		}else{
 			$data['giveback_address'] = 'spu参数错误';
 			$data['giveback_username'] ='无';
 			$data['giveback_tel'] = '无';
 		}
-
 		//还机信息为空则返回还机申请页面信息
 		if( !$orderGivebackInfo ){
 			

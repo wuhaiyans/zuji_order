@@ -33,7 +33,11 @@ class DeliveryGoods extends Warehouse
         'status',
         'status_time',
         'zuqi',
-        'zuqi_type'
+        'zuqi_type',
+        'specs',
+        'goods_thumb',
+        'zujin',
+        'imgs'
     ];
 
     /**
