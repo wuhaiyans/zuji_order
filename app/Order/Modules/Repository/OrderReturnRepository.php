@@ -570,6 +570,28 @@ class OrderReturnRepository
 
     }
 
+    /***
+     * 是否逾期
+     * @param $order_no
+     * @return bool
+     */
+    public static function isOverDue($order_no){
+        $whereArray = [];
+        $whereArray[] = ['order_info.order_no', '=', $order_no];
+        $whereArray[] = ['order_goods.end_time', '>', 0];
+        $whereArray[] = ['order_goods.end_time','<=',time()];
+        $whereArray[] = ['order_info.order_status','=',OrderStatus::OrderInService];  //租用中
+        $result = DB::table('order_info')
+            ->leftJoin('order_goods','order_info.order_no', '=', 'order_goods.order_no')
+            ->where($whereArray)
+            ->select('order_goods.end_time')
+            ->first();
+        if( !$result ){
+            return false;
+        }
+        return objectToArray($result);
+
+    }
 
 
 }

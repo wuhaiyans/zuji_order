@@ -83,7 +83,7 @@ class Receive
                     'imei'          => isset($d['imei']) ? $d['imei'] : '',
                     'specs'         => $d['specs'] ? $d['specs'] : '',
                     'goods_thumb'   => $d['goods_thumb'] ? $d['goods_thumb'] : '',
-                    'zujin'         => $d['zujin'] ? $d['zujin'] : '',
+                    'zujin'         => $d['zujin'] ? $d['zujin'] : 0,
                 ];
             }
         }
