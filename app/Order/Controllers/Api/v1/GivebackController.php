@@ -1473,5 +1473,45 @@ class GivebackController extends Controller
 	}
 
 
+	/**
+	 * 线下门店端 待检测列表
+	 * @param Request $request
+	 */
+	public function UnderLineGetList(  Request $request ) {
+		$params = $request->input();
+		$whereArr = $additionArr = isset($params['params'])? $params['params'] :[];
+
+		if( isset($whereArr['end_time']) ){
+			$whereArr['end_time'] = date('Y-m-d 23:59:59', strtotime($whereArr['end_time']));
+		}
+
+		$orderGivebackService = new OrderGiveback( );
+		$orderGivebackList = $orderGivebackService->UnderLineGetList( $whereArr, $additionArr );
+		return apiResponse($orderGivebackList);
+	}
+
+	/**
+	 * 线下门店端 获取监测支付信息
+	 * @param Request $request
+	 */
+	public function getEvaluationPayInfo(  Request $request ) {
+		$params = $request->input();
+		$goodsNo = isset($params['params']['goods_no']) ? $params['params']['goods_no'] : "";
+
+		if( $goodsNo == "" ){
+			return apiResponse([],ApiStatus::CODE_20001, "goods_no不能为空");
+		}
+
+		$status = false;
+		$orderGivebackService = new OrderGiveback();
+		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo( $goodsNo );
+		if($orderGivebackInfo['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY ){
+			$status = true;
+		}
+
+		return apiResponse(['status'=>$status]);
+	}
+
+
 }
 ?>
