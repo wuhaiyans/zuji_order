@@ -53,6 +53,25 @@ class CheckItemController extends Controller
     }
 
     /**
+     * 线下门店待检测列表
+     */
+    public function xianxiaCheck(){
+        $request = request()->input();
+        $channel_id = json_decode($request['userinfo']['channel_id'], true);
+        $list_obj = Receive::where(['status'=>Receive::STATUS_RECEIVED,'channel_id'=>$channel_id])->get();
+        if($list_obj){
+            $list = [];
+            foreach ($list_obj as $key=>$item){
+                $list[$key] = $item->toArray();
+                $list[$key]['goods_list'] = $item->goods->toArray();
+            }
+            return \apiResponse($list);
+        }else{
+            return \apiResponse([]);
+        }
+    }
+
+    /**
      * 线下门店根据订单号查询是否显示检测,检测结果按钮
      *
      * @param order_no string 订单编号

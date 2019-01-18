@@ -726,7 +726,12 @@ class DeliveryController extends Controller
         $channel_id = json_decode($request['userinfo']['channel_id'], true);
         $list_obj = Delivery::where(['status'=>Delivery::STATUS_INIT,'channel_id'=>$channel_id])->get();
         if($list_obj){
-            return \apiResponse($list_obj->toArray());
+            $list = [];
+            foreach ($list_obj as $key=>$item){
+                $list[$key] = $item->toArray();
+                $list[$key]['goods_list'] = $item->goods->toArray();
+            }
+            return \apiResponse($list);
         }else{
             return \apiResponse([]);
         }

@@ -193,13 +193,15 @@ class OrderGiveback
 	 *      ]
 	 * ]
 	 */
-	public function getList( $where = [], $additional = [] ) {
+	public function getList( $where = [], $additional = [] ,$status = []) {
+		$this->__parseWhereIn( $status );
 		$this->__parseWhere( $where );
 		$this->__parseAddition( $additional );
         $orderList = DB::table('order_giveback')
             ->leftJoin('order_goods', 'order_goods.goods_no', '=', 'order_giveback.goods_no')
             ->leftJoin('order_info','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
+			->whereIn('order_giveback.status',$status)
 			->orderBy('order_giveback.create_time', 'desc')
             ->select('order_giveback.*','order_goods.goods_name','order_goods.amount_after_discount','order_goods.zuqi_type','order_goods.zuqi','order_goods.surplus_yajin','order_info.mobile')
 //			paginate: 参数
@@ -651,9 +653,18 @@ class OrderGiveback
 		$where = $whereArray;
 		return true;
 	}
+
 	private function __parseAddition( &$addition ) {
 		$addition['page'] = isset($addition['page']) && $addition['page'] ? $addition['page'] : 1;
 		$addition['size'] = isset($addition['size']) && $addition['size'] ? max($addition['size'],20) : 20;
+		return true;
+	}
+
+	private function __parseWhereIn( &$status ) {
+		if(empty($status)){
+			$status = OrderGivebackStatus::getStatusList();
+			$status = array_keys($status);
+		}
 		return true;
 	}
 
@@ -695,4 +706,5 @@ class OrderGiveback
 		return true;
 
 	}
+
 }
