@@ -812,7 +812,7 @@ class GivebackController extends Controller
 		if( isset($whereArr['end_time']) ){
 			$whereArr['end_time'] = date('Y-m-d 23:59:59', strtotime($whereArr['end_time']));
 		}
-		
+
 		$orderGivebackService = new OrderGiveback( );
 		$orderGivebackList = $orderGivebackService->getList( $whereArr, $additionArr );
 		return apiResponse($orderGivebackList);
@@ -1477,7 +1477,7 @@ class GivebackController extends Controller
 	 * 线下门店端 待检测列表
 	 * @param Request $request
 	 */
-	public function UnderLineGetList(  Request $request ) {
+	public function UnderLineGetList( Request $request ) {
 		$params = $request->input();
 		$whereArr = $additionArr = isset($params['params'])? $params['params'] :[];
 
@@ -1485,8 +1485,10 @@ class GivebackController extends Controller
 			$whereArr['end_time'] = date('Y-m-d 23:59:59', strtotime($whereArr['end_time']));
 		}
 
-		$orderGivebackService = new OrderGiveback( );
-		$orderGivebackList = $orderGivebackService->UnderLineGetList( $whereArr, $additionArr );
+		$orderGivebackService = new OrderGiveback();
+		$status = [OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK,OrderGivebackStatus::STATUS_DEAL_WAIT_PAY];
+
+		$orderGivebackList = $orderGivebackService->getList( $whereArr, $additionArr, $status);
 		return apiResponse($orderGivebackList);
 	}
 

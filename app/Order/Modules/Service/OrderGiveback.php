@@ -193,13 +193,15 @@ class OrderGiveback
 	 *      ]
 	 * ]
 	 */
-	public function getList( $where = [], $additional = [] ) {
+	public function getList( $where = [], $additional = [] ,$status = []) {
+		$this->__parseWhereIn( $status );
 		$this->__parseWhere( $where );
 		$this->__parseAddition( $additional );
         $orderList = DB::table('order_giveback')
             ->leftJoin('order_goods', 'order_goods.goods_no', '=', 'order_giveback.goods_no')
             ->leftJoin('order_info','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
+			->whereIn('order_giveback.status',$status)
 			->orderBy('order_giveback.create_time', 'desc')
             ->select('order_giveback.*','order_goods.goods_name','order_goods.amount_after_discount','order_goods.zuqi_type','order_goods.zuqi','order_goods.surplus_yajin','order_info.mobile')
 //			paginate: 参数
@@ -651,9 +653,18 @@ class OrderGiveback
 		$where = $whereArray;
 		return true;
 	}
+
 	private function __parseAddition( &$addition ) {
 		$addition['page'] = isset($addition['page']) && $addition['page'] ? $addition['page'] : 1;
 		$addition['size'] = isset($addition['size']) && $addition['size'] ? max($addition['size'],20) : 20;
+		return true;
+	}
+
+	private function __parseWhereIn( &$status ) {
+		if(empty($status)){
+			$status = OrderGivebackStatus::getStatusList();
+			$status = array_keys($status);
+		}
 		return true;
 	}
 
@@ -696,97 +707,4 @@ class OrderGiveback
 
 	}
 
-
-	/**
-	 * 获取还机单列表
-	 * @param array $where 查询条件
-	 * $where = [<br\>
-	 *     'begin_time' => '',//还机单创建的开始时间<br\>
-	 *     'end_time' => '',//还机单创建的结束时间<br\>
-	 *     'status' => '',//还机单状态<br\>
-	 *     'payment_status' => '',//还机单支付状态<br\>
-	 *     'payment_end_time' => '',//还机单支付状态更新最后时间<br\>
-	 *     'kw_type' => '',//搜索关键字类型<br\>
-	 *     'keywords' => '',//搜索关键字<br\>
-	 * ]<br\>
-	 * @param array $additional 附加条件
-	 * $additonal = [<br\>
-	 *		'page' => '',//页数<br\>
-	 *		'size' => '',//每页大小<br\>
-	 * ]<br\>
-	 * @return array $result 返回的数据
-	 * $result = [<br\>
-	 *		'current_page'=>'',//当前页<br\>
-	 *		'first_page_url'=>'',//第一页url<br\>
-	 *		'from'=>'',//从第几条数据<br\>
-	 *		'last_page'=>'',//最终页<br\>
-	 *		'last_page_url'=>'',//最终页url<br\>
-	 *		'next_page_url'=>'',//下一页<br\>
-	 *		'path'=>'',//当前域名路径<br\>
-	 *		'per_page'=>'',//每页大小<br\>
-	 *		'prev_page_url'=>'',//上一页<br\>
-	 *		'to'=>'',//到第几条数据<br\>
-	 *		'total'=>'',//一共几条数据<br\>
-	 *      'data' => [ //数据详情<br\>
-	 *			'id' => ''//主键id<br\>
-	 *			'giveback_no' => ''//还机编号（业务编号）<br\>
-	 *			'order_no' => ''//订单编号<br\>
-	 *			'goods_no' => ''//商品编号<br\>
-	 *			'goods_name' => ''//设备名称<br\>
-	 *			'amount_after_discount' => ''//设备优惠后总金额<br\>
-	 *			'zuqi' => ''//商品租期<br\>
-	 *			'zuqi_type' => ''//商品租期类型<br\>
-	 *			'user_id' => ''//用户id<br\>
-	 *			'username' => ''//用户名<br\>
-	 *			'mobile' => ''//用户手机号<br\>
-	 *			'status' => ''//状态值<br\>
-	 *			'status_name' => ''//状态名称<br\>
-	 *			'instalment_num' => ''//剩余分期数<br\>
-	 *			'instalment_amount' => ''//剩余分期支付金额<br\>
-	 *			'payment_status' => ''//支付状态值<br\>
-	 *			'payment_status_name' => ''//支付状态名称<br\>
-	 *			'payment_time' => ''//支付时间<br\>
-	 *			'logistics_id' => ''//物流id<br\>
-	 *			'logistics_name' => ''//物流名称<br\>
-	 *			'logistics_no' => ''//物流编号<br\>
-	 *			'evaluation_status' => ''//检测状态值<br\>
-	 *			'evaluation_status_name' => ''//检测状态名称<br\>
-	 *			'evaluation_remark' => ''//检测备注<br\>
-	 *			'evaluation_time' => ''//检测时间<br\>
-	 *			'yajin_status' => ''//押金状态值<br\>
-	 *			'yajin_status_name' => ''//押金状态名称<br\>
-	 *			'compensate_amount' => ''//赔偿金额<br\>
-	 *			'create_time' => ''//创建时间<br\>
-	 *			'update_time' => ''//最后更新时间<br\>
-	 *			'remark' => ''//备注<br\>
-	 *      ]
-	 * ]
-	 */
-	public function UnderLineGetList( $where = [], $additional = [] ) {
-		$status = [OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK,OrderGivebackStatus::STATUS_DEAL_WAIT_PAY];
-		$this->__parseAddition( $additional );
-		$orderList = DB::table('order_giveback')
-			->leftJoin('order_goods', 'order_goods.goods_no', '=', 'order_giveback.goods_no')
-			->leftJoin('order_info','order_info.order_no', '=', 'order_goods.order_no')
-			->whereIn('status',$status)
-			->orderBy('order_giveback.create_time', 'desc')
-			->select('order_giveback.*','order_goods.goods_name','order_goods.amount_after_discount','order_goods.zuqi_type','order_goods.zuqi','order_goods.surplus_yajin','order_info.mobile')
-			->paginate($additional['size'],['*'], 'p', $additional['page']);
-		$orderList = json_decode(json_encode($orderList),true);
-		if( $orderList ){
-			foreach ($orderList['data'] as  &$value) {
-				$value['username'] = $value['mobile'];
-				$value['status_name'] = OrderGivebackStatus::getStatusName($value['status']);
-				$value['payment_status_name'] = OrderGivebackStatus::getPaymentStatusName($value['payment_status']);
-				$value['evaluation_status_name'] = OrderGivebackStatus::getEvaluationStatusName($value['evaluation_status']);
-				$value['yajin_status_name'] = OrderGivebackStatus::getYajinStatusName($value['yajin_status']);
-				$value['create_time'] = date('Y-m-d H:i:s',$value['create_time']);
-				$value['evaluation_time'] = date('Y-m-d H:i:s',$value['evaluation_time']);
-				$value['update_time'] = date('Y-m-d H:i:s',$value['update_time']);
-				$value['payment_time'] = $value['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY ? date('Y-m-d H:i:s',$value['payment_time']) : '--';
-				$value['yajin_should_return'] = ($value['compensate_amount']+$value['instalment_amount']) >= $value['surplus_yajin'] ? 0 : $value['surplus_yajin']-($value['compensate_amount']+$value['instalment_amount']) ;
-			}
-		}
-		return $orderList;
-	}
 }
