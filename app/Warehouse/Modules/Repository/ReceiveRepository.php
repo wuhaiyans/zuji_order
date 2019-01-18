@@ -536,20 +536,20 @@ class ReceiveRepository
         $params['compensate_amount'] = isset($params['compensate_amount']) ? $params['compensate_amount'] : 0;
 
 //        图片上传待商议
-//        if($params['check_result']==CheckItems::RESULT_FALSE){
-//            $update_obj = new TencentUpload();
-//            $upload_imgs = $update_obj->file_upload_all();
-//            $imgs = [];
-//            foreach ($upload_imgs as $key=>$item) {
-//                if($item['ret']){
-//                    return false;
-//                }
-//                $imgs[] = $item['img']['url'];
-//            }
-//            $params['imgs'] = json_encode($imgs);
-//        }else{
+        if($params['check_result']==CheckItems::RESULT_FALSE){
+            $update_obj = new TencentUpload();
+            $upload_imgs = $update_obj->file_upload_all();
+            $imgs = [];
+            foreach ($upload_imgs as $key=>$item) {
+                if($item['ret']){
+                    return false;
+                }
+                $imgs[] = $item['img']['url'];
+            }
+            $params['imgs'] = json_encode($imgs);
+        }else{
             $params['imgs']=0;
-//        }
+        }
 
         $model = new CheckItems();
         return $model->create($params);

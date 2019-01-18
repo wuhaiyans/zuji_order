@@ -253,13 +253,16 @@ class GivebackController extends Controller
 				//推送到收发货系统
 				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], 1, [
 					[
-						'goods_no'=>$goodsNo,
-						'goods_name'=>$orderGoodsInfo['goods_name'],
-						'business_no' => $giveback_no,
-						'zuqi' => $orderGoodsInfo['zuqi'],
-						'zuqi_type' => $orderGoodsInfo['zuqi_type'],
-						'channel_id' => $orderInfo[0]['channel_id'],
-						'appid' => $orderInfo[0]['appid'],
+						'goods_no'		=> $goodsNo,
+						'goods_name'	=> $orderGoodsInfo['goods_name'],
+						'business_no' 	=> $giveback_no,
+						'zuqi' 			=> $orderGoodsInfo['zuqi'],
+						'zuqi_type' 	=> $orderGoodsInfo['zuqi_type'],
+						'channel_id' 	=> $orderInfo[0]['channel_id'],
+						'appid' 		=> $orderInfo[0]['appid'],
+						'specs' 		=> $orderGoodsInfo['specs'],
+						'goods_thumb' 	=> $orderGoodsInfo['goods_thumb'],
+						'zujin' 		=> $orderGoodsInfo['zujin'],
 					],
 				],[
 					'logistics_id' => $paramsArr['logistics_id'],
@@ -1467,6 +1470,46 @@ class GivebackController extends Controller
 		}
 
 		return true;
+	}
+
+
+	/**
+	 * 线下门店端 待检测列表
+	 * @param Request $request
+	 */
+	public function UnderLineGetList(  Request $request ) {
+		$params = $request->input();
+		$whereArr = $additionArr = isset($params['params'])? $params['params'] :[];
+
+		if( isset($whereArr['end_time']) ){
+			$whereArr['end_time'] = date('Y-m-d 23:59:59', strtotime($whereArr['end_time']));
+		}
+
+		$orderGivebackService = new OrderGiveback( );
+		$orderGivebackList = $orderGivebackService->UnderLineGetList( $whereArr, $additionArr );
+		return apiResponse($orderGivebackList);
+	}
+
+	/**
+	 * 线下门店端 获取监测支付信息
+	 * @param Request $request
+	 */
+	public function getEvaluationPayInfo(  Request $request ) {
+		$params = $request->input();
+		$goodsNo = isset($params['params']['goods_no']) ? $params['params']['goods_no'] : "";
+
+		if( $goodsNo == "" ){
+			return apiResponse([],ApiStatus::CODE_20001, "goods_no不能为空");
+		}
+
+		$status = false;
+		$orderGivebackService = new OrderGiveback();
+		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo( $goodsNo );
+		if($orderGivebackInfo['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY ){
+			$status = true;
+		}
+
+		return apiResponse(['status'=>$status]);
 	}
 
 

@@ -3836,4 +3836,27 @@ class OrderReturnCreater
         return true;
 
     }
+
+    /**
+     * 判断订单是否是逾期订单
+     * @params  order_no 订单编号  【必传】
+     */
+    public static function isOverDue( $order_no ){
+        if(!isset($order_no)){
+            return false;
+        }
+       $result = OrderReturnRepository::isOverDue($order_no);
+       $arr = [];
+      if( !$result ){
+          //逾期天数
+          $arr['overDue_time'] =  '0'.'天';
+          $arr['isOverDue'] = false;
+      }else{
+          //逾期天数
+          $arr['overDue_time'] =  (int)((time()-$result['end_time'])/(24*3600)+1).'天';
+          $arr['isOverDue'] = true;
+      }
+      return $arr;
+
+    }
 }
