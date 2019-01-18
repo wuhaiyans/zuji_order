@@ -385,6 +385,38 @@ class OrderController extends Controller
 
 
     /**
+     * 线下门店订单列表接口
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function orderOfflineList(Request $request){
+        try{
+
+            $allParams = $request->all();
+            $params =   $allParams['params'];
+
+            $params['channel_id'] = json_decode($allParams['userinfo']['channel_id'], true);
+            $orderData = Service\OrderOperate::getOfflineOrderList($params);
+
+            if ($orderData['code']===ApiStatus::CODE_0) {
+
+                return apiResponse($orderData['data'],ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_33001);
+            }
+
+        }catch (\Exception $e) {
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
+    }
+
+
+
+
+    /**
      * 客户端订单列表接口
      * Author: heaven
      * @param Request $request
