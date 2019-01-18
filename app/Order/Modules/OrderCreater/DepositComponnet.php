@@ -96,18 +96,26 @@ class DepositComponnet implements OrderCreater
                         'is_order'=>1,
                     ];
                     LogApi::info(config('app.env')."OrderCreate-jisuan_yajin:".$this->orderNo,$arr);
-                    try{
-                        //调用风控押金计算接口
-                        $deposit = Yajin::calculate($arr);
-                    }catch (\Exception $e){
-                        //如果押金接口请求失败 押金不进行减免
-//                        $this->getOrderCreater()->setError('商品押金接口错误');
-//                        $this->flag = false;
-                        LogApi::alert("OrderCreate:获取押金接口失败",$arr,[config('web.order_warning_user')]);
-                        LogApi::error(config('app.env')."OrderCreate-YajinCalculate-interface-error",$arr);
+                    if($this->schema['order']['app_id'] ==139){
+                        try{
+                            //调用风控押金计算接口
+                            $deposit = Yajin::calculate($arr);
+                        }catch (\Exception $e){
+                            //如果押金接口请求失败 押金不进行减免
+    //                        $this->getOrderCreater()->setError('商品押金接口错误');
+    //                        $this->flag = false;
+                            LogApi::alert("OrderCreate:获取押金接口失败",$arr,[config('web.order_warning_user')]);
+                            LogApi::error(config('app.env')."OrderCreate-YajinCalculate-interface-error",$arr);
+                            $deposit['jianmian'] =0;
+                            $deposit['yajin'] = $v['yajin'] * 100;
+                            $deposit['_msg'] ='商品押金接口错误';
+                            $deposit['jianmian_detail'] =[];
+                        }
+                    }else{
+                        //除了139 全押金
                         $deposit['jianmian'] =0;
                         $deposit['yajin'] = $v['yajin'] * 100;
-                        $deposit['_msg'] ='商品押金接口错误';
+                        $deposit['_msg'] ='全押金';
                         $deposit['jianmian_detail'] =[];
                     }
                     LogApi::info(config('app.env')."OrderCreate-deposit_yajin:".$this->orderNo,$deposit);

@@ -232,6 +232,10 @@ class SceneConfig {
      */
     const RELETSUCCESS = 'ReletSuccess';
 
+    /**
+     * 场景：<b>【逾期扣款成功】</b>
+     */
+    const OVERDUEDEDUCTION = 'OverdueDeduction';
 
 
 }

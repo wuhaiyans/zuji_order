@@ -66,9 +66,10 @@ class OrderPayNotify
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_PAY);
             $orderNoticeObj->notify();
             //发送订单消息队列
-            $schedule = new OrderScheduleOnce(['user_id'=>$orderInfo['user_id'],'order_no'=>$orderNo]);
-            $schedule->OrderRisk();
-
+            if($orderInfo['appid']==139 || $orderInfo['order_type'] == OrderStatus::orderMiniService){
+                $schedule = new OrderScheduleOnce(['user_id'=>$orderInfo['user_id'],'order_no'=>$orderNo]);
+                $schedule->OrderRisk();
+            }
             //推送到区块链
             $b =OrderBlock::orderPushBlock($orderNo,OrderBlock::OrderPayed);
             LogApi::info("OrderPay-addOrderBlock:".$orderNo."-".$b);
