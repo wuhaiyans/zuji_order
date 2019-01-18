@@ -314,6 +314,11 @@ class OrderClearingRepository
             $whereArray[] = ['order_no', '=', $param['order_no']];
         }
 
+
+        if (isset($param['offLine']) && !empty($param['offLine'])) {
+            $whereArray[] = ['order_no', '!=', 0];
+        }
+
         //应用来源ID
         if (isset($param['app_id']) && !empty($param['app_id'])) {
             $whereArray[] = ['channel_id', '=', $param['app_id']];
