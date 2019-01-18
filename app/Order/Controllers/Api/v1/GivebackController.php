@@ -253,13 +253,16 @@ class GivebackController extends Controller
 				//推送到收发货系统
 				$warehouseResult = \App\Lib\Warehouse\Receive::create($paramsArr['order_no'], 1, [
 					[
-						'goods_no'=>$goodsNo,
-						'goods_name'=>$orderGoodsInfo['goods_name'],
-						'business_no' => $giveback_no,
-						'zuqi' => $orderGoodsInfo['zuqi'],
-						'zuqi_type' => $orderGoodsInfo['zuqi_type'],
-						'channel_id' => $orderInfo[0]['channel_id'],
-						'appid' => $orderInfo[0]['appid'],
+						'goods_no'		=> $goodsNo,
+						'goods_name'	=> $orderGoodsInfo['goods_name'],
+						'business_no' 	=> $giveback_no,
+						'zuqi' 			=> $orderGoodsInfo['zuqi'],
+						'zuqi_type' 	=> $orderGoodsInfo['zuqi_type'],
+						'channel_id' 	=> $orderInfo[0]['channel_id'],
+						'appid' 		=> $orderInfo[0]['appid'],
+						'specs' 		=> $orderGoodsInfo['specs'],
+						'goods_thumb' 	=> $orderGoodsInfo['goods_thumb'],
+						'zujin' 		=> $orderGoodsInfo['zujin'],
 					],
 				],[
 					'logistics_id' => $paramsArr['logistics_id'],

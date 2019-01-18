@@ -206,7 +206,7 @@ class OrderOverdueDeduction
                 'business_type'  => \App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,
                 'business_no'    => $param['out_trade_no'],
                 'appid'          => $orderInfo['appid'],
-                'channel'        => $orderInfo['channel_id'],
+                'channel'        => \App\Order\Modules\Repository\Pay\Channel::Alipay,
                 'amount'         => $overdueDeductionInfo['deduction_amount'],
                 'create_time'    => time(),
                 'trade_no'       => $param['out_trade_no'],
