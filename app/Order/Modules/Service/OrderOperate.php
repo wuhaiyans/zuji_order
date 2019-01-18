@@ -648,6 +648,13 @@ class OrderOperate
                 return false;
             }
 
+            $orderInfo =$order->getData();
+            if($orderInfo['order_status'] != Inc\OrderStatus::OrderDeliveryed){
+                LogApi::error(config('app.env')."环境 DeliveryReceive:订单状态已更改",$orderInfo);
+                DB::rollBack();
+                return true;
+            }
+
             //订单确认收货系列操作
             $userInfo =self::_orderReceive($order,$params,$system);
             if(!$userInfo){
