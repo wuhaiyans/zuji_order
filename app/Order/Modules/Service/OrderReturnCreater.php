@@ -581,8 +581,12 @@ class OrderReturnCreater
                     $goodsDeliveryInfo[$k]['quantity']  = $goods_info['quantity'];//商品数量
                     $goodsDeliveryInfo[$k]['refund_no'] = $params['detail'][$k]['refund_no'];//退换货单号
                     $goodsDeliveryInfo[$k]['goods_name'] = $goods_info['goods_name'];//商品名称
-                    $goodsDeliveryInfo[$k]['zuqi'] = $goods_info['zuqi'];//商品租期
-                    $goodsDeliveryInfo[$k]['zuqi_type'] = $goods_info['zuqi_type'];//租期类型
+                    $goodsDeliveryInfo[$k]['zuqi']        = $goods_info['zuqi'];//商品租期
+                    $goodsDeliveryInfo[$k]['zuqi_type']  = $goods_info['zuqi_type'];//租期类型
+                    $goodsDeliveryInfo[$k]['specs']       = $goods_info['specs'];//商品规格
+                    $goodsDeliveryInfo[$k]['goods_thumb']= $goods_info['goods_thumb'];//商品缩略图
+                    $goodsDeliveryInfo[$k]['zujin']       = $goods_info['zujin'];//租金
+
 
                     $yes_list[] = $params['detail'][$k]['refund_no'];
                     // 退货
@@ -728,11 +732,13 @@ class OrderReturnCreater
                         'refund_no' =>$goodsDeliveryInfo[$k]['refund_no'],
                         'serial_no' => $goodsDeliveryInfo[$k]['serial_number'],
                         'quantity'  => $goodsDeliveryInfo[$k]['quantity'],
-                        'imei'     =>$goodsDeliveryInfo[$k]['imei1'],
+                        'imei'         =>$goodsDeliveryInfo[$k]['imei1'],
                         'business_no' =>$goodsDeliveryInfo[$k]['refund_no'],
                         'zuqi'         =>$goodsDeliveryInfo[$k]['zuqi'],
                         'zuqi_type'   =>$goodsDeliveryInfo[$k]['zuqi_type'],
-                       // 'channel_id'  =>$order_info['channel_id'],
+                        'specs'        =>$goodsDeliveryInfo[$k]['specs'],
+                        'goods_thumb' =>$goodsDeliveryInfo[$k]['goods_thumb'],
+                        'zujin'        =>$goodsDeliveryInfo[$k]['zujin'],
                     //    'appid'       =>$order_info['appid']
                     ];
                 }
