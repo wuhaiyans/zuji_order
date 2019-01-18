@@ -285,6 +285,10 @@ return [
     'api.giveback.get.list'       => 'GivebackController@getList',
 	//还机获取还机信息
     'api.giveback.get.info'       => 'GivebackController@getInfo',
+	//线下门店端 待检测列表接口
+	'api.giveback.UnderLineGetList'       => 'GivebackController@UnderLineGetList',
+	// 线下门店端 监测不合格 获取还机支付信息
+	'api.giveback.getEvaluationPayInfo'       => 'GivebackController@getEvaluationPayInfo',
 
     //-+------------------------------------------------------------------------
     // | 买断相关接口
