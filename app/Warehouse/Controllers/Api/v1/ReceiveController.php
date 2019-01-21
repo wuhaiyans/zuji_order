@@ -309,6 +309,7 @@ class ReceiveController extends Controller
      */
     public function checkItemsFinish()
     {
+
         $rules = [
             'receive_no' => 'required',
             'check_description' => 'required',
@@ -318,6 +319,7 @@ class ReceiveController extends Controller
         ];
 
         $params = $this->_dealParams($rules);
+        LogApi::info("[checkItemsFinish]检测完成接收参数",['params'=>$params]);
         $param = request()->input();
         $userinfo=$param['userinfo'];
 
@@ -342,7 +344,7 @@ class ReceiveController extends Controller
                 //'refund_no'=>$receive_goods['receive_no']?$receive_goods['receive_no']:'',
             ];
 
-            LogApi::info('checkItemsFinish_info_Receive',$params);
+            LogApi::info('checkItemsFinish_info_Receive',$items);
 
             $this->receive->checkItem($params);
             Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);

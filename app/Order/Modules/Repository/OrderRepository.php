@@ -685,7 +685,7 @@ class OrderRepository
         }
 
         if (isset($param['mobile']) && !empty($param['mobile'])) {
-            $whereArray[] = ['order_user_address.consignee_mobile', '=', $param['keywords']];
+            $whereArray[] = ['order_user_address.consignee_mobile', '=', $param['mobile']];
         }
 
         //应用渠道

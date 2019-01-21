@@ -1068,6 +1068,49 @@ class OrderController extends Controller
     }
 
 
+
+    /**
+     * 线下订单详情接口
+     * Author: heaven
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function orderOffInfo(Request $request)
+    {
+        try{
+            $params = $request->all();
+            $rule = [
+                'order_no'=> 'required'
+            ];
+
+            $validateParams = $this->validateParams($rule,  $params);
+
+
+            if ($validateParams['code']!=0) {
+
+                return apiResponse([],$validateParams['code']);
+            }
+
+
+            $orderData = Service\OrderOperate::getOrderInfo($validateParams['data']['order_no']);
+            if ($orderData['code']===ApiStatus::CODE_0) {
+
+                return apiResponse($orderData['data'],ApiStatus::CODE_0);
+            } else {
+
+                return apiResponse([],ApiStatus::CODE_32002);
+            }
+
+        }catch (\Exception $e) {
+            LogApi::info("订单详情异常",$e);
+            return apiResponse([],ApiStatus::CODE_50000,$e->getMessage());
+
+        }
+
+
+    }
+
+
     /**
      *
      * 订单列表过滤筛选列表接口

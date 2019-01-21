@@ -133,7 +133,15 @@ class OrderCleaning
                 //查询商品信息
                 if (!empty($values['order_no'])) {
                     //根据订单号获取商品信息
-                    $orderCleanList['data'][$keys]['goods_info'] = objectToArray(OrderGoodsRepository::getGoodsByOrderNo($values['order_no']));
+                   $goodsList =  objectToArray(OrderGoodsRepository::getGoodsByOrderNo($values['order_no']));
+                   if (!empty($goodsList)) {
+
+                        foreach ($goodsList as $goodsKeys=>$goodsValues) {
+                            $goodsList[$goodsKeys]['specs'] = filterSpecs($goodsValues['specs']);
+                        }
+
+                   }
+                    $orderCleanList['data'][$keys]['goods_info'] = $goodsList;
                 }
 
 

@@ -9,6 +9,7 @@ namespace App\Warehouse\Controllers\Api\v1;
 
 
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Warehouse\Models\Receive;
 use App\Warehouse\Modules\Repository\CheckItemRepository;
 
@@ -18,16 +19,18 @@ class CheckItemController extends Controller
      * 查看检测详情
      *      包括收货信息商品信息和检测信息
      *
-     * @param receive_no    收货单号
-     * @param goods_no      商品唯一编号
+     * @param order_no  订单编号
+     * @param goods_no  商品唯一编号
      */
     public function getDetails()
     {
         $rules = [
-            'receive_no' => 'required',
+            'order_no' => 'required',
             'goods_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
+
+        LogApi::info("CheckItem_getDetails_查看检测详情",$params);
 
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
@@ -35,6 +38,7 @@ class CheckItemController extends Controller
 
         try {
             $data = CheckItemRepository::getDetails($params);
+            $data['EvaluationPayInfo'] = \App\Lib\Warehouse\Receive::getEvaluationPayInfo($params);
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
