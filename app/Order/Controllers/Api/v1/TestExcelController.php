@@ -159,7 +159,6 @@ class TestExcelController extends Controller
     }
 
     public function overdueDetail(){
-        echo 123;die;
         $order_no = $_GET['order_no'];
         $type = $_GET['type'];
         $ret = OrderBlock::orderPushBlock($order_no,$type);
