@@ -28,6 +28,6 @@ class Check  extends \App\Lib\BaseApi
 
         return $response;*/
 
-        return self::request(\config('app.APPID'), env('WAREHOUSE_API'),'warehouse.checkitem.getDetails', $params);
+        return self::request(\config('app.APPID'), env('WAREHOUSE_API'),'warehouse.checkitem.getDetails','1.0', $params);
     }
 }

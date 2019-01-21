@@ -216,7 +216,6 @@ class OrderBlock {
                 $checkInfo = Check::getCheckDetail($order_info['order_no'],$it['goods_no']);
                 if($checkInfo){
                     var_dump($checkInfo);die;
-                    $checkInfo = json_decode($checkInfo,true);
                     $data['input_record'] = [
                         'images'=>$checkInfo['imgs']?json_decode($checkInfo['imgs'],true):"",
                         'create_time'=>date('Y-m-d H:i:s',$checkInfo['create_time']),
