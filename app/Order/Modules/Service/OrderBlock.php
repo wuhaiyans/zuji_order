@@ -199,9 +199,10 @@ class OrderBlock {
             $data['face_record'] = $cardInfo['zhima'];
 
             //客服回访
-            $visit = OrderVisit::query()->where(['order_no'=>$order_info['order_no']])->first()->toArray();
+            $visit = OrderVisit::query()->where(['order_no'=>$order_info['order_no']])->first();
             $data['customer_service_record'] = "";
             if($visit){
+                $visit = $visit->toArray();
                 $data['customer_service_record'] = [
                     "type"=>OrderStatus::getVisitName($visit['visit_id']),
                     "text"=>$visit['visit_text'],
@@ -210,14 +211,16 @@ class OrderBlock {
             }
 
             //入库记录-检测图片
-            $checkInfo = Delivery::getCheckDetail($order_info['order_no'],$order_info['goods_no']);
             $data['input_record'] = "";
-            if($checkInfo){
-                $checkInfo = json_decode($checkInfo,true);
-                $data['input_record'] = [
-                    'images'=>$checkInfo['imgs']?json_decode($checkInfo['imgs'],true):"",
-                    'create_time'=>date('Y-m-d H:i:s',$checkInfo['create_time']),
-                ];
+            foreach( $result['goods_info'] as $it ){
+                $checkInfo = Delivery::getCheckDetail($order_info['order_no'],$it['goods_no']);
+                if($checkInfo){
+                    $checkInfo = json_decode($checkInfo,true);
+                    $data['input_record'] = [
+                        'images'=>$checkInfo['imgs']?json_decode($checkInfo['imgs'],true):"",
+                        'create_time'=>date('Y-m-d H:i:s',$checkInfo['create_time']),
+                    ];
+                }
             }
 
             //逾期客服回访记录
@@ -240,10 +243,11 @@ class OrderBlock {
                 "mobile"=>$order_info['mobile'],
                 "template"=>Config::getCode($order_info['channel_id'],SceneConfig::WITHHOLD_FAIL_INITIATIVE)
             ];
-            $smsLog = OrderSmsLog::where($where)->get()->toArray();
+            $smsLog = OrderSmsLog::where($where)->get();
 
             $data['collection_message'] = "";
             if($smsLog){
+                $smsLog = $smsLog->toArray();
                 $log = [];
                 foreach($smsLog as $item){
                     $content = json_decode($item['params'],true);
