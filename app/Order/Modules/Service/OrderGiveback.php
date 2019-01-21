@@ -223,6 +223,7 @@ class OrderGiveback
 				$value['update_time'] = date('Y-m-d H:i:s',$value['update_time']);
 				$value['payment_time'] = $value['payment_status'] == OrderGivebackStatus::PAYMENT_STATUS_ALREADY_PAY ? date('Y-m-d H:i:s',$value['payment_time']) : '--';
 				$value['yajin_should_return'] = ($value['compensate_amount']+$value['instalment_amount']) >= $value['surplus_yajin'] ? 0 : $value['surplus_yajin']-($value['compensate_amount']+$value['instalment_amount']) ;
+				$value['specs'] = filterSpecs($value['specs']);
 			}
 		}
         return $orderList;
