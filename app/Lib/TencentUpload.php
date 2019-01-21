@@ -5,7 +5,7 @@
  * @author wangjinlin
  */
 namespace App\Lib;
-use App\Lib\Common\LogApi;
+use App\Lib\Common;
 
 /**
  * TencentUpload类
@@ -111,7 +111,7 @@ class TencentUpload {
     public function file_upload_all_test(){
 
         $file = $_FILES['params'];
-        LogApi::info("[file_upload_all_test]图片上传接受参数",['params'=>$file]);
+        Common\LogApi::info("[file_upload_all_test]图片上传接受参数",['params'=>$file]);
         $tmp_name = $file['tmp_name']['imgs'];
         foreach ($tmp_name as $key=>$value){
             if(!empty($value))
