@@ -2231,7 +2231,7 @@ class OrderOperate
 
                     if ($orderGivebackInfo['status'] == Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK){
                         $goodsList[$keys]['act_goods_state']['check_btn'] = true;
-                        $orderListArray['data'][$values['order_no']]['order_status_name'] = Inc\OrderGivebackStatus::getStatusList(Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK);
+                        $orderListArray['data'][$values['order_no']]['order_status_name'] = Inc\OrderGivebackStatus::getStatusName(Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK);
                     }
 
                     if (in_array($orderGivebackInfo['evaluation_status'], array(Inc\OrderGivebackStatus::EVALUATION_STATUS_QUALIFIED, Inc\OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED))){
