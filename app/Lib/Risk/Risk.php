@@ -204,6 +204,10 @@ class Risk extends \App\Lib\BaseApi{
         return true;
     }
 
+    //获取下单用户身份证及人脸识别信息
+    static public function getIdentityCard($userId){
+        return self::request(\config('app.APPID'), \config('risksystem.FENGKONG_API'),'member.qukuai.cards', '1.0', ['user_id'=>$userId]);
+    }
 }
 
 
