@@ -357,7 +357,7 @@ class OrderClearingRepository
             $whereArray[] = ['create_time', '>=', strtotime($param['begin_time'])];
             $whereArray[] = ['create_time', '<', (strtotime($param['end_time'])+3600*24)];
         }
-        
+
         $query = DB::table('order_clearing')->where($whereArray)
             ->when(!empty($whereInArray),function($join) use ($whereInArray) {
                 return $join->whereIn('order_clearing.channel_id', $whereInArray);
