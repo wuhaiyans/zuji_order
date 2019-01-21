@@ -309,6 +309,7 @@ class ReceiveController extends Controller
      */
     public function checkItemsFinish()
     {
+
         $rules = [
             'receive_no' => 'required',
             'check_description' => 'required',
@@ -318,6 +319,7 @@ class ReceiveController extends Controller
         ];
 
         $params = $this->_dealParams($rules);
+        LogApi::info("[checkItemsFinish]检测完成接收参数",['params'=>$params]);
         $param = request()->input();
         $userinfo=$param['userinfo'];
 

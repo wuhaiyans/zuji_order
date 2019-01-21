@@ -15,6 +15,7 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Service\OrderCleaning;
+use Illuminate\Support\Facades\DB;
 
 class OrderClearingRepository
 {
@@ -307,11 +308,17 @@ class OrderClearingRepository
     public static function getOrderCleanList($param, $limit=2)
     {
         $whereArray = array();
+        $whereInArray = array();
         //出账状态
         //根据订单编号
         if (isset($param['order_no']) && !empty($param['order_no'])) {
 
             $whereArray[] = ['order_no', '=', $param['order_no']];
+        }
+
+
+        if (isset($param['offLine']) && !empty($param['offLine'])) {
+            $whereArray[] = ['order_no', '!=', ''];
         }
 
         //应用来源ID
@@ -339,19 +346,30 @@ class OrderClearingRepository
             $whereArray[] = ['create_time', '>=', strtotime($param['begin_time'])];
         }
 
+        //第三方渠道类型
+        if (isset($param['channel_id']) && !empty($param['channel_id'])) {
+
+            $whereInArray = $param['channel_id'];
+        }
+
         //创建时间
         if (isset($param['begin_time']) && !empty($param['begin_time']) && isset($param['end_time']) && !empty($param['end_time'])) {
             $whereArray[] = ['create_time', '>=', strtotime($param['begin_time'])];
             $whereArray[] = ['create_time', '<', (strtotime($param['end_time'])+3600*24)];
         }
-        $query = OrderClearing::where($whereArray)->orderBy('create_time','DESC');
+
+        $query = DB::table('order_clearing')->where($whereArray)
+            ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                return $join->whereIn('order_clearing.channel_id', $whereInArray);
+            })
+            ->orderBy('create_time','DESC');
 
         if (isset($param['size']) && !empty($param['size'])) {
 
             $limit  =    $param['size'];
         }
-        return $query->paginate($limit,
-            ['*'], 'page', $param['page'])->toArray();
+        return objectToArray($query->paginate($limit,
+            ['*'], 'page', $param['page']));
     }
 
 

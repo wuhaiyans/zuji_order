@@ -17,6 +17,7 @@ use App\Order\Modules\Inc\OrderCleaningStatus;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Inc\PayInc;
+use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderMiniRepository;
 use App\Order\Modules\Repository\OrderClearingRepository;
 use App\Lib\ApiStatus;
@@ -129,8 +130,19 @@ class OrderCleaning
                 //入账来源
                 $channelData = Channel::getChannel($values['app_id']);
                 $orderCleanList['data'][$keys]['app_id_name'] = $channelData['appid']['name'];
-                //是否显示乐百分备注，是乐百分出账，并且之前没有增加过备注信息
+                //查询商品信息
+                if (!empty($values['order_no'])) {
+                    //根据订单号获取商品信息
+                   $goodsList =  objectToArray(OrderGoodsRepository::getGoodsByOrderNo($values['order_no']));
+                   if (!empty($goodsList)) {
 
+                        foreach ($goodsList as $goodsKeys=>$goodsValues) {
+                            $goodsList[$goodsKeys]['specs'] = filterSpecs($goodsValues['specs']);
+                        }
+
+                   }
+                    $orderCleanList['data'][$keys]['goods_info'] = $goodsList;
+                }
 
 
             }

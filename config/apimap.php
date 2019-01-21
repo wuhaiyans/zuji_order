@@ -285,6 +285,10 @@ return [
     'api.giveback.get.list'       => 'GivebackController@getList',
 	//还机获取还机信息
     'api.giveback.get.info'       => 'GivebackController@getInfo',
+	//线下门店端 待检测列表接口
+	'api.giveback.UnderLineGetList'       => 'GivebackController@UnderLineGetList',
+	// 线下门店端 监测不合格 获取还机支付信息
+	'api.giveback.getEvaluationPayInfo'       => 'GivebackController@getEvaluationPayInfo',
 
     //-+------------------------------------------------------------------------
     // | 买断相关接口
@@ -362,6 +366,16 @@ return [
     'mini.order.givebackpay' => 'MiniGivebackController@givebackPay',
     //小程序订单还机支付状态查询接口
     'mini.order.givebackpaystatus' => 'MiniGivebackController@givebackPayStatus',
+
+
+
+    //-+------------------------------------------------------------------------
+    // | 线下门店接口
+    //-+------------------------------------------------------------------------
+
+    'api.offline.orderOfflineList'        => 'OrderController@orderOfflineList',
+
+
 
     /***********************************************************************************************
      * ******************************队列消费处理接口start    heaven********************************

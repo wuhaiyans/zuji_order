@@ -27,7 +27,6 @@ class InnerServiceController extends Controller
      */
     public function DeliveryApply(Request $request)
     {
-
         $input = file_get_contents("php://input");
         LogApi::info(__METHOD__.'() '.microtime(true).'InnerService-DeliveryApply-info:'.$input);
         $params = json_decode($input,true);

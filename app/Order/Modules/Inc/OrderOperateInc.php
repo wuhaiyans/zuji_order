@@ -420,6 +420,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderInService => [
                     'return_visit_btn'   => true,
                     //取消订单
+
                     'refund_btn'   => false,
                     //确认订单
                     'confirm_btn'   => false,
@@ -525,7 +526,174 @@ class OrderOperateInc
                     //'线下还机'
                     'offline_giveback_btn' => false,
                 ],
-            )
+            ),
+            //线下门店后台用户出现的按钮
+            'offlineOrderBtn'=>array(
+                //待支付
+                Inc\OrderStatus::OrderWaitPaying => [
+                    //支付后取消
+                    'cancel_pay_btn'    => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
+                    //发货
+                    'deliver_btn'    => false,
+                    //检测
+                    'check_btn'    => false,
+                    //检测结果
+                    'check_result_btn'    => false,
+                    //出账
+                    'clean_account_btn'    => false,
+                ],
+                //支付中
+                Inc\OrderStatus::OrderPaying => [
+
+                    //支付后取消
+                    'cancel_pay_btn'    => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
+                    //发货
+                    'deliver_btn'    => false,
+                    //检测
+                    'check_btn'    => false,
+                    //检测结果
+                    'check_result_btn'    => false,
+                    //出账
+                    'clean_account_btn'    => false,
+
+                ],
+                //已支付
+                Inc\OrderStatus::OrderPayed => [
+                    //支付后取消
+                    'cancel_pay_btn'    => true,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
+                    //发货
+                    'deliver_btn'    => true,
+                    //检测
+                    'check_btn'    => false,
+                    //检测结果
+                    'check_result_btn'    => false,
+                    //出账
+                    'clean_account_btn'    => false,
+                ],
+                //备货中
+                Inc\OrderStatus::OrderInStock => [
+                    //支付后取消
+                    'cancel_pay_btn'    => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
+                    //发货
+                    'deliver_btn'    => false,
+                    //检测
+                    'check_btn'    => false,
+                    //检测结果
+                    'check_result_btn'    => false,
+                    //出账
+                    'clean_account_btn'    => false,
+                ],
+                //已发货
+                Inc\OrderStatus::OrderDeliveryed => [
+
+                    //支付后取消
+                    'cancel_pay_btn'    => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
+                    //发货
+                    'deliver_btn'    => false,
+                    //检测
+                    'check_btn'    => false,
+                    //检测结果
+                    'check_result_btn'    => false,
+                    //出账
+                    'clean_account_btn'    => false,
+                ],
+                //租用中
+                Inc\OrderStatus::OrderInService => [
+
+                    //支付后取消
+                    'cancel_pay_btn'    => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
+                    //发货
+                    'deliver_btn'    => false,
+                    //检测
+                    'check_btn'    => false,
+                    //检测结果
+                    'check_result_btn'    => false,
+                    //出账
+                    'clean_account_btn'    => false,
+
+                ],
+                //已取消（未支付）
+                Inc\OrderStatus::OrderCancel => [
+
+                    //支付后取消
+                    'cancel_pay_btn'    => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
+                    //发货
+                    'deliver_btn'    => false,
+                    //检测
+                    'check_btn'    => false,
+                    //检测结果
+                    'check_result_btn'    => false,
+                    //出账
+                    'clean_account_btn'    => false,
+
+                ],
+                //已关闭（已退款）
+                Inc\OrderStatus::OrderClosedRefunded => [
+
+                    //支付后取消
+                    'cancel_pay_btn'    => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
+                    //发货
+                    'deliver_btn'    => false,
+                    //检测
+                    'check_btn'    => false,
+                    //检测结果
+                    'check_result_btn'    => false,
+                    //出账
+                    'clean_account_btn'    => false,
+
+                ],
+                //已完成
+                Inc\OrderStatus::OrderCompleted => [
+
+                    //支付后取消
+                    'cancel_pay_btn'    => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
+                    //发货
+                    'deliver_btn'    => false,
+                    //检测
+                    'check_btn'    => false,
+                    //检测结果
+                    'check_result_btn'    => false,
+                    //出账
+                    'clean_account_btn'    => false,
+
+                ],
+                //逾期关闭
+                Inc\OrderStatus::OrderAbnormal => [
+
+                    //支付后取消
+                    'cancel_pay_btn'    => false,
+                    //'线下还机'
+                    'offline_giveback_btn' => false,
+                    //发货
+                    'deliver_btn'    => false,
+                    //检测
+                    'check_btn'    => false,
+                    //检测结果
+                    'check_result_btn'    => false,
+                    //出账
+                    'clean_account_btn'    => false,
+
+                ],
+                )
+
 
 
         );

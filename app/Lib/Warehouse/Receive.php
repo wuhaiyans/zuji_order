@@ -1,12 +1,13 @@
 <?php
 /**
- * User: wansq
+ * User: wanjinlin
  * Date: 2018/5/7
  * Time: 17:52
  */
 
 
 namespace App\Lib\Warehouse;
+use App\Lib\Common\LogApi;
 use App\Lib\Curl;
 use App\Lib\Order\Giveback;
 use App\Lib\Order\ReturnGoods;
@@ -75,30 +76,33 @@ class Receive
                 if (!$d['goods_no']) continue;
                 
                 $receive_detail[] = [
-                    'serial_no' => isset($d['serial_no']) ? $d['serial_no'] : '',//可以不传
-                    'goods_no'  => $d['goods_no'],
-                    'refund_no'  => isset($d['refund_no'])? $d['refund_no'] : '',
-                    'goods_name'  => $d['goods_name'],
-                    'quantity'  => isset($d['quantity']) ? $d['quantity'] : 1,
-                    'imei'      => isset($d['imei']) ? $d['imei'] : ''
+                    'serial_no'     => isset($d['serial_no']) ? $d['serial_no'] : '',//可以不传
+                    'goods_no'      => $d['goods_no'],
+                    'refund_no'     => isset($d['refund_no'])? $d['refund_no'] : '',
+                    'goods_name'    => $d['goods_name'],
+                    'quantity'      => isset($d['quantity']) ? $d['quantity'] : 1,
+                    'imei'          => isset($d['imei']) ? $d['imei'] : '',
+                    'specs'         => $d['specs'] ? $d['specs'] : '',
+                    'goods_thumb'   => $d['goods_thumb'] ? $d['goods_thumb'] : '',
+                    'zujin'         => $d['zujin'] ? $d['zujin'] : 0,
                 ];
             }
         }
         //转发给创建收货单接口的参数
         $result = [
-            'order_no' => $order_no,
-            'receive_detail' => $receive_detail,
-            'logistics_id' => $logistics_id,
-            'logistics_no' => $logistics_no,
-            'type' => $type,
-            'business_key' => $data['business_key'],
-            'customer' => $data['customer'],
-            'customer_mobile' => $data['customer_mobile'],
-            'customer_address' => $data['customer_address'],
-            'channel_id' => $data['channel_id'],
-            'appid' => $data['appid'],
-            'order_type' => $orderInfo['order_type'],
-            'business_no'      =>isset($goods_info[0]['business_no'])?$goods_info[0]['business_no']:'',
+            'order_no'          => $order_no,
+            'receive_detail'    => $receive_detail,
+            'logistics_id'      => $logistics_id,
+            'logistics_no'      => $logistics_no,
+            'type'              => $type,
+            'business_key'      => $data['business_key'],
+            'customer'          => $data['customer'],
+            'customer_mobile'   => $data['customer_mobile'],
+            'customer_address'  => $data['customer_address'],
+            'channel_id'        => $data['channel_id'],
+            'appid'             => $data['appid'],
+            'order_type'        => $orderInfo['order_type'],
+            'business_no'       => isset($goods_info[0]['business_no'])?$goods_info[0]['business_no']:'',
         ];
 
         $base_api = config('tripartite.warehouse_api_uri');
@@ -166,6 +170,35 @@ class Receive
 
         return true;
     }
+
+    /**
+     * 线下门店端 监测不合格 获取支付信息
+     *@params $params
+     *[
+     * 'goods_no'   =>'' 商品编号  string  【必传】
+     * ]
+     * @return status true or false
+     *
+     */
+    public static function getEvaluationPayInfo(array $params){
+
+        $data = config('tripartite.Interior_Order_Request_data');
+        $data['method'] ='api.giveback.getEvaluationPayInfo';
+        $data['params'] = [
+            'goods_no'=>$params['goods_no']
+        ];
+        $baseUrl = config("ordersystem.ORDER_API");
+        $info = Curl::post($baseUrl, $data);
+        LogApi::info("Receive_getEvaluationPayInfo_退换货转发收发货收到货通知接口",$info);
+        $res = json_decode($info,true);
+        if ($res['code'] != 0) {
+            throw new \Exception( 'code '.$res['code'].':'.$res['msg']);
+        }
+
+        return $res['data']['status'];
+
+    }
+
     /**
      * @param $order_no
      * $business_key业务类型

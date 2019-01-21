@@ -35,8 +35,11 @@ class OrderCleaningController extends Controller
      */
     public function cleanList(Request $request){
 //        LogApi::info('订单清算列表接口调用参数：', $request->all());
-        $params = $request->input('params');
 
+        $allParams = $request->all();
+        $params =   $allParams['params'];
+
+        $params['channel_id'] = json_decode($allParams['userinfo']['channel_id'], true);
         $res = OrderCleaning::getOrderCleaningList($params);
 
         if(!is_array($res)){
