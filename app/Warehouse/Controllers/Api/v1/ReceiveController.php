@@ -309,6 +309,7 @@ class ReceiveController extends Controller
      */
     public function checkItemsFinish()
     {
+
         $rules = [
             'receive_no' => 'required',
             'check_description' => 'required',
@@ -318,6 +319,7 @@ class ReceiveController extends Controller
         ];
 
         $params = $this->_dealParams($rules);
+        LogApi::info("[checkItemsFinish]检测完成接收参数",['params'=>$params]);
         $param = request()->input();
         $userinfo=$param['userinfo'];
 
@@ -327,22 +329,20 @@ class ReceiveController extends Controller
 
         try {
             DB::beginTransaction();
-            $params['create_time'] = time();
-
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
             $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
             //$receive_goods = ReceiveGoods::where(['receive_no','=',$params['receive_no']])->first()->toArray();
             $items[] = [
                 'goods_no'=>$params['goods_no'],
                 'evaluation_status'=>$params['check_result'],
-                'evaluation_time'=>$params['create_time'],
+                'evaluation_time'=>time(),
                 'evaluation_remark'=>$params['check_description'],
                 'compensate_amount'=>$params['compensate_amount'],
                 'business_no'=>$receive_row['business_no'],
                 //'refund_no'=>$receive_goods['receive_no']?$receive_goods['receive_no']:'',
             ];
 
-            LogApi::info('checkItemsFinish_info_Receive',$params);
+            LogApi::info('checkItemsFinish_info_Receive',$items);
 
             $this->receive->checkItem($params);
             Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);

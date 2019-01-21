@@ -506,7 +506,10 @@ class ReceiveRepository
         $params['check_result'] = isset($params['check_result']) ? $params['check_result'] : CheckItems::RESULT_FALSE;
         $params['check_description'] = isset($params['check_description']) ? $params['check_description'] : '无';
         $params['compensate_amount'] = isset($params['compensate_amount']) ? $params['compensate_amount'] : 0;
+        // $base_img是获取到前端传递的值
+        $params['base_img'] = str_replace('data:image/jpg;base64,', '', $params['imgs']);
 
+        LogApi::info('[checkItemsFinish]录入检测单接收数据',['params'=>$params]);
         if($params['check_result']==CheckItems::RESULT_FALSE){
             $update_obj = new TencentUpload();
             $upload_imgs = $update_obj->file_upload_all();

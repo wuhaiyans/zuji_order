@@ -53,7 +53,7 @@ class ImportOrderReturnAddress extends Command
      */
     public function handle()
     {
-            $total = OrderGoods::query()->count();
+            $total = OrderGoods::query()->where("id","<=","122857")->count();
             $bar = $this->output->createProgressBar($total);
             $limit = 1000;
             $page = 1;
@@ -62,7 +62,7 @@ class ImportOrderReturnAddress extends Command
             $orderId = 0;
             do {
 
-                $datas01 = OrderGoods::query()->forPage($page, $limit)->get();
+                $datas01 = OrderGoods::query()->where("id","<=","122857")->forPage($page, $limit)->get();
                 $goods = objectToArray($datas01);
                 foreach ($goods as $k => $v) {
                     if(isset(GivebackAddressStatus::SPU_ADDRDSS_TYPE[$v['prod_id']])){

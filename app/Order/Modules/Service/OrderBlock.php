@@ -1,5 +1,13 @@
 <?php
 namespace App\Order\Modules\Service;
+use App\Lib\Risk\Risk;
+use App\Lib\Warehouse\Delivery;
+use App\Order\Models\OrderSmsLog;
+use App\Order\Models\OrderVisit;
+use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Repository\ShortMessage\Config;
+use App\Order\Modules\Repository\ShortMessage\SceneConfig;
+
 /**
  * 支付宝区块链推送服务
  * Author: wutiantang
@@ -28,7 +36,14 @@ class OrderBlock {
     const OrderTakeDeliver = 'order_take_deliver';
     //扣款（主动还款）
     const OrderWithHold = 'order_with_hold';
-
+    //确认订单客服回访记录
+    const OrderVisit = 'order_visit';
+    //逾期客服回访记录
+    const OrderOverdue = 'order_overdue';
+    //逾期短信通知
+    const OrderInstalmentSendMessage = 'order_instalment_send_message';
+    //检测入库记录
+    const OrderWarehouseDetail = 'order_warehouse_detail';
 
     /**
      * 创建
@@ -167,6 +182,82 @@ class OrderBlock {
             'delivery_time'		=> $order_info['delivery_time']>0?date('Y-m-d H:i:s',$order_info['delivery_time']):'',// 物流发货时间
             'receive_time'		=> $order_info['receive_time']>0?date('Y-m-d H:i:s',$order_info['receive_time']):'', // 物流签收时间
         ];
+
+        //区块链渠道扩展
+        if($order_info['appid'] == 144){
+
+            //身份证照获取
+            $cardInfo = Risk::getIdentityCard($order_info['user_id']);
+            //无身份证照无需上链
+            if($cardInfo['flag']!="YES"){
+                return 1;
+            }
+            $data['identity_card'] = [
+                'front'=>$cardInfo['card']['front'],
+                'back'=>$cardInfo['card']['back'],
+            ];
+            $data['face_record'] = $cardInfo['zhima'];
+
+            //客服回访
+            $visit = OrderVisit::query()->where(['order_no'=>$order_info['order_no']])->first()->toArray();
+            $data['customer_service_record'] = "";
+            if($visit){
+                $data['customer_service_record'] = [
+                    "type"=>OrderStatus::getVisitName($visit['visit_id']),
+                    "text"=>$visit['visit_text'],
+                    "create_time"=>date('Y-m-d H:i:s',$visit['create_time']),
+                ];
+            }
+
+            //入库记录-检测图片
+            $checkInfo = Delivery::getCheckDetail($order_info['order_no'],$order_info['goods_no']);
+            $data['input_record'] = "";
+            if($checkInfo){
+                $checkInfo = json_decode($checkInfo,true);
+                $data['input_record'] = [
+                    'images'=>$checkInfo['imgs']?json_decode($checkInfo['imgs'],true):"",
+                    'create_time'=>date('Y-m-d H:i:s',$checkInfo['create_time']),
+                ];
+            }
+
+            //逾期客服回访记录
+            $OverdueVisit = OrderOverdueVisit::getOverdueVisitInfo($order_info['order_no']);
+            $data['overdue_customer_service_record'] = "";
+            if($OverdueVisit){
+                $record = [];
+                foreach($OverdueVisit as $visit){
+                    $record[] = [
+                        "type"=>OrderStatus::getVisitName($visit['visit_id']),
+                        "text"=>$visit['visit_text'],
+                        "create_time"=>date('Y-m-d H:i:s',$visit['create_time']),
+                    ];
+                }
+                $data['overdue_customer_service_record'] = $record;
+            }
+
+            //逾期短信通知记录
+            $where = [
+                "mobile"=>$order_info['mobile'],
+                "template"=>Config::getCode($order_info['channel_id'],SceneConfig::WITHHOLD_FAIL_INITIATIVE)
+            ];
+            $smsLog = OrderSmsLog::where($where)->get()->toArray();
+
+            $data['collection_message'] = "";
+            if($smsLog){
+                $log = [];
+                foreach($smsLog as $item){
+                    $content = json_decode($item['params'],true);
+                    $template = "【拿趣用】尊敬的用户".$content['realName']."，您的本月账单应付金额为".$content['zuJin']."元，可以点击链接支付".$content['zhifuLianjie']." 。如若提前还款，您将在拿趣用享有更多福利！如您在使用中遇到问题或有其它疑问请联系客服电话：".$content['serviceTel']."。";
+                    $log[] = [
+                        "content"=>$template,
+                        "send_time"=>date('Y-m-d H:i:s',$item['send_time']),
+                    ];
+                }
+                $data['collection_message'] = $log;
+            }
+
+
+        }
 
         // 电子合同
         $contract_info = \DB::connection('mysql_01')->table('zuji_order2_contract')

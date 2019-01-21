@@ -136,8 +136,8 @@ class OrderCleaning
                    $goodsList =  objectToArray(OrderGoodsRepository::getGoodsByOrderNo($values['order_no']));
                    if (!empty($goodsList)) {
 
-                        foreach ($goodsList as $keys=>$goodsValues) {
-                            $goodsList[$keys]['specs'] = filterSpecs($goodsValues['specs']);
+                        foreach ($goodsList as $goodsKeys=>$goodsValues) {
+                            $goodsList[$goodsKeys]['specs'] = filterSpecs($goodsValues['specs']);
                         }
 
                    }
