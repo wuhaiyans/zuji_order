@@ -10,6 +10,7 @@
 
 namespace App\Warehouse\Modules\Repository;
 
+use App\Lib\Common\LogApi;
 use App\Lib\TencentUpload;
 use App\Warehouse\Config;
 use App\Warehouse\Models\CheckItems;
@@ -534,11 +535,11 @@ class ReceiveRepository
         $params['check_result'] = isset($params['check_result']) ? $params['check_result'] : CheckItems::RESULT_FALSE;
         $params['check_description'] = isset($params['check_description']) ? $params['check_description'] : '无';
         $params['compensate_amount'] = isset($params['compensate_amount']) ? $params['compensate_amount'] : 0;
-
+        LogApi::info("[xianxiaCheckItem]创建检测单接收数据",['params'=>$params]);
 //        图片上传待商议
         if($params['check_result']==CheckItems::RESULT_FALSE){
             $update_obj = new TencentUpload();
-            $upload_imgs = $update_obj->file_upload_all();
+            $upload_imgs = $update_obj->file_upload_all_test();
             $imgs = [];
             foreach ($upload_imgs as $key=>$item) {
                 if($item['ret']){

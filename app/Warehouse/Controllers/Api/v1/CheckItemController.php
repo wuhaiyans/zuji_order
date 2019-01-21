@@ -9,6 +9,7 @@ namespace App\Warehouse\Controllers\Api\v1;
 
 
 use App\Lib\ApiStatus;
+use App\Lib\Common\LogApi;
 use App\Warehouse\Models\Receive;
 use App\Warehouse\Modules\Repository\CheckItemRepository;
 
@@ -29,12 +30,15 @@ class CheckItemController extends Controller
         ];
         $params = $this->_dealParams($rules);
 
+        LogApi::info("CheckItem_getDetails_查看检测详情",$params);
+
         if (!$params) {
             return \apiResponse([], ApiStatus::CODE_20001, session()->get(self::SESSION_ERR_KEY));
         }
 
         try {
             $data = CheckItemRepository::getDetails($params);
+            $data['EvaluationPayInfo'] = \App\Lib\Warehouse\Receive::getEvaluationPayInfo($params);
         } catch (\Exception $e) {
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }

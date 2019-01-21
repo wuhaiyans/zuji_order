@@ -1,12 +1,13 @@
 <?php
 /**
- * User: wansq
+ * User: wanjinlin
  * Date: 2018/5/7
  * Time: 17:52
  */
 
 
 namespace App\Lib\Warehouse;
+use App\Lib\Common\LogApi;
 use App\Lib\Curl;
 use App\Lib\Order\Giveback;
 use App\Lib\Order\ReturnGoods;
@@ -169,6 +170,35 @@ class Receive
 
         return true;
     }
+
+    /**
+     * 线下门店端 监测不合格 获取支付信息
+     *@params $params
+     *[
+     * 'goods_no'   =>'' 商品编号  string  【必传】
+     * ]
+     * @return status true or false
+     *
+     */
+    public static function getEvaluationPayInfo(array $params){
+
+        $data = config('tripartite.Interior_Order_Request_data');
+        $data['method'] ='api.giveback.getEvaluationPayInfo';
+        $data['params'] = [
+            'goods_no'=>$params['goods_no']
+        ];
+        $baseUrl = config("ordersystem.ORDER_API");
+        $info = Curl::post($baseUrl, $data);
+        LogApi::info("Receive_getEvaluationPayInfo_退换货转发收发货收到货通知接口",$info);
+        $res = json_decode($info,true);
+        if ($res['code'] != 0) {
+            throw new \Exception( 'code '.$res['code'].':'.$res['msg']);
+        }
+
+        return $res['data']['status'];
+
+    }
+
     /**
      * @param $order_no
      * $business_key业务类型
