@@ -905,9 +905,9 @@ class GivebackController extends Controller
 		//还机地址 maxiaoyu 2019-1-16 改
 		$giveback = OrderGoodsExtend::query()
 			->where(['goods_no'=>$goodsNo])
-			->first()
-			->toArray();
+			->first();
 		if($giveback){
+			$giveback = $giveback->toArray();
 			$data['giveback_address'] = $giveback['return_address_value'];
 			$data['giveback_username'] = $giveback['return_name'];
 			$data['giveback_tel'] = $giveback['return_phone'];
