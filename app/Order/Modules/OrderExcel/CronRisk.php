@@ -9,6 +9,7 @@ namespace App\Order\Modules\OrderExcel;
 use App\Lib\Channel\Channel;
 use App\Lib\Excel;
 use App\Order\Models\Order;
+use App\Order\Models\OrderGoodsDelivery;
 use App\Order\Models\OrderGoodsInstalment;
 use App\Order\Models\OrderRisk;
 use App\Order\Modules\Inc;
@@ -94,7 +95,9 @@ class CronRisk
             $userAddressList = OrderUserAddressRepository::getUserAddressColumn($orderNos);
             //获取订单信用分信息
             $riskSoceList = OrderRiskRepository::getRiskColumn($orderNos);
-
+            //获取商品imei
+            $imeiList = OrderGoodsDelivery::query()->wherein("order_no",$orderNos)->get()->toArray();
+            $imeiList = array_column($imeiList,null,"order_no");
 
             $orderError = "";
             $userError = "";
@@ -119,7 +122,12 @@ class CronRisk
                     $riskData = json_decode($riskSoceList[$item['order_no']]['data'],true);
                     $item['credit'] =  $riskData['score']?$riskData['score']:"";
                 }
-
+                if(empty($imeiList[$item['order_no']])){
+                    $item['imei'] = "";
+                }
+                else{
+                    $item['imei'] = $imeiList[$item['order_no']]['imei1'];
+                }
                 //商品相关信息
                 if(empty($goodsList[$item['order_no']])){
                     $goodsError .= $item['order_no'].",";
@@ -232,6 +240,7 @@ class CronRisk
                     $item['zujin'],
                     $item['credit'],
                     $item['goods_name'],
+                    $item['imei']." ",
                     $item['order_amount'],
                     $item['market_price'],
                     $item['order_insurance'],
@@ -277,6 +286,7 @@ class CronRisk
             '月租金',
             '信用分',
             '选购产品',
+            'imei',
             '订单金额',
             '市场价',
             '碎屏意外险',
