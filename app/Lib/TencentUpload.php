@@ -5,6 +5,7 @@
  * @author wangjinlin
  */
 namespace App\Lib;
+use App\Lib\Common\LogApi;
 
 /**
  * TencentUpload类
@@ -103,6 +104,48 @@ class TencentUpload {
 
         return $this->respall;
     }
+
+    /**
+     * 图片上传 批量(无缩略图)
+     **/
+    public function file_upload_all_test(){
+
+        $file = $_FILES['params'];
+        LogApi::info("[file_upload_all_test]图片上传接受参数",['params'=>$file]);
+        $tmp_name = $file['tmp_name']['imgs'];
+        foreach ($tmp_name as $key=>$value){
+            if(!empty($value))
+            {
+                $fileName = $file['name']['imgs'][$key];
+                //后缀名
+                $suffix   = strrchr($file['name']['imgs'][$key],".");
+
+                $newName = time().mt_rand(10000,99999);
+
+                // 上传大图
+                $fileSrc  = base64_encode(file_get_contents($value));
+                $result = $this->tencentUpload($newName.$suffix,$fileSrc);
+                if($result&&$result['ret']==0&&$result['data']['url']!=""){
+                    // 解决无缩略图时，thumb_url 为空字符串的问题
+                    $img['url'] = empty($result['data']['url'])?0:$result['data']['url'];
+                    $img['originalName'] = $fileName;
+                    $img['name'] = $newName;
+
+                    $this->respall[$key]['img'] = $img;
+                    $this->respall[$key]['ret'] = 0;
+                    $this->respall[$key]['msg'] = "上传成功";
+                }else{
+                    $this->respall[$key]['img'] = [];
+                    $this->respall[$key]['ret'] = 1;
+                    $this->respall[$key]['msg'] = "图片".$key."上传失败";
+                }
+            }
+
+        }
+
+        return $this->respall;
+    }
+
 
     //文件上传核心方法
     private function tencentUpload($name,$src){
