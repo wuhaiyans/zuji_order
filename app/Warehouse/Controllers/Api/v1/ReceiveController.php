@@ -329,15 +329,13 @@ class ReceiveController extends Controller
 
         try {
             DB::beginTransaction();
-            $params['create_time'] = time();
-
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
             $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
             //$receive_goods = ReceiveGoods::where(['receive_no','=',$params['receive_no']])->first()->toArray();
             $items[] = [
                 'goods_no'=>$params['goods_no'],
                 'evaluation_status'=>$params['check_result'],
-                'evaluation_time'=>$params['create_time'],
+                'evaluation_time'=>time(),
                 'evaluation_remark'=>$params['check_description'],
                 'compensate_amount'=>$params['compensate_amount'],
                 'business_no'=>$receive_row['business_no'],
