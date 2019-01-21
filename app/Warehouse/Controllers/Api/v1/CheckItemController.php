@@ -18,13 +18,13 @@ class CheckItemController extends Controller
      * 查看检测详情
      *      包括收货信息商品信息和检测信息
      *
-     * @param receive_no    收货单号
-     * @param goods_no      商品唯一编号
+     * @param order_no  订单编号
+     * @param goods_no  商品唯一编号
      */
     public function getDetails()
     {
         $rules = [
-            'receive_no' => 'required',
+            'order_no' => 'required',
             'goods_no' => 'required'
         ];
         $params = $this->_dealParams($rules);
