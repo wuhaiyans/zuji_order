@@ -27,6 +27,11 @@ class Delivery extends Warehouse
             'return_address_value'=>'北京朝阳区来广营高科技产业园18号院16号楼5层拿趣用',
             'return_name'=>'初漫',
             'return_phone'=>'15330284993',
+        ],
+        2=>[
+            'return_address_value'=>'广州省深圳市龙岗区坂田杨美上段六巷四号',
+            'return_name'=>'陈先生',
+            'return_phone'=>'15012817788',
         ]
     ];
 
