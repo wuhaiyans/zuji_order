@@ -1,7 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
 use App\Lib\Risk\Risk;
-use App\Lib\Warehouse\Delivery;
+use App\Lib\Warehouse\Check;
 use App\Order\Models\OrderSmsLog;
 use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc\OrderStatus;
@@ -213,7 +213,7 @@ class OrderBlock {
             //入库记录-检测图片
             $data['input_record'] = "";
             foreach( $result['goods_info'] as $it ){
-                $checkInfo = Delivery::getCheckDetail($order_info['order_no'],$it['goods_no']);
+                $checkInfo = Check::getCheckDetail($order_info['order_no'],$it['goods_no']);
                 if($checkInfo){
                     var_dump($checkInfo);die;
                     $checkInfo = json_decode($checkInfo,true);
