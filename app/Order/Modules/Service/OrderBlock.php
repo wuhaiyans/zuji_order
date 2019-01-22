@@ -244,7 +244,7 @@ class OrderBlock {
             if($orderBlockNode == OrderBlock::OrderWarehouseDetail) {
                 $data['input_record'][] = [
                     'images' => $blockData['images'],
-                    'create_time' => date('Y-m-d H:i:s', $blockData['create_time']),
+                    'create_time' => date('Y-m-d H:i:s', time()),
                 ];
             }
             //逾期客服回访记录
