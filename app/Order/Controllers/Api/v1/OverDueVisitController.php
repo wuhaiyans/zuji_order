@@ -2,11 +2,13 @@
 namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
+use App\Order\Modules\Service\OrderBlock;
 use App\Order\Modules\Service\OrderOverdueVisit;
 use Illuminate\Http\Request;
 
 class OverDueVisitController extends Controller
 {
+    protected static $email = ['qinliping@huishoubao.com.cn'];
     /**
      * 获取回访详情
      * @author qinliping
@@ -47,6 +49,11 @@ class OverDueVisitController extends Controller
         $createVisit = OrderOverdueVisit::createVisit($params['params']);
         if( !$createVisit ){
             return apiResponse([],ApiStatus::CODE_95008);
+        }
+        $b = OrderBlock::orderPushBlock($params['params']['order_no'],OrderBlock::OrderOverdue);
+        if($b ==100){
+            LogApi::alert("overdueVistBlock:".$params['params']['order_no'],[],self::$email);
+            LogApi::error("overdueVistBlock:".$params['params']['order_no']);
         }
         return apiResponse($createVisit,ApiStatus::CODE_0);
     }

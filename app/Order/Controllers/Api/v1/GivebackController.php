@@ -90,16 +90,22 @@ class GivebackController extends Controller
 		$data['goods_info'] = $orderGoodsInfo;//商品信息
 		// jinlin 2018-09-28 临时配置收货地址
 		//$data['giveback_address'] = '朝阳区朝来科技园18号院16号楼5层';//规划地址
-		$giveback = GivebackAddressStatus::getGivebackAddress($orderGoodsInfo['prod_id']);
+		//$giveback = GivebackAddressStatus::getGivebackAddress($orderGoodsInfo['prod_id']);
+		//还机地址 maxiaoyu 2019-1-16 改
+		$giveback = OrderGoodsExtend::query()
+			->where(['goods_no'=>$goodsNo])
+			->first();
 		if($giveback){
-			$data['giveback_address'] = $giveback['giveback_address'];
-			$data['giveback_username'] = $giveback['giveback_username'];
-			$data['giveback_tel'] = $giveback['giveback_tel'];
+			$giveback = $giveback->toArray();
+			$data['giveback_address'] = $giveback['return_address_value'];
+			$data['giveback_username'] = $giveback['return_name'];
+			$data['giveback_tel'] = $giveback['return_phone'];
 		}else{
-			$data['giveback_address'] = 'spu参数错误';
-			$data['giveback_username'] ='无';
-			$data['giveback_tel'] = '无';
+			$data['giveback_address'] = GivebackAddressStatus::ADDRESS_TYPE[2]['address'];
+			$data['giveback_username'] = GivebackAddressStatus::ADDRESS_TYPE[2]['addressee'];
+			$data['giveback_tel'] = GivebackAddressStatus::ADDRESS_TYPE[2]['phone'];
 		}
+		
 		$data['status'] = ''.OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_APPLYING);//状态
 		$data['status_text'] = '还机申请中';//后台状态
 		
@@ -912,9 +918,9 @@ class GivebackController extends Controller
 			$data['giveback_username'] = $giveback['return_name'];
 			$data['giveback_tel'] = $giveback['return_phone'];
 		}else{
-			$data['giveback_address'] = 'spu参数错误';
-			$data['giveback_username'] ='无';
-			$data['giveback_tel'] = '无';
+			$data['giveback_address'] = GivebackAddressStatus::ADDRESS_TYPE[2]['address'];
+			$data['giveback_username'] = GivebackAddressStatus::ADDRESS_TYPE[2]['addressee'];
+			$data['giveback_tel'] = GivebackAddressStatus::ADDRESS_TYPE[2]['phone'];
 		}
 		//还机信息为空则返回还机申请页面信息
 		if( !$orderGivebackInfo ){
