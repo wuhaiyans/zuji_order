@@ -802,7 +802,7 @@ class DeliveryController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             WarehouseWarning::warningWarehouse('[线下门店发货]失败',[$params,$e]);
-            return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50000, $e->getMessage());
+            return \apiResponse([$result['order_no']], ApiStatus::CODE_50000, $e->getMessage());
         }
 
         return \apiResponse([]);
