@@ -333,6 +333,7 @@ class ReceiveController extends Controller
 
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
             $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
+            $params['order_no'] = $receive_row['order_no'];
             //$receive_goods = ReceiveGoods::where(['receive_no','=',$params['receive_no']])->first()->toArray();
             $items[] = [
                 'goods_no'=>$params['goods_no'],
