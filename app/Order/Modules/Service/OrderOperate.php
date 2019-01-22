@@ -1791,10 +1791,7 @@ class OrderOperate
         //根据用户id查找订单列表
 
         $orderListArray = OrderRepository::getAdminOrderList($param);
-//        dd($orderListArray);
 
-
-//        $orderListArray = objectToArray($orderList);
 
         if (!empty($orderListArray['data'])) {
 
@@ -1820,9 +1817,6 @@ class OrderOperate
                 $actArray = Inc\OrderOperateInc::orderInc($values['order_status'], 'offlineOrderBtn');
 
 
-
-
-
                 $orderListArray['data'][$keys]['admin_Act_Btn'] = $actArray;
                 //回访标识
                 $orderListArray['data'][$keys]['visit_name'] = !empty($values['visit_id'])? Inc\OrderStatus::getVisitName($values['visit_id']):Inc\OrderStatus::getVisitName(Inc\OrderStatus::visitUnContact);
@@ -1832,7 +1826,7 @@ class OrderOperate
             }
 
         }
-
+                //线下订单设备操作按钮逻辑
         $orderListArray =  self::getManageOffLineGoodsActState($orderListArray);
 
         return apiResponseArray(ApiStatus::CODE_0,$orderListArray);
@@ -2235,14 +2229,12 @@ class OrderOperate
             $imeInfo = [];
             $imeInfo =    DeliveryDetail::getGoodsDeliveryInfo($orderNo,$values['goods_no']);
             if ($imeInfo) {
-
                 $imeInfo = $imeInfo->getData();
             }
 
             $goodsList[$keys]['imei'] =   $imeInfo['imei1'] ?? '';
-            $goodsList[$keys]['serial_number'] =   $imeInfo['serial_number']?? '';
+            $goodsList[$keys]['serial_number'] =   $imeInfo['serial_number'] ?? '';
             if ($goodsExtendArray) {
-
                 $goodsList[$keys]['firstAmount'] = $goodsExtendArray[$values['goods_no']]['firstAmount'];
                 $goodsList[$keys]['firstInstalmentDate'] = $goodsExtendArray[$values['goods_no']]['firstInstalmentDate'];
 
@@ -2289,9 +2281,7 @@ class OrderOperate
             if (empty($actArray)){
                 $goodsList[$keys]['act_goods_state']= [];
             } else {
-
                 $goodsList[$keys]['act_goods_state']= $actArray;
-
                 //获取订单信息
                 $orderData = OrderRepository::getInfoById($orderNo);
                 if ($orderData) {
@@ -2322,6 +2312,20 @@ class OrderOperate
                             'status_info' => Inc\OrderOperateInc::orderInc('rent_status_info', 'good_status_info'),
                             'status_time' => date("Y-m-d H:i",$values['begin_time']),
                         );
+
+
+                        //获取出账信息
+                       $orderCleaning =  OrderCleaning::getOrderCleaningList(array('order_no'=>$orderNo));
+                       if (!empty($orderCleaning['data'])) {
+                            if (in_array($orderCleaning['data'][0]['status'], array(Inc\OrderCleaningStatus::orderCleaningDeposit,
+                                Inc\OrderCleaningStatus::orderCleaningUnfreeze, Inc\OrderCleaningStatus::orderCleaningUnRefund)))
+                           $goodsList[$keys]['good_statu_info'] = array(
+                               'status_name' => Inc\OrderOperateInc::orderInc('unclean_account_status_name', 'good_status_info'),
+                               'status_info' => Inc\OrderOperateInc::orderInc('unclean_account_status_info', 'good_status_info'),
+                               'status_time' => date("Y-m-d H:i",$orderCleaning['data'][0]['create_time']),
+                           );
+                       }
+
                     }
 
                 }
@@ -2337,9 +2341,11 @@ class OrderOperate
                     );
 
                 }
+
+
+
                 //获取还机单基本信息
                 if ($orderGivebackInfo) {
-
                     if ($orderGivebackInfo['status'] == Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK){
                         $goodsList[$keys]['act_goods_state']['check_btn'] = true;
                         $goodsList[$keys]['good_statu_info'] = array(
@@ -2365,7 +2371,6 @@ class OrderOperate
                     }
 
                 }
-
 
             }
 
@@ -2815,9 +2820,6 @@ class OrderOperate
         //订单状态名称
         $orderData['order_status_name'] = Inc\OrderStatus::getStatusName($orderData['order_status']);
 
-
-
-
         //订单风控审核状态名称
         $orderData['risk_check_name'] = Inc\OrderRiskCheckStatus::getStatusName($orderData['risk_check']);
 
@@ -2839,7 +2841,6 @@ class OrderOperate
             }
 
         }
-
 
         //订单金额
         $orderData['order_gooods_amount']  = normalizeNum($orderData['order_amount']+$orderData['coupon_amount']+$orderData['discount_amount']+$orderData['order_insurance']);
