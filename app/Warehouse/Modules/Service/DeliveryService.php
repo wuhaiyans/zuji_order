@@ -681,16 +681,16 @@ class DeliveryService
         }
 
         //修改发货商品清单
-//        $update_obj = new TencentUpload();
-//        $upload_imgs = $update_obj->file_upload_all();
-//        $imgs = [];
-//        foreach ($upload_imgs as $key=>$item) {
-//            if($item['ret']){
-//                return false;
-//            }
-//            $imgs[] = $item['img']['url'];
-//        }
-//        $goods_model->imgs = json_encode($imgs);
+        $update_obj = new TencentUpload();
+        $upload_imgs = $update_obj->file_upload_all();
+        $imgs = [];
+        foreach ($upload_imgs as $key=>$item) {
+            if($item['ret']){
+                return false;
+            }
+            $imgs[] = $item['img']['url'];
+        }
+        $goods_model->imgs = json_encode($imgs);
         $goods_model->status = DeliveryGoods::STATUS_ALL;
         $goods_model->status_time = time();
         if(!$goods_model->save()){
