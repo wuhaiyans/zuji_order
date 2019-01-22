@@ -757,6 +757,7 @@ class DeliveryController extends Controller
             'goods_no' => 'required', //商品编号
             'apple_serial' => 'required', //针对苹果的序列号
             'price' => 'required', //采购价格
+            'logistics_note' => 'required', //发货备注
         ];
         $params = $this->_dealParams($rules);
 
@@ -771,7 +772,7 @@ class DeliveryController extends Controller
         //设置默认数据
         $params['logistics_id']=1001;
         $params['logistics_no']='1001';
-        $params['logistics_note']='线下发货';
+        //$params['logistics_note']='线下发货';
 
         try {
             DB::beginTransaction();
@@ -781,7 +782,7 @@ class DeliveryController extends Controller
                 'order_no' => $result['order_no'],
                 'logistics_id' => $params['logistics_id'],
                 'logistics_no' => $params['logistics_no'],
-                'logistics_note'=>$params['logistics_id']
+                'logistics_note'=>$params['logistics_note']
             ];
 
             //操作员信息,用户或管理员操作有
