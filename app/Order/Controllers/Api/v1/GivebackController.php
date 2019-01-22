@@ -101,9 +101,9 @@ class GivebackController extends Controller
 			$data['giveback_username'] = $giveback['return_name'];
 			$data['giveback_tel'] = $giveback['return_phone'];
 		}else{
-			$address['giveback_address'] = GivebackAddressStatus::ADDRESS_TYPE[2]['address'];
-			$address['giveback_username'] = GivebackAddressStatus::ADDRESS_TYPE[2]['addressee'];
-			$address['giveback_tel'] = GivebackAddressStatus::ADDRESS_TYPE[2]['phone'];
+			$data['giveback_address'] = GivebackAddressStatus::ADDRESS_TYPE[2]['address'];
+			$data['giveback_username'] = GivebackAddressStatus::ADDRESS_TYPE[2]['addressee'];
+			$data['giveback_tel'] = GivebackAddressStatus::ADDRESS_TYPE[2]['phone'];
 		}
 		
 		$data['status'] = ''.OrderGivebackStatus::adminMapView(OrderGivebackStatus::STATUS_APPLYING);//状态
@@ -918,9 +918,9 @@ class GivebackController extends Controller
 			$data['giveback_username'] = $giveback['return_name'];
 			$data['giveback_tel'] = $giveback['return_phone'];
 		}else{
-			$address['giveback_address'] = GivebackAddressStatus::ADDRESS_TYPE[2]['address'];
-			$address['giveback_username'] = GivebackAddressStatus::ADDRESS_TYPE[2]['addressee'];
-			$address['giveback_tel'] = GivebackAddressStatus::ADDRESS_TYPE[2]['phone'];
+			$data['giveback_address'] = GivebackAddressStatus::ADDRESS_TYPE[2]['address'];
+			$data['giveback_username'] = GivebackAddressStatus::ADDRESS_TYPE[2]['addressee'];
+			$data['giveback_tel'] = GivebackAddressStatus::ADDRESS_TYPE[2]['phone'];
 		}
 		//还机信息为空则返回还机申请页面信息
 		if( !$orderGivebackInfo ){
