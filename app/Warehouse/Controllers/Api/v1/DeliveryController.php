@@ -732,7 +732,7 @@ class DeliveryController extends Controller
                 $list[$key] = $item->toArray();
                 $list[$key]['goods_list'] = $item->goods->toArray();
                 foreach ($list[$key]['goods_list'] as $k=>$val){
-                    $list[$key]['goods_list'][$k]['specs'] = filterSpecs($val['specs']);
+                    $list[$key]['goods_list'][$k]['specs'] = $val['specs']?filterSpecs($val['specs']):'';
                 }
             }
             return \apiResponse($list);
