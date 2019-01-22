@@ -25,8 +25,8 @@ class TestController extends Controller
 
 	public function sendSms(Request $request) {
 
-		$orderNo 		= "A816197261601303";
-		$business_no 	= 'A816197261601303';
+		$orderNo 		= "AC04111917737302";
+		$business_no 	= 'AC04111917737302';
 		$amount 		= '100';
 
 		$orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $orderNo);
