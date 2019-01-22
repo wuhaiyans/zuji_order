@@ -1614,7 +1614,7 @@ class OrderOperate
             //已支付总金额
             $orderData['instalment_payed_amount'] = normalizeNum($instalmentPayedAmount);
         }
-        
+
         $order['instalment_info'] = $goodsExtendData;
 
         //订单状态名称
@@ -2204,6 +2204,145 @@ class OrderOperate
    }
 
 
+
+
+    /**
+     * 获取线下门店订单详情的操作
+     * Author: heaven
+     * @param $orderNo
+     * @param $actArray
+     * @return array|bool
+     */
+    public static function getGoodsListOfflineActState($orderNo, $actArray, $goodsExtendArray=array(), $payType='')
+    {
+        $goodsList = OrderRepository::getGoodsListByOrderId($orderNo);
+        if (empty($goodsList)) return [];
+        //到期时间多于1个月不出现到期处理
+        //获取还机单信息
+        $orderGivebackService = new OrderGiveback();//创建还机单服务层
+        foreach($goodsList as $keys=>$values) {
+            $goodsList[$keys]['specs'] = filterSpecs($values['specs']);
+            $goodsList[$keys]['left_zujin'] = '';
+            $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($values['goods_no']);
+            $goodsList[$keys]['give_back_status'] = '';
+            $goodsList[$keys]['evaluation_status'] = '';
+            if ($orderGivebackInfo) {
+                $goodsList[$keys]['give_back_status'] = $orderGivebackInfo['status'];
+                $goodsList[$keys]['evaluation_status'] = $orderGivebackInfo['evaluation_status'];
+            }
+
+            //获取ime信息
+            $imeInfo = [];
+            $imeInfo =    DeliveryDetail::getGoodsDeliveryInfo($orderNo,$values['goods_no']);
+            if ($imeInfo) {
+
+                $imeInfo = $imeInfo->getData();
+            }
+
+            $goodsList[$keys]['imei'] =   $imeInfo['imei1'] ?? '';
+            $goodsList[$keys]['serial_number'] =   $imeInfo['serial_number']?? '';
+            if ($goodsExtendArray) {
+
+                $goodsList[$keys]['firstAmount'] = $goodsExtendArray[$values['goods_no']]['firstAmount'];
+                $goodsList[$keys]['firstInstalmentDate'] = $goodsExtendArray[$values['goods_no']]['firstInstalmentDate'];
+
+            } else {
+
+                if ($payType==Inc\PayInc::PcreditPayInstallment) {
+
+                    //如果是花呗先享月租金+碎屏保
+                    if ($values['zuqi_type']==Inc\OrderStatus::ZUQI_TYPE_DAY) {
+
+                        $goodsList[$keys]['firstAmount'] = normalizeNum($values['amount_after_discount']+$values['insurance']);
+                    } else {
+
+                        $goodsList[$keys]['firstAmount'] = normalizeNum(($values['amount_after_discount']+$values['insurance'])/$values['zuqi']);
+                    }
+
+                }
+
+            }
+
+            //处于租期中，获取剩余未支付租金
+            if($values['goods_status']>=Inc\OrderGoodStatus::RENTING_MACHINE) {
+                $instaulment = OrderGoodsInstalmentRepository::getSumAmount($values['goods_no']);
+                if ($instaulment){
+                    $goodsList[$keys]['left_zujin'] = $instaulment['amount'];
+                }
+            }
+
+            //显示花期还款总金额及每月支付金额
+            $repaymentAmount =   normalizeNum($values['amount_after_discount']+$values['insurance']);
+
+            $goodsList[$keys]['repayment_amount'] =  $repaymentAmount;
+            $zujinInsurance =   normalizeNum($values['zujin']+$values['insurance']);
+            $goodsList[$keys]['zujin_Insurance'] =  $zujinInsurance;
+            if ($values['zuqi_type']==Inc\OrderStatus::ZUQI_TYPE_DAY) {
+                $goodsList[$keys]['repayment_month'] =   $repaymentAmount;
+            } else {
+                $goodsList[$keys]['repayment_month'] =   normalizeNum($repaymentAmount/$values['zuqi']);
+            }
+            $goodsList[$keys]['less_yajin'] = normalizeNum($values['goods_yajin']-$values['yajin']);
+            $isGiveBack = $values['goods_status']>=Inc\OrderGoodStatus::BACK_IN_THE_MACHINE && $values['goods_status']<Inc\OrderGoodStatus::BUY_OFF;
+            $goodsList[$keys]['is_giveback'] = $isGiveBack ?? 0;
+            $goodsList[$keys]['market_zujin'] = normalizeNum($values['amount_after_discount']+$values['coupon_amount']+$values['discount_amount']);
+            if (empty($actArray)){
+                $goodsList[$keys]['act_goods_state']= [];
+            } else {
+
+                $goodsList[$keys]['act_goods_state']= $actArray;
+                //创建服务层对象
+                //获取逾期信息
+                if (($values['goods_status']==Inc\OrderGoodStatus::RENTING_MACHINE) && ($values['end_time']<=time() && $values['end_time']>0)) {
+
+                    $overdueTime = (int)((time()-$values['end_time'])/(24*3600))+1;
+                    $goodsList[$keys]['good_statu_info'] = array(
+                        'status_name' => Inc\OrderOperateInc::orderInc('overdue_status_name', 'good_status_info'),
+                        'status_info' => Inc\OrderOperateInc::orderInc('overdue_status_info', 'good_status_info').$overdueTime.'天',
+                        'status_time' => date("Y-m-d H:i",$values['end_time']),
+                    );
+
+                }
+                //获取还机单基本信息
+                if ($orderGivebackInfo) {
+
+                    if ($orderGivebackInfo['status'] == Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK){
+                        $goodsList[$keys]['act_goods_state']['check_btn'] = true;
+                        $goodsList[$keys]['good_statu_info'] = array(
+                            'status_name' => Inc\OrderOperateInc::orderInc('check_giveback_status_name', 'good_status_info'),
+                            'status_info' => Inc\OrderOperateInc::orderInc('check_giveback_status_info', 'good_status_info'),
+                            'status_time' => date("Y-m-d H:i",$orderGivebackInfo['create_time']),
+                        );
+                    }
+
+                    if (in_array($orderGivebackInfo['evaluation_status'], array(Inc\OrderGivebackStatus::EVALUATION_STATUS_QUALIFIED, Inc\OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED))){
+                        $goodsList[$keys]['act_goods_state']['check_result_btn'] = true;
+                        //检测不合格并且还机属于待支付，显示待赔付
+                        if ($orderGivebackInfo['evaluation_status']==Inc\OrderGivebackStatus::EVALUATION_STATUS_UNQUALIFIED && $orderGivebackInfo['status'] == Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_PAY)
+                        {
+                            $goodsList[$keys]['good_statu_info'] = array(
+                                'status_name' => Inc\OrderOperateInc::orderInc('unpay_giveback_status_name', 'good_status_info'),
+                                'status_info' => Inc\OrderOperateInc::orderInc('unpay_giveback_status_info', 'good_status_info'),
+                                'status_time' => date("Y-m-d H:i",$orderGivebackInfo['evaluation_time']),
+                            );
+
+                        }
+
+                    }
+
+                }
+
+
+            }
+
+        }
+
+        return $goodsList;
+
+
+    }
+
+
     /**
      * 获取线下门店后台设置的操作列表
      * Author: heaven
@@ -2214,7 +2353,7 @@ class OrderOperate
     public static function getManageOffLineGoodsActState($orderListArray)
     {
         $goodsList = OrderRepository::getGoodsListByOrderIdArray($orderListArray['orderIds'], array('goods_yajin','yajin','discount_amount','amount_after_discount',
-            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no','surplus_yajin'));
+            'goods_status','coupon_amount','goods_name','goods_no','specs','zuqi','zuqi_type','order_no','surplus_yajin','goods_thumb'));
         if (empty($goodsList)) return [];
         $goodsList = array_column($goodsList,NULL,'goods_no');
         //到期时间多于1个月不出现到期处理
@@ -2576,6 +2715,135 @@ class OrderOperate
         if (empty($orderNo)) return false;
         $orderInfo = OrderRepository::getOrderInfo(['order_no'=>$orderNo]);
         return $orderInfo;
+
+    }
+
+
+    /**
+     * 获取线下门店订单详情
+     * Author: heaven
+     * @param $orderNo
+     * @return array|\Illuminate\Http\JsonResponse
+     */
+    public static function getOrderOfflineInfo($orderNo)
+    {
+        $order = array();
+        if (empty($orderNo))   return apiResponse([],ApiStatus::CODE_32001,ApiStatus::$errCodes[ApiStatus::CODE_32001]);
+        //查询订单和用户发货的数据
+        $orderData =  OrderRepository::getOrderInfo(array('order_no'=>$orderNo));
+        if (empty($orderData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+        //分期数据
+        $goodsExtendData =  OrderGoodsInstalment::queryList(array('order_no'=>$orderNo));
+
+        $orderData['instalment_unpay_amount'] = 0.00;
+        $orderData['instalment_payed_amount'] = 0.00;
+        $goodsExtendArray = array();
+        if ($goodsExtendData) {
+            $instalmentUnpayAmount  = 0.00;
+            $instalmentPayedAmount  = 0.00;
+            foreach ($goodsExtendData as $goodsKeys=>$goodsValues) {
+                if (is_array($goodsValues)) {
+                    foreach($goodsValues as $keys=>$values) {
+                        $goodsExtendData[$goodsKeys][$keys]['payment_time']   = $values['payment_time'] ? date("Y-m-d H:i:s",$values['payment_time']) : "";
+                        $goodsExtendData[$goodsKeys][$keys]['update_time']    = $values['update_time'] ? date("Y-m-d H:i:s",$values['update_time']) : "";
+                        $goodsExtendData[$goodsKeys][$keys]['withhold_time']  = withholdDate($values['term'], $values['day']);
+                        if ($values['times']==1)
+                        {
+                            $goodsExtendArray[$values['goods_no']]['firstAmount'] =$values['amount'];
+                            $goodsExtendArray[$values['goods_no']]['firstInstalmentDate'] = withholdDate($values['term'], $values['day']);
+                        }
+
+
+                        if ($values['status']==Inc\OrderInstalmentStatus::SUCCESS)
+                        {
+
+
+                            $instalmentPayedAmount+=$values['amount'];
+                        } else {
+
+                            $instalmentUnpayAmount+=$values['amount'];
+                        }
+
+                        $goodsExtendData[$goodsKeys][$keys]['status']         = \App\Order\Modules\Inc\OrderInstalmentStatus::getStatusName($values['status']);
+                    }
+
+                }
+            }
+
+
+            //未支付总金额
+            $orderData['instalment_unpay_amount'] = normalizeNum($instalmentUnpayAmount);
+            //已支付总金额
+            $orderData['instalment_payed_amount'] = normalizeNum($instalmentPayedAmount);
+        }
+
+        $order['instalment_info'] = $goodsExtendData;
+
+        //订单状态名称
+        $orderData['order_status_name'] = Inc\OrderStatus::getStatusName($orderData['order_status']);
+
+
+
+
+        //订单风控审核状态名称
+        $orderData['risk_check_name'] = Inc\OrderRiskCheckStatus::getStatusName($orderData['risk_check']);
+
+        //支付方式名称
+        $orderData['pay_type_name'] = Inc\PayInc::getPayName($orderData['pay_type']);
+
+        //应用来源
+        $orderData['appid_name'] = OrderInfo::getAppidInfo($orderData['appid']);
+        $orderData['zm_order_no']    =  '';
+        //获取小程序芝麻单号
+        if ($orderData['order_type']==Inc\OrderStatus::orderMiniService) {
+
+            $miniOrderData = OrderMiniRepository::getMiniOrderInfo($orderNo);
+
+            if ($miniOrderData) {
+
+                $orderData['zm_order_no']    =    $miniOrderData['zm_order_no']?? '';
+
+            }
+
+        }
+
+
+        //订单金额
+        $orderData['order_gooods_amount']  = normalizeNum($orderData['order_amount']+$orderData['coupon_amount']+$orderData['discount_amount']+$orderData['order_insurance']);
+        //支付金额
+        $orderData['pay_amount']  = normalizeNum($orderData['order_amount']+$orderData['order_insurance']);
+        //总租金
+        $orderData['zujin_amount']  =   $orderData['order_amount'];
+        //碎屏意外险
+        $orderData['order_insurance_amount']  =   $orderData['order_insurance'];
+        //授权总金额
+        $orderData['yajin_amount']  =   $orderData['order_yajin'];
+
+        $orderData['certified_platform_name']  =   Certification::getPlatformName($orderData['certified_platform']);
+        //判断是否第三平台下过单
+        $orderData['matching_name']  = $orderData['matching']? '是':'否';
+
+        $order['order_info'] = $orderData;
+
+        //订单商品列表相关的数据
+        $actArray = Inc\OrderOperateInc::orderInc($orderData['order_status'], 'offlineOrderBtn');
+
+        $goodsData =  self::getGoodsListOfflineActState($orderNo, $actArray, $goodsExtendArray,$orderData['pay_type']);
+
+        if (empty($goodsData)) return apiResponseArray(ApiStatus::CODE_32002,[]);
+
+        $order['goods_info'] = $goodsData;
+        //设备扩展信息表
+        $goodsExtendData =  self::getOrderDeliveryInfo($orderNo);
+        if ($goodsExtendData) {
+            $logisticsArray =   config('web.logistics');
+            $goodsExtendData['logistics_name'] = isset($logisticsArray[$goodsExtendData['logistics_id']])   ?  $logisticsArray[$goodsExtendData['logistics_id']]:   '';
+        }
+        $order['goods_extend_info'] = $goodsExtendData;
+        //优惠券信息
+        $couponInfo =    OrderRepository::getCouponByOrderNo($orderNo);
+        $order['coupon_info'] =   $couponInfo;
+        return apiResponseArray(ApiStatus::CODE_0,$order);
 
     }
 

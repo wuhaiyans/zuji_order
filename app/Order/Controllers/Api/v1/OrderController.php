@@ -1092,7 +1092,7 @@ class OrderController extends Controller
             }
 
 
-            $orderData = Service\OrderOperate::getOrderInfo($validateParams['data']['order_no']);
+            $orderData = Service\OrderOperate::getOrderOfflineInfo($validateParams['data']['order_no']);
             if ($orderData['code']===ApiStatus::CODE_0) {
 
                 return apiResponse($orderData['data'],ApiStatus::CODE_0);

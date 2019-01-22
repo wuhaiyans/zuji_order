@@ -22,6 +22,16 @@ class OrderOperateInc
     private static function getOrderOperate()
     {
         return array(
+            'good_status_info'=>array(
+                'unpay_giveback_status_name' => '待用户赔付',
+                'unpay_giveback_status_info' =>  '用户尚未赔付，需赔付后解除资金预授权',
+                'check_giveback_status_name' =>  '待检测',
+                'check_giveback_status_info' =>  '查看功能是否正常，是否有磨损',
+                'overdue_status_name'        =>  '已逾期',
+                'overdue_status_info'        =>  '用户已逾期',
+
+
+            ),
             //客户端订单列表的可用操作
             'actState'=>array(
                 //待支付
