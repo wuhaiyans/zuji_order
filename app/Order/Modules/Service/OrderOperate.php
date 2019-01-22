@@ -2291,7 +2291,41 @@ class OrderOperate
             } else {
 
                 $goodsList[$keys]['act_goods_state']= $actArray;
-                //创建服务层对象
+
+                //获取订单信息
+                $orderData = OrderRepository::getInfoById($orderNo);
+                if ($orderData) {
+                    //已取消订单数据显示
+                    if ($orderData['order_status']==Inc\OrderStatus::OrderCancel || $orderData['order_status']==Inc\OrderStatus::OrderClosedRefunded)
+                    {
+                        $goodsList[$keys]['good_statu_info'] = array(
+                            'status_name' => Inc\OrderOperateInc::orderInc('cancel_status_name', 'good_status_info'),
+                            'status_info' => Inc\OrderOperateInc::orderInc('cancel_status_info', 'good_status_info'),
+                            'status_time' => date("Y-m-d H:i",$orderData['complete_time']),
+                        );
+                    }
+                    //备货中数据显示
+                    if ($orderData['order_status']==Inc\OrderStatus::OrderInStock)
+                    {
+                        $goodsList[$keys]['good_statu_info'] = array(
+                            'status_name' => Inc\OrderOperateInc::orderInc('toshipped_status_name', 'good_status_info'),
+                            'status_info' => Inc\OrderOperateInc::orderInc('toshipped_status_info', 'good_status_info'),
+                            'status_time' => date("Y-m-d H:i",$orderData['confirm_time']),
+                        );
+                    }
+
+                    //租用中数据显示
+                    if ($orderData['order_status']==Inc\OrderStatus::OrderInService)
+                    {
+                        $goodsList[$keys]['good_statu_info'] = array(
+                            'status_name' => Inc\OrderOperateInc::orderInc('rent_status_name', 'good_status_info'),
+                            'status_info' => Inc\OrderOperateInc::orderInc('rent_status_info', 'good_status_info'),
+                            'status_time' => date("Y-m-d H:i",$values['begin_time']),
+                        );
+                    }
+
+                }
+
                 //获取逾期信息
                 if (($values['goods_status']==Inc\OrderGoodStatus::RENTING_MACHINE) && ($values['end_time']<=time() && $values['end_time']>0)) {
 
@@ -2769,7 +2803,6 @@ class OrderOperate
 
                 }
             }
-
 
             //未支付总金额
             $orderData['instalment_unpay_amount'] = normalizeNum($instalmentUnpayAmount);
