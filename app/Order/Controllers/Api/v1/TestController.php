@@ -44,7 +44,7 @@ class TestController extends Controller
 			'back_url' => config('ordersystem.ORDER_API').'/unFreezeClean', //预授权解冻接口回调url地址
 			'user_id' => 3209,//用户id
 		];
-		p($unFreezeParams);
+		
 		LogApi::info("fundauth_createpay:花呗分期代扣押金 参数为：",$unFreezeParams);
 
 		$succss = CommonFundAuthApi::unfreeze($unFreezeParams);
