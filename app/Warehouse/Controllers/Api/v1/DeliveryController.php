@@ -755,6 +755,8 @@ class DeliveryController extends Controller
             'imei_id' => 'required',//必填
             'order_no' => 'required',//订单编号必填
             'goods_no' => 'required', //商品编号
+            'apple_serial' => 'required', //针对苹果的序列号
+            'price' => 'required', //采购价格
         ];
         $params = $this->_dealParams($rules);
 
