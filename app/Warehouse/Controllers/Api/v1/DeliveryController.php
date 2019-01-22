@@ -793,13 +793,13 @@ class DeliveryController extends Controller
             DeliveryService::xianxiaSend($params);
             //通知订单接口
             LogApi::info('delivery_send_order_info_xianxiaDelivery',[$orderDetail,$result['goods_info'],$user_info]);
-//            $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
-//            if(!$a){
-//                DB::rollBack();
-//                WarehouseWarning::warningWarehouse('[线下门店发货]通知订单失败',[$params,$a]);
-//                return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
-//
-//            }
+            $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
+            if(!$a){
+                DB::rollBack();
+                WarehouseWarning::warningWarehouse('[线下门店发货]通知订单失败',[$params,$a]);
+                return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
+
+            }
 
             DB::commit();
         } catch (\Exception $e) {
