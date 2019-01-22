@@ -93,6 +93,8 @@ class ReletController extends Controller
      * ]
      */
     public function createRelet(Request $request){
+        //用户信息
+        $userinfo = $request->input('userinfo');
         //接收参数
         $params = $request->input('params');
 
@@ -116,8 +118,11 @@ class ReletController extends Controller
         // 支付宝支付扩展参数
         if( $params['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Alipay ){
             if( isset($extended_params['alipay_params']['trade_type']) && $extended_params['alipay_params']['trade_type']=='MINI' ){
-				//$params['extended_params']['alipay_params']['alipay_user_id'] = '2088202442717364';//session()->get('alipay_user_id');
-				$params['extended_params']['alipay_params']['alipay_user_id'] = session()->get('alipay_user_id');
+				if( isset($userinfo['extended_data']['alipay_user_id']) ){
+					$params['extended_params']['alipay_params']['alipay_user_id'] = $userinfo['extended_data']['alipay_user_id'];
+				}else{
+					$params['extended_params']['alipay_params']['alipay_user_id'] = null;
+				}
             }
         }
 		
