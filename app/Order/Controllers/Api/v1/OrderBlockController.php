@@ -22,6 +22,9 @@ class OrderBlockController extends Controller
         }
 
         $ret = OrderBlock::orderPushBlock($params['order_no'],$params['type'],$params);
+        if(is_numeric($ret)){
+            return  apiResponse([],$ret);
+        }
         return $ret;
     }
 
