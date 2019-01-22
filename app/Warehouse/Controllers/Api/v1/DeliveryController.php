@@ -724,6 +724,7 @@ class DeliveryController extends Controller
     public function xianxiaList(){
         $request = request()->input();
         $channel_id = json_decode($request['userinfo']['channel_id'], true);
+        LogApi::info('delivery_xianxiaList',$channel_id);
         $list_obj = Delivery::where(['status'=>Delivery::STATUS_INIT,'channel_id'=>$channel_id])->get();
         if($list_obj){
             $list = [];
