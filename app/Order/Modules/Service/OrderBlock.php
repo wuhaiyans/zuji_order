@@ -204,7 +204,6 @@ class OrderBlock {
                 ];
                 $phase = $phaseModel->where($where)->orderBy("id","desc")->first();
                 $phase = $phase?$phase->toArray():[];
-                var_dump($phase);die;
             }
 
             //身份证照获取
