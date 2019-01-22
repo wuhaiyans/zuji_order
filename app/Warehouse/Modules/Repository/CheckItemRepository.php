@@ -19,11 +19,11 @@ class CheckItemRepository
 {
 
     /**
-     * 取消检测 针对设备
+     * 线下门店根据订单号和商品编号查询检测详情
      */
     public static function getDetails($params)
     {
-        $receive_model = Receive::where(['order_no'=>$params['order_no']])->first();
+        $receive_model = Receive::where(['order_no'=>$params['order_no']])->orderBy('receive_no','desc')->first();
         if (!$receive_model) {
             throw new NotFoundResourceException('收货单order_no未找到:' . $params['order_no']);
         }

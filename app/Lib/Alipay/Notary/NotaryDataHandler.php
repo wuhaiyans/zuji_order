@@ -186,7 +186,7 @@ class NotaryDataHandler {
 		$notary = new Notary($info->id,$info->transaction_id, $info->transaction_token, $info->phase, $info->txhash, $info->type, $info->content, $info->content_hash, NotaryMeta::fromArray($meta));
 		return true;
 	}
-	
+
 	
 	/**
 	 * 转换为事务对象

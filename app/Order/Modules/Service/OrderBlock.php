@@ -1,5 +1,15 @@
 <?php
 namespace App\Order\Modules\Service;
+use App\Lib\Alipay\Notary\DataModel\NotaryPhase;
+use App\Lib\Alipay\Notary\DataModel\NotaryTransaction;
+use App\Lib\Risk\Risk;
+use App\Lib\Warehouse\Check;
+use App\Order\Models\OrderSmsLog;
+use App\Order\Models\OrderVisit;
+use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Repository\ShortMessage\Config;
+use App\Order\Modules\Repository\ShortMessage\SceneConfig;
+
 /**
  * 支付宝区块链推送服务
  * Author: wutiantang
@@ -28,7 +38,14 @@ class OrderBlock {
     const OrderTakeDeliver = 'order_take_deliver';
     //扣款（主动还款）
     const OrderWithHold = 'order_with_hold';
-
+    //确认订单客服回访记录
+    const OrderVisit = 'order_visit';
+    //逾期客服回访记录
+    const OrderOverdue = 'order_overdue';
+    //逾期短信通知
+    const OrderInstalmentSendMessage = 'order_instalment_send_message';
+    //检测入库记录
+    const OrderWarehouseDetail = 'order_warehouse_detail';
 
     /**
      * 创建
@@ -36,7 +53,7 @@ class OrderBlock {
      * @param string $orderBlockNode 区块节点
      * @return int  0：成功；1：订单错误；2：未实名；3：用户错误；4：支付问题；100：存证失败
      */
-    public static function orderPushBlock( string $order_no, string $orderBlockNode ): int{
+    public static function orderPushBlock( string $order_no, string $orderBlockNode ,$blockData=[]): int{
 
         // 订单编号
         $data = [];
@@ -168,6 +185,93 @@ class OrderBlock {
             'receive_time'		=> $order_info['receive_time']>0?date('Y-m-d H:i:s',$order_info['receive_time']):'', // 物流签收时间
         ];
 
+        //实例化可信存证 应用
+        $accountId = 'DCODMVCN';
+        $notaryApp = new \App\Lib\Alipay\Notary\NotaryApp($accountId);
+
+        //区块链渠道扩展
+        if($order_info['appid'] == 144){
+
+            //获取历史区块链推送数据
+            $transactionModel = new NotaryTransaction();
+            $transaction = $transactionModel->where(['order_no'=>$order_info['order_no']])->orderBy("id","desc")->first();
+            if($transaction){
+                $transaction = $transaction->toArray();
+                $phaseModel = new NotaryPhase();
+                $where = [
+                    ['transaction_token','=',$transaction['transaction_token']],
+                    ['phase','<>','electronic-contract'],
+                ];
+                $phase = $phaseModel->where($where)->orderBy("id","desc")->first();
+                if($phase){
+                    $phase = $phase->toArray();
+                    $phase = json_decode($phase['content'],true);
+                }
+            }
+
+            //身份证照获取
+            $cardInfo = Risk::getIdentityCard($order_info['user_id']);
+            //无身份证照无需上链
+            if($cardInfo['flag']!="YES"){
+                return 1;
+            }
+            $data['identity_card'] = [
+                'front'=>$cardInfo['card']['front'],
+                'back'=>$cardInfo['card']['back'],
+            ];
+            //初次从风控获取人脸信息，后续从历史数据里获取
+            if($orderBlockNode == self::OrderUnPay){
+                $data['face_record'] = $cardInfo['zhima'];
+            }
+            else{
+                $data['face_record'] = $phase['face_record'];
+            }
+
+            //客服回访
+            $visit = OrderVisit::query()->where(['order_no'=>$order_info['order_no']])->first();
+            $data['customer_service_record'] = "";
+            if($visit){
+                $visit = $visit->toArray();
+                $data['customer_service_record'] = [
+                    "type"=>OrderStatus::getVisitName($visit['visit_id']),
+                    "text"=>$visit['visit_text'],
+                    "create_time"=>date('Y-m-d H:i:s',$visit['create_time']),
+                ];
+            }
+
+            //入库记录-检测图片
+            $data['input_record'] = isset($phase['input_record'])?$phase['input_record']:[];
+            if($orderBlockNode == OrderBlock::OrderWarehouseDetail && !empty($blockData['images'])) {
+                $data['input_record'][] = [
+                    'images' => $blockData['images'],
+                    'create_time' => date('Y-m-d H:i:s', time()),
+                ];
+            }
+            //逾期客服回访记录
+            $OverdueVisit = OrderOverdueVisit::getOverdueVisitInfo($order_info['order_no']);
+            $data['overdue_customer_service_record'] = "";
+            if($OverdueVisit){
+                $record = [];
+                foreach($OverdueVisit as $visit){
+                    $record[] = [
+                        "type"=>OrderStatus::getVisitName($visit['visit_id']),
+                        "text"=>$visit['visit_text'],
+                        "create_time"=>date('Y-m-d H:i:s',$visit['create_time']),
+                    ];
+                }
+                $data['overdue_customer_service_record'] = $record;
+            }
+
+            //逾期短信通知记录
+            $data['collection_message'] = isset($phase['collection_message'])?$phase['collection_message']:[];
+            if($orderBlockNode == OrderBlock::OrderInstalmentSendMessage){
+                $message['text'] = "【拿趣用】尊敬的用户".$blockData['realName']."，您的本月账单应付金额为".$blockData['zuJin']."元，可以点击链接支付".$blockData['zhifuLianjie']." 。如若提前还款，您将在拿趣用享有更多福利！如您在使用中遇到问题或有其它疑问请联系客服电话：".$blockData['serviceTel']."。";
+                $message['send_time'] = date("Y-m-d H:i:s",time());
+                $data['collection_message'][] = $message;
+            }
+
+        }
+
         // 电子合同
         $contract_info = \DB::connection('mysql_01')->table('zuji_order2_contract')
             ->where(['order_no'=>$order_info['order_no']])
@@ -201,9 +305,6 @@ class OrderBlock {
         // | 开始存证
         //-+--------------------------------------------------------------------
 
-        $accountId = 'DCODMVCN';
-
-        $notaryApp = new \App\Lib\Alipay\Notary\NotaryApp($accountId);
         try{
         // 开启存证事务
         if( !$notaryApp->startTransactionByBusiness($order_no, '') ){

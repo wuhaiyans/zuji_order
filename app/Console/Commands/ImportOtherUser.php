@@ -135,7 +135,7 @@ class ImportOtherUser extends Command
             }
             $bar->finish();
             if(count($arr)>0){
-                LogApi::notify("第三方用户数据导入失败",$arr);
+                LogApi::notify("ImportOtherUser:第三方用户数据导入失败",$arr);
                 echo "部分导入成功";
                 return;
             }

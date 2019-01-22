@@ -507,6 +507,7 @@ class ReceiveRepository
         $params['check_description'] = isset($params['check_description']) ? $params['check_description'] : '无';
         $params['compensate_amount'] = isset($params['compensate_amount']) ? $params['compensate_amount'] : 0;
 
+        LogApi::info('[checkItemsFinish]录入检测单接收数据',['params'=>$params]);
         if($params['check_result']==CheckItems::RESULT_FALSE){
             $update_obj = new TencentUpload();
             $upload_imgs = $update_obj->file_upload_all();
@@ -539,7 +540,7 @@ class ReceiveRepository
 //        图片上传待商议
         if($params['check_result']==CheckItems::RESULT_FALSE){
             $update_obj = new TencentUpload();
-            $upload_imgs = $update_obj->file_upload_all_test();
+            $upload_imgs = $update_obj->file_upload_all();
             $imgs = [];
             foreach ($upload_imgs as $key=>$item) {
                 if($item['ret']){

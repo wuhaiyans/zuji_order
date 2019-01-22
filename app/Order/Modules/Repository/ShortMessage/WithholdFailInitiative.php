@@ -88,6 +88,12 @@ class WithholdFailInitiative implements ShortMessage {
             'serviceTel'    => config('tripartite.Customer_Service_Phone'),
         ];
 
+        /**
+         * 支付宝区块链推送服务
+         */
+        \App\Order\Modules\Service\OrderBlock::orderPushBlock($instalmentInfo['order_no'],\App\Order\Modules\Service\OrderBlock::OrderInstalmentSendMessage,$dataSms);
+
+
         // 发送短息
         return \App\Lib\Common\SmsApi::sendMessage($mobile, $code, $dataSms);
     }

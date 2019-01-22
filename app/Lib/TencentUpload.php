@@ -5,7 +5,7 @@
  * @author wangjinlin
  */
 namespace App\Lib;
-use App\Lib\Common;
+use App\Lib\Common\LogApi;
 
 /**
  * TencentUpload类
@@ -69,8 +69,9 @@ class TencentUpload {
      * 图片上传 批量(无缩略图)
      **/
     public function file_upload_all(){
-
+        LogApi::info("[checkItemsFinish]图片上传");
         $file = $_FILES['params'];
+        LogApi::info("[checkItemsFinish]接收文件参数",['params'=>$file]);
         $tmp_name = $file['tmp_name']['imgs'];
         foreach ($tmp_name as $key=>$value){
             if(!empty($value))
@@ -111,7 +112,7 @@ class TencentUpload {
     public function file_upload_all_test(){
 
         $file = $_FILES['params'];
-        Common\LogApi::info("[file_upload_all_test]图片上传接受参数",['params'=>$file]);
+        LogApi::info("[file_upload_all_test]图片上传接受参数",['params'=>$file]);
         $tmp_name = $file['tmp_name']['imgs'];
         foreach ($tmp_name as $key=>$value){
             if(!empty($value))

@@ -12,6 +12,7 @@ use App\Order\Modules\OrderExcel\CronOperator;
 use App\Order\Modules\OrderExcel\CronOverdue;
 use App\Order\Modules\OrderExcel\CronRisk;
 use App\Order\Modules\Repository\OrderUserAddressRepository;
+use App\Order\Modules\Service\OrderBlock;
 use Illuminate\Http\Request;
 use App\Order\Modules\Repository\OrderGoodsRepository;
 use App\Order\Modules\Repository\OrderUserCertifiedRepository;
@@ -158,10 +159,18 @@ class TestExcelController extends Controller
     }
 
     public function overdueDetail(){
+        $order_no = $_GET['order_no'];
+        $type = $_GET['type'];
+        $ret = OrderBlock::orderPushBlock($order_no,$type);
+        var_dump($ret);
 
-        $obj = new CronOverdue();
-        $obj->detail();
-        echo "success";
+        $data = [
+            'realName'=>'',
+            'zuJin'=>'',
+            'zhifuLianjie'=>'',
+            'serviceTel'=>'',
+        ];
+        $ret = OrderBlock::orderPushBlock($order_no,OrderBlock::OrderVisit);
     }
 
 }
