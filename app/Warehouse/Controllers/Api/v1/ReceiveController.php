@@ -319,7 +319,7 @@ class ReceiveController extends Controller
         ];
 
         $params = $this->_dealParams($rules);
-        LogApi::info("[checkItemsFinish_1]检测完成接收参数",['params'=>$params]);
+        LogApi::info("[checkItemsFinish_1]检测完成接收参数",$params);
         $param = request()->input();
         $userinfo=$param['userinfo'];
 
@@ -345,9 +345,9 @@ class ReceiveController extends Controller
                 //'refund_no'=>$receive_goods['receive_no']?$receive_goods['receive_no']:'',
             ];
 
-            LogApi::info('checkItemsFinish_info_Receive',$params);
+            LogApi::info('checkItemsFinish_info_Receive',$items);
 
-            $this->receive->checkItem($params);
+            //$this->receive->checkItem($params);
             //Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
 
             DB::commit();
