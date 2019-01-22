@@ -203,7 +203,10 @@ class OrderBlock {
                     ['phase','<>','electronic-contract'],
                 ];
                 $phase = $phaseModel->where($where)->orderBy("id","desc")->first();
-                $phase = $phase?$phase->toArray():[];
+                if($phase){
+                    $phase = $phase->toArray();
+                    $phase = json_decode($phase['content'],true);
+                }
             }
 
             //身份证照获取
