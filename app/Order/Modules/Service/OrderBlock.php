@@ -237,17 +237,13 @@ class OrderBlock {
             }
 
             //入库记录-检测图片
-            $data['input_record'] = "";
-            foreach( $result['goods_info'] as $it ){
-                $checkInfo = Check::getCheckDetail($order_info['order_no'],$it['goods_no']);
-                if($checkInfo){
-                    $data['input_record'] = [
-                        'images'=>$checkInfo['imgs']?json_decode($checkInfo['imgs'],true):"",
-                        'create_time'=>date('Y-m-d H:i:s',$checkInfo['create_time']),
-                    ];
-                }
+            $data['input_record'] = isset($phase['input_record'])?$phase['input_record']:[];
+            if($orderBlockNode == OrderBlock::OrderWarehouseDetail) {
+                $data['input_record'][] = [
+                    'images' => $blockData['imgs'],
+                    'create_time' => date('Y-m-d H:i:s', $blockData['create_time']),
+                ];
             }
-
             //逾期客服回访记录
             $OverdueVisit = OrderOverdueVisit::getOverdueVisitInfo($order_info['order_no']);
             $data['overdue_customer_service_record'] = "";
