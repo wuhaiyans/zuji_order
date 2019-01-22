@@ -521,7 +521,7 @@ class ReceiveRepository
             }
             $params['imgs'] = json_encode($imgs);
             //调用区块链上传检测信息,有图片时候
-            Check::setBlockchainCheckItem(['order_no'=>$params['order_no'],'imgs'=>$imgs]);
+            //Check::setBlockchainCheckItem(['order_no'=>$params['order_no'],'imgs'=>$imgs]);
         }else{
             $params['imgs']=0;
         }
