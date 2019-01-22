@@ -348,7 +348,7 @@ class ReceiveController extends Controller
             LogApi::info('checkItemsFinish_info_Receive',$items);
 
             $this->receive->checkItem($params);
-            Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
+            //Receive::checkItemsResult($items,$receive_row['business_key'],$userinfo);
 
             DB::commit();
 
