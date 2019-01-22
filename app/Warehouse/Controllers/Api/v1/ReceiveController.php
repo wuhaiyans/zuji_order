@@ -354,7 +354,7 @@ class ReceiveController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            LogApi::info('checkItemsFinish_info_Receive_error',[$params,$e->getMessage()]);
+            LogApi::info('checkItemsFinish_info_Receive_error',json_encode([$params,$e->getMessage()]));
             WarehouseWarning::warningWarehouse('[检测完成]失败',[$params,$e]);
             return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
