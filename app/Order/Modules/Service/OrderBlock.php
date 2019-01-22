@@ -243,7 +243,7 @@ class OrderBlock {
             $data['input_record'] = isset($phase['input_record'])?$phase['input_record']:[];
             if($orderBlockNode == OrderBlock::OrderWarehouseDetail) {
                 $data['input_record'][] = [
-                    'images' => $blockData['imgs'],
+                    'images' => $blockData['images'],
                     'create_time' => date('Y-m-d H:i:s', $blockData['create_time']),
                 ];
             }
