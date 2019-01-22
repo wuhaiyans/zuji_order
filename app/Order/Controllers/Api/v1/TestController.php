@@ -27,7 +27,7 @@ class TestController extends Controller
 
 		$orderNo 		= "B118181088356238";
 		$business_no 	= 'B118181088356238';
-		$amount 		= '100';
+		$amount 		= '98';
 
 		$orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $orderNo);
 		$fundauthNo = $orderAuthInfo->getFundauthNo();
