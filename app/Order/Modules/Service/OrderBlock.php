@@ -264,13 +264,12 @@ class OrderBlock {
             }
 
             //逾期短信通知记录
-            $data['collection_message'] = [];
+            $data['collection_message'] = isset($phase['collection_message'])?$phase['collection_message']:[];
             if($orderBlockNode == OrderBlock::OrderInstalmentSendMessage){
                 $message['text'] = "【拿趣用】尊敬的用户".$blockData['realName']."，您的本月账单应付金额为".$blockData['zuJin']."元，可以点击链接支付".$blockData['zhifuLianjie']." 。如若提前还款，您将在拿趣用享有更多福利！如您在使用中遇到问题或有其它疑问请联系客服电话：".$blockData['serviceTel']."。";
                 $message['send_time'] = date("Y-m-d H:i:s",time());
                 $data['collection_message'][] = $message;
             }
-
 
         }
 
