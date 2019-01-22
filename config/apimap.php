@@ -374,6 +374,8 @@ return [
     //-+------------------------------------------------------------------------
 
     'api.offline.orderOfflineList'        => 'OrderController@orderOfflineList',
+    'api.offline.orderOffInfo'        => 'OrderController@orderOffInfo',
+
 
 
 
