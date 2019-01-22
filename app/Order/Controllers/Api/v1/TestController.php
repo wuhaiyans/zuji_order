@@ -25,9 +25,9 @@ class TestController extends Controller
 
 	public function sendSms(Request $request) {
 
-		$orderNo 		= "B118181088356238";
-		$business_no 	= 'B118181088356238';
-		$amount 		= '98';
+		$orderNo 		= "AC14185589722259";
+		$business_no 	= 'AC14185589722259';
+		$amount 		= '90';
 
 		$orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $orderNo);
 		$fundauthNo = $orderAuthInfo->getFundauthNo();
@@ -49,7 +49,7 @@ class TestController extends Controller
 
 		$succss = CommonFundAuthApi::unfreeze($unFreezeParams);
 
-
+		die;
 
 //		$notice = new \App\Order\Modules\Service\OrderNotice(
 //			\App\Order\Modules\Inc\OrderStatus::BUSINESS_ZUJI,
