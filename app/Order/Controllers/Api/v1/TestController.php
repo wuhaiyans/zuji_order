@@ -5,6 +5,10 @@ use App\Order\Modules\Repository\Pay\UnderPay\OrderBuyout;
 use App\Order\Modules\Repository\OrderRepository;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use Illuminate\Http\Request;
+use App\Order\Modules\Repository\Pay\PayQuery;
+use App\Order\Modules\Inc\OrderStatus;
+use App\Lib\Common\LogApi;
+use App\Lib\Payment\CommonFundAuthApi;
 
 class TestController extends Controller
 {
@@ -20,6 +24,31 @@ class TestController extends Controller
 	}
 
 	public function sendSms(Request $request) {
+
+		$orderNo 		= "B118181088356238";
+		$business_no 	= 'B118181088356238';
+		$amount 		= '100';
+
+		$orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $orderNo);
+		$fundauthNo = $orderAuthInfo->getFundauthNo();
+
+		$authInfo = PayQuery::getAuthInfoByAuthNo($fundauthNo);
+
+
+
+		$unFreezeParams = [
+			'name'		=> '订金解冻资金', //交易名称
+			'out_trade_no' => $business_no, //订单系统交易码
+			'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
+			'amount' => $amount, //解冻金额 单位：分
+			'back_url' => config('ordersystem.ORDER_API').'/unFreezeClean', //预授权解冻接口回调url地址
+			'user_id' => 3209,//用户id
+		];
+//		p($unFreezeParams);
+		LogApi::info("fundauth_createpay:花呗分期代扣押金 参数为：",$unFreezeParams);
+
+		$succss = CommonFundAuthApi::unfreeze($unFreezeParams);
+
 
 
 //		$notice = new \App\Order\Modules\Service\OrderNotice(
