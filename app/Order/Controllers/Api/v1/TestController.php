@@ -24,22 +24,22 @@ class TestController extends Controller
 	}
 
 	public function sendSms(Request $request) {
-
-		$orderNo 		= "AC18121975603746";
+//
+//		$orderNo 		= "B118181088356238";
 		$business_no 	= 'AC18121975603746';
 		$amount 		= '10';
-
-		$orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $orderNo);
-		$fundauthNo = $orderAuthInfo->getFundauthNo();
-
-		$authInfo = PayQuery::getAuthInfoByAuthNo($fundauthNo);
+//
+//		$orderAuthInfo = PayQuery::getPayByBusiness(OrderStatus::BUSINESS_ZUJI, $orderNo);
+//		$fundauthNo = $orderAuthInfo->getFundauthNo();
+//
+//		$authInfo = PayQuery::getAuthInfoByAuthNo($fundauthNo);
 
 
 
 		$unFreezeParams = [
 			'name'		=> '订金解冻资金', //交易名称
 			'out_trade_no' => $business_no, //订单系统交易码
-			'fundauth_no' => $authInfo['out_fundauth_no'], //支付系统授权码
+			'fundauth_no' => '20AC1821995494699', //支付系统授权码
 			'amount' => $amount, //解冻金额 单位：分
 			'back_url' => config('ordersystem.ORDER_API').'/unFreezeClean', //预授权解冻接口回调url地址
 			'user_id' => 3209,//用户id

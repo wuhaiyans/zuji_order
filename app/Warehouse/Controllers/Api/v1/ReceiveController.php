@@ -319,7 +319,7 @@ class ReceiveController extends Controller
         ];
 
         $params = $this->_dealParams($rules);
-        LogApi::info("[checkItemsFinish]检测完成接收参数",['params'=>$params]);
+        LogApi::info("[checkItemsFinish_1]检测完成接收参数",$params);
         $param = request()->input();
         $userinfo=$param['userinfo'];
 
