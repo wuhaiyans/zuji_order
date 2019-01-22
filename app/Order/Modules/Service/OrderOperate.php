@@ -499,6 +499,13 @@ class OrderOperate
                 DB::rollBack();
                 return false;
             }
+
+            $b = OrderBlock::orderPushBlock($params['order_no'],OrderBlock::OrderVisit);
+            if($b ==100){
+                LogApi::alert("orderVistSaveBlock:".$params['order_no'],[],[config('web.order_warning_user')]);
+                LogApi::error("orderVistSaveBlock:".$params['order_no']);
+            }
+
             DB::commit();
             return true;
         }catch (\Exception $exc){
