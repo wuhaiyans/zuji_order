@@ -241,7 +241,7 @@ class OrderBlock {
 
             //入库记录-检测图片
             $data['input_record'] = isset($phase['input_record'])?$phase['input_record']:[];
-            if($orderBlockNode == OrderBlock::OrderWarehouseDetail) {
+            if($orderBlockNode == OrderBlock::OrderWarehouseDetail && !empty($blockData['images'])) {
                 $data['input_record'][] = [
                     'images' => $blockData['images'],
                     'create_time' => date('Y-m-d H:i:s', time()),
