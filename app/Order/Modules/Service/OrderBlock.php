@@ -1,5 +1,7 @@
 <?php
 namespace App\Order\Modules\Service;
+use App\Lib\Alipay\Notary\DataModel\NotaryPhase;
+use App\Lib\Alipay\Notary\DataModel\NotaryTransaction;
 use App\Lib\Risk\Risk;
 use App\Lib\Warehouse\Check;
 use App\Order\Models\OrderSmsLog;
@@ -51,7 +53,7 @@ class OrderBlock {
      * @param string $orderBlockNode 区块节点
      * @return int  0：成功；1：订单错误；2：未实名；3：用户错误；4：支付问题；100：存证失败
      */
-    public static function orderPushBlock( string $order_no, string $orderBlockNode ): int{
+    public static function orderPushBlock( string $order_no, string $orderBlockNode ,$blockData=[]): int{
 
         // 订单编号
         $data = [];
@@ -183,8 +185,26 @@ class OrderBlock {
             'receive_time'		=> $order_info['receive_time']>0?date('Y-m-d H:i:s',$order_info['receive_time']):'', // 物流签收时间
         ];
 
+        //实例化可信存证 应用
+        $accountId = 'DCODMVCN';
+        $notaryApp = new \App\Lib\Alipay\Notary\NotaryApp($accountId);
+
         //区块链渠道扩展
         if($order_info['appid'] == 144){
+
+            //获取历史区块链推送数据
+            $transactionModel = new NotaryTransaction();
+            $transaction = $transactionModel->where(['order_no'=>$order_info['order_no']])->orderBy("id","desc")->first();
+            if($transaction){
+                $transaction = $transaction->toArray();
+                $phaseModel = new NotaryPhase();
+                $where = [
+                    ['transaction_token','=',$transaction['transaction_token']],
+                    ['phase','<>','electronic-contract'],
+                ];
+                $phase = $phaseModel->where($where)->orderBy("id","desc")->first();
+                $phase = $phase?json_decode($phase,true):[];
+            }
 
             //身份证照获取
             $cardInfo = Risk::getIdentityCard($order_info['user_id']);
@@ -196,7 +216,13 @@ class OrderBlock {
                 'front'=>$cardInfo['card']['front'],
                 'back'=>$cardInfo['card']['back'],
             ];
-            $data['face_record'] = $cardInfo['zhima'];
+            //初次从风控获取人脸信息，后续从历史数据里获取
+            if($orderBlockNode == self::OrderUnPay){
+                $data['face_record'] = $cardInfo['zhima'];
+            }
+            else{
+                $data['face_record'] = $phase['face_record'];
+            }
 
             //客服回访
             $visit = OrderVisit::query()->where(['order_no'=>$order_info['order_no']])->first();
@@ -238,25 +264,11 @@ class OrderBlock {
             }
 
             //逾期短信通知记录
-            $where = [
-                "mobile"=>$order_info['mobile'],
-                "template"=>Config::getCode($order_info['channel_id'],SceneConfig::WITHHOLD_FAIL_INITIATIVE)
-            ];
-            $smsLog = OrderSmsLog::where($where)->get();
-
-            $data['collection_message'] = "";
-            if($smsLog){
-                $smsLog = $smsLog->toArray();
-                $log = [];
-                foreach($smsLog as $item){
-                    $content = json_decode($item['params'],true);
-                    $template = "【拿趣用】尊敬的用户".$content['realName']."，您的本月账单应付金额为".$content['zuJin']."元，可以点击链接支付".$content['zhifuLianjie']." 。如若提前还款，您将在拿趣用享有更多福利！如您在使用中遇到问题或有其它疑问请联系客服电话：".$content['serviceTel']."。";
-                    $log[] = [
-                        "content"=>$template,
-                        "send_time"=>date('Y-m-d H:i:s',$item['send_time']),
-                    ];
-                }
-                $data['collection_message'] = $log;
+            $data['collection_message'] = [];
+            if($orderBlockNode == OrderBlock::OrderInstalmentSendMessage){
+                $message['text'] = "【拿趣用】尊敬的用户".$blockData['realName']."，您的本月账单应付金额为".$blockData['zuJin']."元，可以点击链接支付".$blockData['zhifuLianjie']." 。如若提前还款，您将在拿趣用享有更多福利！如您在使用中遇到问题或有其它疑问请联系客服电话：".$blockData['serviceTel']."。";
+                $message['send_time'] = date("Y-m-d H:i:s",time());
+                $data['collection_message'][] = $message;
             }
 
 
@@ -295,9 +307,6 @@ class OrderBlock {
         // | 开始存证
         //-+--------------------------------------------------------------------
 
-        $accountId = 'DCODMVCN';
-
-        $notaryApp = new \App\Lib\Alipay\Notary\NotaryApp($accountId);
         try{
         // 开启存证事务
         if( !$notaryApp->startTransactionByBusiness($order_no, '') ){
