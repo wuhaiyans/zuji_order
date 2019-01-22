@@ -12,6 +12,7 @@ namespace App\Warehouse\Modules\Repository;
 
 use App\Lib\Common\LogApi;
 use App\Lib\TencentUpload;
+use App\Lib\Warehouse\Check;
 use App\Warehouse\Config;
 use App\Warehouse\Models\CheckItems;
 use App\Warehouse\Models\DeliveryGoodsImei;
@@ -519,6 +520,8 @@ class ReceiveRepository
                 $imgs[] = $item['img']['url'];
             }
             $params['imgs'] = json_encode($imgs);
+            //调用区块链上传检测信息,有图片时候
+            Check::setBlockchainCheckItem(['order_no'=>$params['order_no'],'imgs'=>$imgs]);
         }else{
             $params['imgs']=0;
         }
