@@ -397,7 +397,10 @@ class OrderController extends Controller
             $params =   $allParams['params'];
 
             $params['channel_id'] = json_decode($allParams['userinfo']['channel_id'], true);
+
             $orderData = Service\OrderOperate::getOfflineOrderList($params);
+
+
 
             if ($orderData['code']===ApiStatus::CODE_0) {
 
