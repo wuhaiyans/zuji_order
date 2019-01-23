@@ -536,6 +536,7 @@ class ReceiveController extends Controller
      * @param compensate_amount 检测赔偿价格
      * @param amount 押金之外需要赔偿金额
      * @param goods_no 商品编号
+     * @param dingsun_type 定损类型
      */
     public function xianxiaCheckItemsFinish()
     {
@@ -545,7 +546,8 @@ class ReceiveController extends Controller
             'check_result' => 'required',
             'compensate_amount' => 'required',
             'amount' => 'required',
-            'goods_no' => 'required'
+            'goods_no' => 'required',
+            'dingsun_type' => 'required',
         ];
 
         $params = $this->_dealParams($rules);

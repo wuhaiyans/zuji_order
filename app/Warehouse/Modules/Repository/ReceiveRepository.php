@@ -540,7 +540,7 @@ class ReceiveRepository
         $params['check_description'] = isset($params['check_description']) ? $params['check_description'] : '无';
         $params['compensate_amount'] = isset($params['compensate_amount']) ? $params['compensate_amount'] : 0;
         LogApi::info("[xianxiaCheckItem]创建检测单接收数据",['params'=>$params]);
-//        图片上传待商议
+//        图片上传
         if($params['check_result']==CheckItems::RESULT_FALSE){
             $update_obj = new TencentUpload();
             $upload_imgs = $update_obj->file_upload_all();
