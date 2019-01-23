@@ -384,7 +384,7 @@ class OrderGoodsInstalmentRepository
     }
 
     /***
-     * 获取订单的扣款失败的总金额
+     *
      * @param array $params
      */
     public static function getFallInstalment(array $params){
@@ -393,9 +393,11 @@ class OrderGoodsInstalmentRepository
         $instalmentList =  OrderGoodsInstalment::query()
             ->where($params)
             ->sum("amount");
+        LogApi::debug("[getOverdueDeductionInfo]getOverdueDeductionInfo",['result'=>$instalmentList]);
         if( !$instalmentList ){
             $instalmentList['aggregate'] = $sum_amount;
         }
+        LogApi::debug("[getOverdueDeductionInfo]getOverdueDeductionInfo",['result'=>$instalmentList]);
         return $instalmentList;
     }
 }
