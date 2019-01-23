@@ -31,11 +31,11 @@ class OrderOverdueDeduction
             foreach ($overdueInfoArray['data'] as $keys=>$values) {
 
                 if($values['order_status'] == OrderStatus::OrderClosedRefunded || $values['order_status'] == OrderStatus::OrderCompleted){
-                    if($overdueInfoArray['data'][$keys]['overdue_amount'] != 0 ){
+                    if($overdueInfoArray['data'][$keys]['overdue_amount'] != 0.00 ){
                         $where = [];
                         $where[] = ['order_no','=',(string)$values['order_no']];
                         $data = [
-                            'overdue_amount'=> 0,
+                            'overdue_amount'=> 0.00,
                         ];
                         //修改押金为0
                        $upResult =  \App\Order\Models\OrderOverdueDeduction::where($where)->update($data);
@@ -45,7 +45,7 @@ class OrderOverdueDeduction
                        }
                     }
 
-                    $overdueInfoArray['data'][$keys]['overdue_amount'] = 0;
+                    $overdueInfoArray['data'][$keys]['overdue_amount'] = 0.00;
                 }
                 //获取订单分期中的扣款失败金额
                 $whereArray = [];
