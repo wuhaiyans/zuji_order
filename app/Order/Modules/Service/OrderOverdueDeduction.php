@@ -52,11 +52,7 @@ class OrderOverdueDeduction
                 $whereArray[] = ['order_no','=',(string)$values['order_no']];
                 $whereArray[] = ['status','=', OrderInstalmentStatus::FAIL ]; // 扣款失败
                 $sum_amount = OrderGoodsInstalmentRepository::getFallInstalment($whereArray);//获取扣款失败的总金额
-                if( !$sum_amount ){
-                    LogApi::debug("[getOverdueDeductionInfo]获取扣款失败的总金额失败",['params'=>$values['order_no'],'sum_amount'=>$sum_amount]);
-                    return false;
-                }
-                if( isset( $sum_amount ) && $overdueInfoArray['data'][$keys]['unpaid_amount'] != $sum_amount){
+                if( $overdueInfoArray['data'][$keys]['unpaid_amount'] != $sum_amount){
                     $upWhere = [];
                     $upWhere[] = ['order_no','=',(string)$values['order_no']];
                     $upData = [
