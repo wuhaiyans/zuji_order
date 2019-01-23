@@ -382,4 +382,19 @@ class OrderGoodsInstalmentRepository
 
         return true;
     }
+
+    /***
+     * 获取订单的扣款失败的总金额
+     * @param array $params
+     */
+    public static function getFallInstalment(array $params){
+        if (empty($params)) return false;
+        $instalmentList =  OrderGoodsInstalment::query()
+            ->select("sum('amount') as z_amount")
+            ->where($params)
+            ->first()
+            ->toArray();
+        if (!$instalmentList) return false;
+        return $instalmentList;
+    }
 }
