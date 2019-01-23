@@ -12,6 +12,7 @@ namespace App\Warehouse\Modules\Repository;
 
 use App\Lib\Common\LogApi;
 use App\Lib\TencentUpload;
+use App\Lib\Warehouse\Check;
 use App\Warehouse\Config;
 use App\Warehouse\Models\CheckItems;
 use App\Warehouse\Models\DeliveryGoodsImei;
@@ -507,7 +508,7 @@ class ReceiveRepository
         $params['check_description'] = isset($params['check_description']) ? $params['check_description'] : '无';
         $params['compensate_amount'] = isset($params['compensate_amount']) ? $params['compensate_amount'] : 0;
 
-        LogApi::info('[checkItemsFinish]录入检测单接收数据',['params'=>$params]);
+        LogApi::info('[checkItemsFinish_2]录入检测单接收数据',['params'=>$params]);
         if($params['check_result']==CheckItems::RESULT_FALSE){
             $update_obj = new TencentUpload();
             $upload_imgs = $update_obj->file_upload_all();
@@ -519,6 +520,8 @@ class ReceiveRepository
                 $imgs[] = $item['img']['url'];
             }
             $params['imgs'] = json_encode($imgs);
+            //调用区块链上传检测信息,有图片时候
+            Check::setBlockchainCheckItem(['order_no'=>$params['order_no'],'imgs'=>$imgs]);
         }else{
             $params['imgs']=0;
         }

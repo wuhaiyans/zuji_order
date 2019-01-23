@@ -17,11 +17,39 @@ use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 class CheckItemRepository
 {
+    /**
+     * 检测详情
+     */
+    public static function getDetails($params)
+    {
+        $goods_model = ReceiveGoods::where([
+            'receive_no'=>$params['receive_no'],
+            'goods_no'=>$params['goods_no']
+        ])->first();
 
+        if (!$goods_model) {
+            throw new NotFoundResourceException('goods设备未找到:' .$params['receive_no'] .'-'. $params['goods_no']);
+        }
+        $goods_row = $goods_model->toArray();
+
+        $checkitems_model = CheckItems::where([
+            'receive_no'=>$params['receive_no'],
+            'goods_no'=>$params['goods_no']
+        ])->first();
+
+        if (!$checkitems_model) {
+            throw new NotFoundResourceException('check设备未找到:' .$params['receive_no'] .'-'. $params['goods_no']);
+        }
+        $checkitems_row = $checkitems_model->toArray();
+
+        $row = array_merge($goods_row,$checkitems_row);
+
+        return $row;
+    }
     /**
      * 线下门店根据订单号和商品编号查询检测详情
      */
-    public static function getDetails($params)
+    public static function getXianxiaDetails($params)
     {
         $receive_model = Receive::where(['order_no'=>$params['order_no']])->orderBy('receive_no','desc')->first();
         if (!$receive_model) {

@@ -22,6 +22,23 @@ class OrderOperateInc
     private static function getOrderOperate()
     {
         return array(
+            'good_status_info'=>array(
+                'unpay_giveback_status_name'     => '待用户赔付',
+                'unpay_giveback_status_info'     =>  '用户尚未赔付，需赔付后解除资金预授权',
+                'check_giveback_status_name'     =>  '待检测',
+                'check_giveback_status_info'     =>  '查看功能是否正常，是否有磨损',
+                'overdue_status_name'            =>  '已逾期',
+                'overdue_status_info'            =>  '用户已逾期',
+                'cancel_status_name'             =>  '已取消',
+                'cancel_status_info'             =>  '用户已取消订单',
+                'toshipped_status_name'          =>  '待发货',
+                'toshipped_status_info'          =>  '需要核对用户的信息,确认用户的信息无误，并上传商品细节图',
+                'rent_status_name'               =>  '租用中',
+                'rent_status_info'               =>  '用户归还需检查相关零配件是否齐全',
+                'unclean_account_status_name'    =>  '待出账',
+                'unclean_account_status_info'    =>  '需核实用户是否支付完毕，对资金预授权进行解冻',
+
+            ),
             //客户端订单列表的可用操作
             'actState'=>array(
                 //待支付

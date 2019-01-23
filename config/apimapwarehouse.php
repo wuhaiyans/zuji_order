@@ -68,15 +68,15 @@ return [
     'warehouse.receiveGoods.checkItems'=> 'ReceiveGoodsController@checkItems',//取检测项
     'warehouse.receive.imeiIn'=> 'ReceiveController@imeiIn', //确认入库
     'warehouse.receive.orderImeiIn'=> 'ReceiveController@orderImeiIn', //确认入库(订单工具)
-
-    'warehouse.receive.xianxiaCheckItemsFinish'=> 'ReceiveController@xianxiaCheckItemsFinish', //线下门店检测完成
+    'warehouse.checkitem.getDetails'=> 'CheckItemController@getDetails', //查看检测详情
 
     //线下门店
     'warehouse.delivery.deliveryNum'=> 'DeliveryController@deliveryNum', //线下门店待发货数量
     'warehouse.delivery.xianxiaList'=> 'DeliveryController@xianxiaList', //线下门店待发货列表
     'warehouse.delivery.xianxiaDelivery'=> 'DeliveryController@xianxiaDelivery', //线下门店发货
 
-    'warehouse.checkitem.getDetails'=> 'CheckItemController@getDetails', //查看检测详情
+    'warehouse.receive.xianxiaCheckItemsFinish'=> 'ReceiveController@xianxiaCheckItemsFinish', //线下门店检测完成
+    'warehouse.checkitem.getXiannxiaDetails'=> 'CheckItemController@getXiannxiaDetails', //线下门店查看检测详情
     'warehouse.checkitem.receiveNum'=> 'CheckItemController@receiveNum', //线下门店待检测数量
     'warehouse.checkitem.reviewButton'=> 'CheckItemController@reviewButton', //线下门店根据订单号查询是否显示检测,检测结果按钮
     'warehouse.checkitem.xianxiaCheck'=> 'CheckItemController@xianxiaCheck', //线下门店待检测列表
