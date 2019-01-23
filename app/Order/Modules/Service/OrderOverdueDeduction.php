@@ -56,11 +56,11 @@ class OrderOverdueDeduction
                     LogApi::debug("[getOverdueDeductionInfo]获取扣款失败的总金额失败",['params'=>$values['order_no']]);
                     return false;
                 }
-                if( $overdueInfoArray['data'][$keys]['unpaid_amount'] != $sum_amount){
+                if( isset( $sum_amount['aggregate'] ) && $overdueInfoArray['data'][$keys]['unpaid_amount'] != $sum_amount['aggregate']){
                     $upWhere = [];
                     $upWhere[] = ['order_no','=',(string)$values['order_no']];
                     $upData = [
-                        'unpaid_amount' => $sum_amount
+                        'unpaid_amount' => $sum_amount['aggregate']
                     ];
                     //修改未缴租金
                     $upUnpaidResult = \App\Order\Models\OrderOverdueDeduction::where($upWhere)->update($upData);

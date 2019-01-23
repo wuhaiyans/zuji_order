@@ -394,7 +394,7 @@ class OrderGoodsInstalmentRepository
             ->where($params)
             ->sum("amount");
         if( !$instalmentList ){
-            $instalmentList = $sum_amount;
+            $instalmentList['aggregate'] = $sum_amount;
         }
         return $instalmentList;
     }
