@@ -2318,14 +2318,31 @@ class OrderOperate
                        $orderCleaning =  OrderCleaning::getOrderCleaningList(array('order_no'=>$orderNo));
                        if (!empty($orderCleaning['data'])) {
                             if (in_array($orderCleaning['data'][0]['status'], array(Inc\OrderCleaningStatus::orderCleaningDeposit,
-                                Inc\OrderCleaningStatus::orderCleaningUnfreeze, Inc\OrderCleaningStatus::orderCleaningUnRefund)))
-                           $goodsList[$keys]['good_statu_info'] = array(
-                               'status_name' => Inc\OrderOperateInc::orderInc('unclean_account_status_name', 'good_status_info'),
-                               'status_info' => Inc\OrderOperateInc::orderInc('unclean_account_status_info', 'good_status_info'),
-                               'status_time' => date("Y-m-d H:i",$orderCleaning['data'][0]['create_time']),
-                           );
+                                Inc\OrderCleaningStatus::orderCleaningUnfreeze, Inc\OrderCleaningStatus::orderCleaningUnRefund))) {
+                                $goodsList[$keys]['good_statu_info'] = array(
+                                    'status_name' => Inc\OrderOperateInc::orderInc('unclean_account_status_name', 'good_status_info'),
+                                    'status_info' => Inc\OrderOperateInc::orderInc('unclean_account_status_info', 'good_status_info'),
+                                    'status_time' => date("Y-m-d H:i",$orderCleaning['data'][0]['create_time']),
+                                );
+                                $goodsList[$keys]['act_goods_state']['clean_account_btn'] = true;
+                                if ($orderCleaning['data'][0]['business_type'] == Inc\OrderCleaningStatus::businessTypeReturnGoods) {
+                                    $goodsList[$keys]['act_goods_state']['check_result_btn'] = true;
+                                }
+                            }
+
                        }
 
+                    }
+
+
+                    //已完结数据显示
+                    if ($orderData['order_status']==Inc\OrderStatus::OrderCompleted)
+                    {
+                        $goodsList[$keys]['good_statu_info'] = array(
+                            'status_name' => Inc\OrderOperateInc::orderInc('complete_status_name', 'good_status_info'),
+                            'status_info' => Inc\OrderOperateInc::orderInc('complete_status_info', 'good_status_info'),
+                            'status_time' => date("Y-m-d H:i",$orderData['complete_time']),
+                        );
                     }
 
                 }
@@ -2406,8 +2423,18 @@ class OrderOperate
             } else {
 
                 $goodsList[$keys]['act_goods_state']= $actArray;
+                    //获取出账信息
+                   $orderCleaning =  OrderCleaning::getOrderCleaningList(array('order_no'=>$values['order_no']));
+                   if (!empty($orderCleaning['data'])) {
+                       if (in_array($orderCleaning['data'][0]['status'], array(Inc\OrderCleaningStatus::orderCleaningDeposit,
+                           Inc\OrderCleaningStatus::orderCleaningUnfreeze, Inc\OrderCleaningStatus::orderCleaningUnRefund))) {
+                           $goodsList[$keys]['act_goods_state']['clean_account_btn'] = true;
+                           if ($orderCleaning['data'][0]['business_type'] == Inc\OrderCleaningStatus::businessTypeReturnGoods) {
+                               $goodsList[$keys]['act_goods_state']['check_result_btn'] = true;
+                           }
+                       }
 
-
+                   }
                 //创建服务层对象
                 $orderGivebackService = new OrderGiveback();
                 //获取还机单基本信息
