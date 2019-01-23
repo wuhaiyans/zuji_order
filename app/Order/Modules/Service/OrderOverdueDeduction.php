@@ -54,14 +54,15 @@ class OrderOverdueDeduction
                     $whereArray[] = ['order_no','=',(string)$values['order_no']];
                     $whereArray[] = ['status','=', OrderInstalmentStatus::FAIL ]; // 扣款失败
                     $sum_amount = OrderGoodsInstalmentRepository::getFallInstalment($whereArray);//获取扣款失败的总金额
+                  
                     if( !$sum_amount ){
                         return false;
                     }
-                    if( $overdueInfoArray['data'][$keys]['unpaid_amount'] != $sum_amount['z_amount']){
+                    if( $overdueInfoArray['data'][$keys]['unpaid_amount'] != $sum_amount){
                         $upWhere = [];
                         $upWhere[] = ['order_no','=',$values['order_no']];
                         $upData = [
-                            'unpaid_amount'=>  $sum_amount['z_amount']
+                            'unpaid_amount'=>  $sum_amount
                         ];
                         //修改未缴租金
                         $upUnpaidResult = \App\Order\Models\OrderOverdueDeduction::where($upWhere)->update($upData);

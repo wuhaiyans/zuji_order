@@ -389,10 +389,13 @@ class OrderGoodsInstalmentRepository
      */
     public static function getFallInstalment(array $params){
         if (empty($params)) return false;
+        $sum_amount = 0;
         $instalmentList =  OrderGoodsInstalment::query()
             ->where($params)
             ->sum("amount");
-        if (!$instalmentList) return false;
+        if( !$instalmentList ){
+            $instalmentList = $sum_amount;
+        }
         return $instalmentList;
     }
 }
