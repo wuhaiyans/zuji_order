@@ -37,9 +37,10 @@ class OrderOverdueDeduction
                         $data = [
                             'overdue_amount'=> 0,
                         ];
-                        //修改未缴租金和押金为0
+                        //修改押金为0
                        $upResult =  \App\Order\Models\OrderOverdueDeduction::where($where)->update($data);
                        if( !$upResult ){
+                           LogApi::debug("[getOverdueDeductionInfo]修改押金为0失败");
                            return false;
                        }
                     }
@@ -52,27 +53,27 @@ class OrderOverdueDeduction
                 $whereArray[] = ['status','=', OrderInstalmentStatus::FAIL ]; // 扣款失败
                 $sum_amount = OrderGoodsInstalmentRepository::getFallInstalment($whereArray);//获取扣款失败的总金额
                 if( !$sum_amount ){
+                    LogApi::debug("[getOverdueDeductionInfo]获取扣款失败的总金额失败");
                     return false;
                 }
                 if( $overdueInfoArray['data'][$keys]['unpaid_amount'] != $sum_amount){
                     $upWhere = [];
-                    $upWhere[] = ['order_no','=',$values['order_no']];
+                    $upWhere[] = ['order_no','=',(string)$values['order_no']];
                     $upData = [
-                        'unpaid_amount'=>$sum_amount
+                        'unpaid_amount' => $sum_amount
                     ];
                     //修改未缴租金
                     $upUnpaidResult = \App\Order\Models\OrderOverdueDeduction::where($upWhere)->update($upData);
                     if( !$upUnpaidResult ){
+                        LogApi::debug("[getOverdueDeductionInfo]修改未缴租金失败");
                         return false;
                     }
                 }
 
                  //应用来源
                 $overdueInfoArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
-
                  //回访标识
                 $overdueInfoArray['data'][$keys]['visit_name'] = !empty($values['v_id'])? OrderStatus::getVisitName($values['v_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
-
                  //租期类型
                 $overdueInfoArray['data'][$keys]['zuqi_name'] =  OrderStatus::getZuqiTypeName($values['zuqi_type']);
 
@@ -88,7 +89,6 @@ class OrderOverdueDeduction
             }
 
         }
-
         return $overdueInfoArray;
     }
 
