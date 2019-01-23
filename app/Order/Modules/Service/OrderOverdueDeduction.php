@@ -31,11 +31,11 @@ class OrderOverdueDeduction
             foreach ($overdueInfoArray['data'] as $keys=>$values) {
 
                 if($values['order_status'] == OrderStatus::OrderClosedRefunded || $values['order_status'] == OrderStatus::OrderCompleted){
-                    if($overdueInfoArray['data'][$keys]['overdue_amount'] != 0 ){
+                    if($overdueInfoArray['data'][$keys]['overdue_amount'] != 0.00 ){
                         $where = [];
                         $where[] = ['order_no','=',(string)$values['order_no']];
                         $data = [
-                            'overdue_amount'=> 0,
+                            'overdue_amount'=> 0.00,
                         ];
                         //修改押金为0
                        $upResult =  \App\Order\Models\OrderOverdueDeduction::where($where)->update($data);
@@ -45,22 +45,18 @@ class OrderOverdueDeduction
                        }
                     }
 
-                    $overdueInfoArray['data'][$keys]['overdue_amount'] = 0;
+                    $overdueInfoArray['data'][$keys]['overdue_amount'] = 0.00;
                 }
                 //获取订单分期中的扣款失败金额
                 $whereArray = [];
                 $whereArray[] = ['order_no','=',(string)$values['order_no']];
                 $whereArray[] = ['status','=', OrderInstalmentStatus::FAIL ]; // 扣款失败
                 $sum_amount = OrderGoodsInstalmentRepository::getFallInstalment($whereArray);//获取扣款失败的总金额
-                if( !$sum_amount ){
-                    LogApi::debug("[getOverdueDeductionInfo]获取扣款失败的总金额失败",['params'=>$values['order_no']]);
-                    return false;
-                }
-                if( isset( $sum_amount['aggregate'] ) && $overdueInfoArray['data'][$keys]['unpaid_amount'] != $sum_amount['aggregate']){
+                if( $overdueInfoArray['data'][$keys]['unpaid_amount'] != $sum_amount){
                     $upWhere = [];
                     $upWhere[] = ['order_no','=',(string)$values['order_no']];
                     $upData = [
-                        'unpaid_amount' => $sum_amount['aggregate']
+                        'unpaid_amount' => $sum_amount
                     ];
                     //修改未缴租金
                     $upUnpaidResult = \App\Order\Models\OrderOverdueDeduction::where($upWhere)->update($upData);

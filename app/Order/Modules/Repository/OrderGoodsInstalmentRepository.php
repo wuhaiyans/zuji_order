@@ -389,15 +389,15 @@ class OrderGoodsInstalmentRepository
      */
     public static function getFallInstalment(array $params){
         if (empty($params)) return false;
-        $sum_amount = 0;
+        $sum_amount = 0.00;
         $instalmentList =  OrderGoodsInstalment::query()
             ->where($params)
             ->sum("amount");
         LogApi::debug("[getOverdueDeductionInfo]getOverdueDeductionInfo",['result'=>$instalmentList]);
-        if( !$instalmentList ){
-            $instalmentList['aggregate'] = $sum_amount;
+        if( $instalmentList ){
+            $sum_amount = $instalmentList;
         }
         LogApi::debug("[getOverdueDeductionInfo]getOverdueDeductionInfo",['result'=>$instalmentList]);
-        return $instalmentList;
+        return $sum_amount;
     }
 }
