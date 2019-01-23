@@ -2364,6 +2364,14 @@ class OrderOperate
 
                 //获取还机单基本信息
                 if ($orderGivebackInfo) {
+
+
+                    if ($orderGivebackInfo['status'] == Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY){
+                        $goodsList[$keys]['act_goods_state']['offline_giveback_btn'] = true;
+//                      $orderListArray['data'][$values['order_no']]['order_status_name'] = Inc\OrderGivebackStatus::getStatusName(Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK);
+                    }
+
+
                     if ($orderGivebackInfo['status'] == Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK){
                         $goodsList[$keys]['act_goods_state']['check_btn'] = true;
                         $goodsList[$keys]['good_statu_info'] = array(
@@ -2442,6 +2450,12 @@ class OrderOperate
                 //获取还机单基本信息
                 $orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo( $values['goods_no'] );
                 if ($orderGivebackInfo) {
+
+
+                  if ($orderGivebackInfo['status'] == Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY){
+                      $goodsList[$keys]['act_goods_state']['offline_giveback_btn'] = true;
+//                      $orderListArray['data'][$values['order_no']]['order_status_name'] = Inc\OrderGivebackStatus::getStatusName(Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK);
+                  }
 
                     if ($orderGivebackInfo['status'] == Inc\OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK){
                         $goodsList[$keys]['act_goods_state']['check_btn'] = true;
