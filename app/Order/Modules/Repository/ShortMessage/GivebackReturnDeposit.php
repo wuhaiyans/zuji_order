@@ -56,7 +56,11 @@ class GivebackReturnDeposit implements ShortMessage {
             return false;
         }
 
-
+        $backObj = new \App\Order\Modules\Repository\OrderGivebackRepository();
+        $backInfo = $backObj->getInfoByGoodsNo($this->business_no);
+        if( !$backInfo ){
+            return false;
+        }
 
         // 短息模板
         $code = $this->getCode($orderInfo['channel_id']);
@@ -69,11 +73,12 @@ class GivebackReturnDeposit implements ShortMessage {
         /** 短信参数
          * 尊敬的{realName}您好，您租赁的{goodsName}，订单号：{orderNo}，押金{tuihuanYajin}已退还！您可以登录 {lianjie} 继续租用其他好物。感谢您对拿趣用的支持！
          */
+        $tuihuanYajin = $goodsInfo['surplus_yajin'] - $backInfo['compensate_amount'] > 0 ? bcsub($goodsInfo['surplus_yajin'], $backInfo['compensate_amount'], 2) : 0;
         $dataSms =[
             'realName'          => $userInfo['realname'],
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
-            'tuihuanYajin'      => $goodsInfo['surplus_yajin'],
+            'tuihuanYajin'      => $tuihuanYajin,
             'lianjie'           => createShortUrl($lianjie),
         ];
 
