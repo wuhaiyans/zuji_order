@@ -562,7 +562,7 @@ class ReceiveController extends Controller
 
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
             //$receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
-            $receive_obj = \App\Warehouse\Models\Receive::where($params['order_no'])->orderBy('receive_no','desc')->first();
+            $receive_obj = \App\Warehouse\Models\Receive::where(['order_no'=>$params['order_no']])->orderBy('receive_no','desc')->first();
             if(!$receive_obj){
                 return apiResponse([], ApiStatus::CODE_60002, '检测单未查到_'.$params['order_no']);
             }
