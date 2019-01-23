@@ -73,7 +73,7 @@ class GivebackReturnDeposit implements ShortMessage {
             'realName'          => $userInfo['realname'],
             'goodsName'         => $goodsInfo['goods_name'],
             'orderNo'           => $orderInfo['order_no'],
-            'tuihuanYajin'      => $goodsInfo['yajin'],
+            'tuihuanYajin'      => $goodsInfo['surplus_yajin'],
             'lianjie'           => createShortUrl($lianjie),
         ];
 
