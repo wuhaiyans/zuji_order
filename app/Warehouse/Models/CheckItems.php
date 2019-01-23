@@ -24,12 +24,20 @@ class CheckItems extends Warehouse
         'create_time',
         'compensate_amount',
         'goods_no',
-        'imgs'
+        'imgs',
+        'dingsun_type',
     ];
 
     //检测结果
     const RESULT_OK = 1;    //ok
     const RESULT_FALSE = 2; //检查有错
+
+    //定损类型
+    const DINGSUN_TYPE=[
+        1=>'丢失',
+        2=>'损坏',
+        3=>'逾期'
+    ];
 
 
     /**

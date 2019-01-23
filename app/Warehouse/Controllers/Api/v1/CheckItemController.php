@@ -10,6 +10,7 @@ namespace App\Warehouse\Controllers\Api\v1;
 
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
+use App\Warehouse\Models\CheckItems;
 use App\Warehouse\Models\Receive;
 use App\Warehouse\Modules\Repository\CheckItemRepository;
 
@@ -135,6 +136,18 @@ class CheckItemController extends Controller
             return \apiResponse(['jiannce'=>false,'jiancejieguo'=>false]);
         }
 
+    }
+
+    /**
+     * 线下门店检测公共参数
+     *
+     * 1.定损类型
+     */
+    public function getPublic(){
+        $data = [
+            'dingsun_type'=>CheckItems::DINGSUN_TYPE
+        ];
+        return \apiResponse($data);
     }
 
 }

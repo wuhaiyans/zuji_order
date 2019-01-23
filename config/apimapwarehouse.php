@@ -80,6 +80,7 @@ return [
     'warehouse.checkitem.receiveNum'=> 'CheckItemController@receiveNum', //线下门店待检测数量
     'warehouse.checkitem.reviewButton'=> 'CheckItemController@reviewButton', //线下门店根据订单号查询是否显示检测,检测结果按钮
     'warehouse.checkitem.xianxiaCheck'=> 'CheckItemController@xianxiaCheck', //线下门店待检测列表
+    'warehouse.checkitem.getPublic'=> 'CheckItemController@getPublic', //线下门店检测公共参数
 
 
 
