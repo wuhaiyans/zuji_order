@@ -540,7 +540,7 @@ class ReceiveController extends Controller
     public function xianxiaCheckItemsFinish()
     {
         $rules = [
-            'receive_no' => 'required',
+            'order_no' => 'required',
             'check_description' => 'required',
             'check_result' => 'required',
             'compensate_amount' => 'required',
@@ -561,7 +561,8 @@ class ReceiveController extends Controller
             $params['create_time'] = time();
 
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
-            $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
+            //$receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
+            $receive_row = \App\Warehouse\Models\Receive::where(['order_no'=>$params['order_no']])->orderBy('desc')->first()->toArray();
             //$receive_goods = ReceiveGoods::where(['receive_no','=',$params['receive_no']])->first()->toArray();
             $items[] = [
                 'goods_no'=>$params['goods_no'],
@@ -573,6 +574,7 @@ class ReceiveController extends Controller
                 'business_no'=>$receive_row['business_no'],
                 //'refund_no'=>$receive_goods['receive_no']?$receive_goods['receive_no']:'',
             ];
+            $params['receive_no'] = $receive_row['receive_no'];
 
             LogApi::info('xianxiaCheckItemsFinish_info_Receive',$params);
 
