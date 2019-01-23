@@ -33,7 +33,7 @@ class OrderOverdueDeduction
                 if($values['order_status'] == OrderStatus::OrderClosedRefunded || $values['order_status'] == OrderStatus::OrderCompleted){
                     if($overdueInfoArray['data'][$keys]['overdue_amount'] != 0 || $overdueInfoArray['data'][$keys]['unpaid_amount'] != 0){
                         $where = [];
-                        $where[] = ['order_no','=',$values['order_no']];
+                        $where[] = ['order_no','=',(string)$values['order_no']];
                         $data = [
                             'overdue_amount'=> 0,
                             'unpaid_amount'=>  0
@@ -51,7 +51,7 @@ class OrderOverdueDeduction
                 if($overdueInfoArray['data'][$keys]['status'] == OrderOverdueStatus::INVALID ){
                     //获取订单分期中的扣款失败金额
                     $whereArray = [];
-                    $whereArray[] = ['order_no','=',$values['order_no']];
+                    $whereArray[] = ['order_no','=',(string)$values['order_no']];
                     $whereArray[] = ['status','=', OrderInstalmentStatus::FAIL ]; // 扣款失败
                     $sum_amount = OrderGoodsInstalmentRepository::getFallInstalment($whereArray);//获取扣款失败的总金额
                     if( !$sum_amount ){
