@@ -390,10 +390,8 @@ class OrderGoodsInstalmentRepository
     public static function getFallInstalment(array $params){
         if (empty($params)) return false;
         $instalmentList =  OrderGoodsInstalment::query()
-            ->select("sum(amount) as z_amount")
             ->where($params)
-            ->first()
-            ->toArray();
+            ->sum("amount");
         if (!$instalmentList) return false;
         return $instalmentList;
     }
