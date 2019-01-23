@@ -755,6 +755,9 @@ class DeliveryController extends Controller
             'imei_id' => 'required',//必填
             'order_no' => 'required',//订单编号必填
             'goods_no' => 'required', //商品编号
+            'apple_serial' => 'required', //针对苹果的序列号
+            'price' => 'required', //采购价格
+            'logistics_note' => 'required', //发货备注
         ];
         $params = $this->_dealParams($rules);
 
@@ -769,7 +772,7 @@ class DeliveryController extends Controller
         //设置默认数据
         $params['logistics_id']=1001;
         $params['logistics_no']='1001';
-        $params['logistics_note']='线下发货';
+        //$params['logistics_note']='线下发货';
 
         try {
             DB::beginTransaction();
@@ -779,7 +782,7 @@ class DeliveryController extends Controller
                 'order_no' => $result['order_no'],
                 'logistics_id' => $params['logistics_id'],
                 'logistics_no' => $params['logistics_no'],
-                'logistics_note'=>$params['logistics_id']
+                'logistics_note'=>$params['logistics_note']
             ];
 
             //操作员信息,用户或管理员操作有
@@ -802,7 +805,7 @@ class DeliveryController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             WarehouseWarning::warningWarehouse('[线下门店发货]失败',[$params,$e]);
-            return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50000, $e->getMessage());
+            return \apiResponse([$result['order_no']], ApiStatus::CODE_50000, $e->getMessage());
         }
 
         return \apiResponse([]);

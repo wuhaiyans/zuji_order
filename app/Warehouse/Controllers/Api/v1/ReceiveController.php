@@ -530,7 +530,7 @@ class ReceiveController extends Controller
     /**
      * 线下门店检测完成
      *
-     * @param receive_no 检测单号
+     * @param order_no 订单号
      * @param check_description 检测备注
      * @param check_result 检测结果
      * @param compensate_amount 检测赔偿价格
@@ -540,7 +540,7 @@ class ReceiveController extends Controller
     public function xianxiaCheckItemsFinish()
     {
         $rules = [
-            'receive_no' => 'required',
+            'order_no' => 'required',
             'check_description' => 'required',
             'check_result' => 'required',
             'compensate_amount' => 'required',
@@ -561,7 +561,13 @@ class ReceiveController extends Controller
             $params['create_time'] = time();
 
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
-            $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
+            //$receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
+            $receive_obj = \App\Warehouse\Models\Receive::where(['order_no'=>$params['order_no']])->orderBy('receive_no','desc')->first();
+            if(!$receive_obj){
+                return apiResponse([], ApiStatus::CODE_60002, '检测单未查到_'.$params['order_no']);
+            }
+            $receive_row = $receive_obj->toArray();
+            $params['receive_no'] = $receive_row['receive_no'];
             //$receive_goods = ReceiveGoods::where(['receive_no','=',$params['receive_no']])->first()->toArray();
             $items[] = [
                 'goods_no'=>$params['goods_no'],

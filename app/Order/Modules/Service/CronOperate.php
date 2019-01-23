@@ -703,7 +703,7 @@ class CronOperate
                         if(in_array((string)$item['order_no'],$getData,true) && $item['status'] == Inc\OrderOverdueStatus::INVALID){
                             $data = [
                                 'status'         => Inc\OrderOverdueStatus::EFFECTIVE,//有效状态
-                                'unpaid_amount' => self::getUnpaidAmount((string)$item['order_no'])//获取订单未缴金额总和
+                              //  'unpaid_amount' => self::getUnpaidAmount((string)$item['order_no'])//获取订单未缴金额总和
                             ];
                             $upResult = OrderOverdueDeductionRepository::upOverdueStatus((string)$item['order_no'],$data);
                             if( !$upResult){
@@ -711,7 +711,7 @@ class CronOperate
                                 return false;
                             }
                         }
-                        //获取连续两个月，总共三个月未缴租金的逾期数据 在表中未缴金额与获取未缴金额不一致，则修改金额
+                       /* //获取连续两个月，总共三个月未缴租金的逾期数据 在表中未缴金额与获取未缴金额不一致，则修改金额
                         if(in_array((string)$item['order_no'],$getData,true) && $item['status'] == Inc\OrderOverdueStatus::EFFECTIVE && $item['unpaid_amount'] != self::getUnpaidAmount((string)$item['order_no'])){
 
                             $data = [
@@ -723,7 +723,7 @@ class CronOperate
                                 return false;
                             }
 
-                        }
+                        }*/
 
                     }
 
@@ -751,7 +751,7 @@ class CronOperate
      * @param $order_no
      * @return mixed
      */
-    public static function getUnpaidAmount($order_no){
+   /* public static function getUnpaidAmount($order_no){
 
         $orderNoArray = \App\Order\Modules\Service\OrderGoodsInstalment::instalmentOverdue();
         foreach ($orderNoArray as $item){
@@ -759,6 +759,6 @@ class CronOperate
                 return $item['amount'];
             }
         }
-    }
+    }*/
 
 }

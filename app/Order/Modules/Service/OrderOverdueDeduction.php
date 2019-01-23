@@ -9,6 +9,7 @@ use App\Order\Models\OrderOverdueRecord;
 use App\Order\Modules\Inc\OrderInstalmentStatus;
 use App\Order\Modules\Inc\OrderOverdueStatus;
 use App\Order\Modules\Inc\OrderStatus;
+use App\Order\Modules\Repository\OrderGoodsInstalmentRepository;
 use App\Order\Modules\Repository\OrderOverdueDeductionRepository;
 use App\Order\Modules\Repository\OrderOverdueRecordRepository;
 use Illuminate\Support\Facades\DB;
@@ -28,27 +29,51 @@ class OrderOverdueDeduction
         $overdueInfoArray = objectToArray($overdueInfo);
         if (!empty($overdueInfoArray['data'])) {
             foreach ($overdueInfoArray['data'] as $keys=>$values) {
+
                 if($values['order_status'] == OrderStatus::OrderClosedRefunded || $values['order_status'] == OrderStatus::OrderCompleted){
-                    if($overdueInfoArray['data'][$keys]['overdue_amount'] != 0 || $overdueInfoArray['data'][$keys]['unpaid_amount'] != 0){
+                    if($overdueInfoArray['data'][$keys]['overdue_amount'] != 0 ){
                         $where = [];
-                        $where[] = ['order_no','=',$values['order_no']];
+                        $where[] = ['order_no','=',(string)$values['order_no']];
                         $data = [
                             'overdue_amount'=> 0,
-                            'unpaid_amount'=>  0
                         ];
-                        //修改未缴租金和押金为0
-                        \App\Order\Models\OrderOverdueDeduction::where($where)->update($data);
+                        //修改押金为0
+                       $upResult =  \App\Order\Models\OrderOverdueDeduction::where($where)->update($data);
+                       if( !$upResult ){
+                           LogApi::debug("[getOverdueDeductionInfo]修改押金为0失败",['params'=>$values['order_no']]);
+                           return false;
+                       }
                     }
 
                     $overdueInfoArray['data'][$keys]['overdue_amount'] = 0;
-                    $overdueInfoArray['data'][$keys]['unpaid_amount'] = 0;
                 }
+                //获取订单分期中的扣款失败金额
+                $whereArray = [];
+                $whereArray[] = ['order_no','=',(string)$values['order_no']];
+                $whereArray[] = ['status','=', OrderInstalmentStatus::FAIL ]; // 扣款失败
+                $sum_amount = OrderGoodsInstalmentRepository::getFallInstalment($whereArray);//获取扣款失败的总金额
+                if( !$sum_amount ){
+                    LogApi::debug("[getOverdueDeductionInfo]获取扣款失败的总金额失败",['params'=>$values['order_no']]);
+                    return false;
+                }
+                if( isset( $sum_amount['aggregate'] ) && $overdueInfoArray['data'][$keys]['unpaid_amount'] != $sum_amount['aggregate']){
+                    $upWhere = [];
+                    $upWhere[] = ['order_no','=',(string)$values['order_no']];
+                    $upData = [
+                        'unpaid_amount' => $sum_amount['aggregate']
+                    ];
+                    //修改未缴租金
+                    $upUnpaidResult = \App\Order\Models\OrderOverdueDeduction::where($upWhere)->update($upData);
+                    if( !$upUnpaidResult ){
+                        LogApi::debug("[getOverdueDeductionInfo]修改未缴租金失败",['params'=>$values['order_no']]);
+                        return false;
+                    }
+                }
+
                  //应用来源
                 $overdueInfoArray['data'][$keys]['appid_name'] = OrderInfo::getAppidInfo($values['app_id']);
-
                  //回访标识
                 $overdueInfoArray['data'][$keys]['visit_name'] = !empty($values['v_id'])? OrderStatus::getVisitName($values['v_id']):OrderStatus::getVisitName(OrderStatus::visitUnContact);
-
                  //租期类型
                 $overdueInfoArray['data'][$keys]['zuqi_name'] =  OrderStatus::getZuqiTypeName($values['zuqi_type']);
 
@@ -64,7 +89,6 @@ class OrderOverdueDeduction
             }
 
         }
-
         return $overdueInfoArray;
     }
 
