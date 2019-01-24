@@ -14,6 +14,7 @@ use App\Order\Modules\Inc\OrderStatus;
 use App\Order\Modules\Service\OrderCreater;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Mockery\Exception;
 
 class ImportOrderReturnAddress extends Command
@@ -53,7 +54,11 @@ class ImportOrderReturnAddress extends Command
      */
     public function handle()
     {
-            $total = OrderGoods::query()->where("id","<=","122857")->count();
+            $orderStatus =[7,8,9,10];
+            $total = DB::table('order_goods')
+                ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods.order_no')
+                ->where("order_goods.id","<=","122857")->whereNotIn("order_info.order_status",$orderStatus)->count();
+
             $bar = $this->output->createProgressBar($total);
             $limit = 1000;
             $page = 1;
@@ -62,7 +67,9 @@ class ImportOrderReturnAddress extends Command
             $orderId = 0;
             do {
 
-                $datas01 = OrderGoods::query()->where("id","<=","122857")->forPage($page, $limit)->get();
+                $datas01 = DB::table('order_goods')
+                    ->leftJoin('order_info', 'order_info.order_no', '=', 'order_goods.order_no')
+                    ->where("order_goods.id","<=","122857")->whereNotIn("order_info.order_status",$orderStatus)->forPage($page, $limit)->get();
                 $goods = objectToArray($datas01);
                 foreach ($goods as $k => $v) {
                     if(isset(GivebackAddressStatus::SPU_ADDRDSS_TYPE[$v['prod_id']])){
@@ -73,7 +80,7 @@ class ImportOrderReturnAddress extends Command
                             $returnInfo['giveback_address']=$goodsArr[$v['zuji_goods_id']]['return_address_info']['return_address_value']??'';//还机回寄地址
                             $returnInfo['giveback_username']=$goodsArr[$v['zuji_goods_id']]['return_address_info']['return_name']??'';//还机回寄收货人姓名
                             $returnInfo['giveback_tel'] = $goodsArr[$v['zuji_goods_id']]['return_address_info']['return_phone']??'';//还机回寄收货人电话'
-                            if($returnInfo['giveback_address'] =='' || $returnInfo['giveback_username'] =='' || $returnInfo['giveback_tel']){
+                            if($returnInfo['giveback_address'] =='' || $returnInfo['giveback_username'] =='' || $returnInfo['giveback_tel']==''){
                                 $returnInfo = GivebackAddressStatus::getGivebackAddress($v['prod_id']);
                             }
                         }catch (\Exception $e){
