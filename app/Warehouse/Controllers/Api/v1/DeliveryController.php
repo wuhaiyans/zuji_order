@@ -835,7 +835,7 @@ class DeliveryController extends Controller
         }
 
         try {
-            $result = $this->delivery->detail($params['order_no']);
+            $result = $this->delivery->xianxiaDetail($params['order_no']);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }
