@@ -776,7 +776,15 @@ class DeliveryController extends Controller
 
         try {
             DB::beginTransaction();
-            $result = $this->_info($params['delivery_no']);
+            //修改发货信息
+            DeliveryService::xianxiaSend($params);
+            //通知订单接口
+            $result = [
+                'order_no'=>$params['order_no'],
+                'goods_info'=>[
+                    $params['goods_no']=>['goods_no'=>$params['goods_no'],'imei1'=>$params['imei'],'serial_number'=>$params['apple_serial']]
+                ]
+            ];
             //线下发货
             $orderDetail = [
                 'order_no' => $result['order_no'],
@@ -789,15 +797,13 @@ class DeliveryController extends Controller
             $user_info['user_id'] = $user['uid'];
             $user_info['user_name'] = $user['username'];
             $user_info['type'] = $user['type'];
-            //修改发货信息
-            DeliveryService::xianxiaSend($params);
-            //通知订单接口
+
             LogApi::info('delivery_send_order_info_xianxiaDelivery',[$orderDetail,$result['goods_info'],$user_info]);
             $a = \App\Lib\Warehouse\Delivery::delivery($orderDetail, $result['goods_info'], $user_info);
             if(!$a){
                 DB::rollBack();
                 WarehouseWarning::warningWarehouse('[线下门店发货]通知订单失败',[$params,$a]);
-                return \apiResponse([$result['order_no'].'_'.$a], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
+                return \apiResponse([$result['order_no']], ApiStatus::CODE_50001, session()->get(\App\Lib\Warehouse\Delivery::SESSION_ERR_KEY));
 
             }
 
@@ -829,7 +835,7 @@ class DeliveryController extends Controller
         }
 
         try {
-            $result = $this->delivery->detail($params['order_no']);
+            $result = $this->delivery->xianxiaDetail($params['order_no']);
         } catch (\Exception $e) {
             return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
         }

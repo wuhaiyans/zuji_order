@@ -168,7 +168,7 @@ class DeliveryService
      */
     public function xianxiaDetail($order_no)
     {
-        if (!($detail = DeliveryRepository::detail($order_no))) {
+        if (!($detail = DeliveryRepository::xianxiaDetail($order_no))) {
             throw new \Exception('发货单中的订单编号:' . $order_no . '不存在');
         }
 
