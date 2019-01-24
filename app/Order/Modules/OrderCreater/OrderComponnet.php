@@ -305,6 +305,12 @@ class OrderComponnet implements OrderCreater
 
         }
 
+
+        $checkStatus = OrderRiskCheckStatus::SystemPass;
+        if($this->appid ==139 || $this->orderType == OrderStatus::orderMiniService){
+            $checkStatus = OrderRiskCheckStatus::Non;
+        }
+
         $orderData = [
             'order_status' => OrderStatus::OrderWaitPaying,
             'order_no' => $this->orderNo,  // 编号
@@ -322,6 +328,7 @@ class OrderComponnet implements OrderCreater
             'order_type'=>$this->orderType,
             'mobile'=>$data['user']['user_mobile'],
             'predict_delivery_time'=>$PredictDeliveryTime,
+            'risk_check'=>$checkStatus,
         ];
 
         $orderRepository = new OrderRepository();
