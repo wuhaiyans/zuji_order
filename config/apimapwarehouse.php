@@ -76,6 +76,7 @@ return [
     'warehouse.delivery.xianxiaDelivery'=> 'DeliveryController@xianxiaDelivery', //线下门店发货
     'warehouse.delivery.xianxiaShow'=> 'DeliveryController@xianxiaShow', //线下发货清单(发货详情)
 
+    'warehouse.receive.xianxiaReceived'=> 'ReceiveController@xianxiaReceived', //线下签收
     'warehouse.receive.xianxiaCheckItemsFinish'=> 'ReceiveController@xianxiaCheckItemsFinish', //线下门店检测完成
     'warehouse.checkitem.getXiannxiaDetails'=> 'CheckItemController@getXiannxiaDetails', //线下门店查看检测详情
     'warehouse.checkitem.receiveNum'=> 'CheckItemController@receiveNum', //线下门店待检测数量
