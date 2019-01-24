@@ -419,6 +419,47 @@ class DeliveryRepository
         return $result;
     }
 
+    /**
+     * @param $order_no
+     * @return array
+     * 明细清单
+     */
+    public static function xianxiaDetail($order_no)
+    {
+        $model = Delivery::where(['order_no'=>$order_no])->orderBy('desc')->first();
+
+        if (!$model) {
+            throw new NotFoundResourceException('发货单中的订单编号:' . $order_no . '未找到');
+        }
+
+        $result = $model->toArray();
+        $goods = $model->goods->toArray();
+
+        if ($model->imeis) {
+            $result['imeis'] = $model->imeis;
+
+            foreach ($goods as &$g) {
+                foreach ($model->imeis as $i) {
+                    if ($i->goods_no == $g['goods_no']) {
+                        $g['imei'] = $i->imei;
+                        $g['price'] = $i->price;
+                        $g['apple_serial'] = $i->apple_serial;
+                    }
+                }
+            }unset($g);
+
+        }
+
+        $result['goods'] = $goods;
+
+
+//        if ($model->goods) {
+//            $result['goods'] = $model->goods;
+//        }
+
+        return $result;
+    }
+
 
     /**
      * @param $delivery_no

@@ -160,6 +160,20 @@ class DeliveryService
 
         return $detail;
     }
+    /**
+     * @param $order_no
+     * @return array
+     * @throws \Exception
+     * 清单明细
+     */
+    public function xianxiaDetail($order_no)
+    {
+        if (!($detail = DeliveryRepository::detail($order_no))) {
+            throw new \Exception('发货单中的订单编号:' . $order_no . '不存在');
+        }
+
+        return $detail;
+    }
 
     /**
      * @param $delivery_no
