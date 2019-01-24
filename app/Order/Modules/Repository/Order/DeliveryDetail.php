@@ -197,7 +197,7 @@ class DeliveryDetail {
                 'imei1'=>isset($goodsInfo[$k]['imei1'])?$goodsInfo[$k]['imei1']:"",
                 'imei2'=>isset($goodsInfo[$k]['imei2'])?$goodsInfo[$k]['imei2']:"",
                 'imei3'=>isset($goodsInfo[$k]['imei3'])?$goodsInfo[$k]['imei3']:"",
-                'serial_number'=>$goodsInfo[$k]['serial_number'] ? $goodsInfo[$k]['serial_number'] : '',
+                'serial_number'=>isset($goodsInfo[$k]['serial_number']) ? $goodsInfo[$k]['serial_number'] : '',
                 'status'=>0,  //有效状态   0：有效   1：无效
             ];
             $res =OrderGoodsDelivery::create($data);//创建商品扩展信息
