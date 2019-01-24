@@ -612,11 +612,11 @@ class OrderOperateInc
                 //备货中
                 Inc\OrderStatus::OrderInStock => [
                     //支付后取消
-                    'cancel_pay_btn'    => false,
+                    'cancel_pay_btn'    => true,
                     //'线下还机'
                     'offline_giveback_btn' => false,
                     //发货
-                    'deliver_btn'    => false,
+                    'deliver_btn'    => true,
                     //检测
                     'check_btn'    => false,
                     //检测结果
