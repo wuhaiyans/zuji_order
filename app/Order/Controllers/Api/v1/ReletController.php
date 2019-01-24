@@ -116,7 +116,7 @@ class ReletController extends Controller
         //支付 扩展参数
         $extended_params = isset($params['extended_params'])?$params['extended_params']:[];
         // 支付宝支付扩展参数
-        if( $params['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Alipay ){
+        if( isset($params['pay_channel_id']) && $params['pay_channel_id'] == \App\Order\Modules\Repository\Pay\Channel::Alipay ){
             if( isset($extended_params['alipay_params']['trade_type']) && $extended_params['alipay_params']['trade_type']=='MINI' ){
 				if( isset($userinfo['extended_data']['alipay_user_id']) ){
 					$params['extended_params']['alipay_params']['alipay_user_id'] = $userinfo['extended_data']['alipay_user_id'];

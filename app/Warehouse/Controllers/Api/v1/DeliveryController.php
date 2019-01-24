@@ -811,6 +811,34 @@ class DeliveryController extends Controller
         return \apiResponse([]);
     }
 
+    /**
+     * 线下发货清单
+     */
+    public function xianxiaShow()
+    {
+        $rules = [
+            'order_no' => 'required',
+        ];
+        $params = $this->_dealParams($rules);
+
+//        $request = request()->input();
+//        $params['channel_id'] = json_decode($request['userinfo']['channel_id'], true);
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            $result = $this->delivery->detail($params['order_no']);
+        } catch (\Exception $e) {
+            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+        //回寄地址
+        $result['return_address_info']=Delivery::RETURN_ADDRESS;
+
+        return \apiResponse($result);
+    }
+
 
     /**
      * @param $delivery_no

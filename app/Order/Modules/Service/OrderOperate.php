@@ -212,7 +212,7 @@ class OrderOperate
         }
         //如果回寄地址发生改变 需要更新地址
         $returnType = $orderDetail['return_address_type'] ?? false;
-        if($orderDetail['return_address_type']){
+        if($returnType){
             $GoodsExtend =  OrderGoodsExtend::where('order_no', '=', $orderDetail['order_no'])->first();
             if($GoodsExtend){
                 $orderGoodsExtend = $GoodsExtend->toArray();
