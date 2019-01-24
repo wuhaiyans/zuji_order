@@ -2926,7 +2926,9 @@ class OrderOperate
         $order['goods_extend_info'] = $goodsExtendData;
         if (in_array($orderData['order_status'], array(Inc\OrderStatus::OrderDeliveryed, Inc\OrderStatus::OrderInService))) {
 
-            $order['user_agreement_info']   =    Contract::getOrderNoContract($orderNo);
+              $userAgreementInfo =    Contract::getOrderNoContract($orderNo);
+
+            $order['user_agreement_info'] = !empty($userAgreementInfo) ? $userAgreementInfo[0]['viewpdf_url']:'';
         }
         //获取合同链接
 
