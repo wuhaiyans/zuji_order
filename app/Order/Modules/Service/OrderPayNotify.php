@@ -66,7 +66,7 @@ class OrderPayNotify
             $orderNoticeObj = new OrderNotice(OrderStatus::BUSINESS_ZUJI,$orderNo,SceneConfig::ORDER_PAY);
             $orderNoticeObj->notify();
             //发送订单消息队列
-            if($orderInfo['appid']==139 || $orderInfo['order_type'] == OrderStatus::orderMiniService){
+            if($orderInfo['appid']==139 || $orderInfo['appid'] ==208 || $orderInfo['order_type'] == OrderStatus::orderMiniService){
                 $schedule = new OrderScheduleOnce(['user_id'=>$orderInfo['user_id'],'order_no'=>$orderNo]);
                 $schedule->OrderRisk();
             }

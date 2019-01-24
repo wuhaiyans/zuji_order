@@ -96,7 +96,7 @@ class DepositComponnet implements OrderCreater
                         'is_order'=>1,
                     ];
                     LogApi::info(config('app.env')."OrderCreate-jisuan_yajin:".$this->orderNo,$arr);
-                    if($this->schema['order']['app_id'] ==139){
+                    if($this->schema['order']['app_id'] ==139 || $this->schema['order']['app_id'] == 208){
                         try{
                             //调用风控押金计算接口
                             $deposit = Yajin::calculate($arr);
@@ -112,7 +112,7 @@ class DepositComponnet implements OrderCreater
                             $deposit['jianmian_detail'] =[];
                         }
                     }else{
-                        //除了139 全押金
+                        //除了139,208 全押金
                         $deposit['jianmian'] =0;
                         $deposit['yajin'] = $v['yajin'] * 100;
                         $deposit['_msg'] ='全押金';

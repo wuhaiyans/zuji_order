@@ -307,7 +307,7 @@ class OrderComponnet implements OrderCreater
 
 
         $checkStatus = OrderRiskCheckStatus::SystemPass;
-        if($this->appid ==139 || $this->orderType == OrderStatus::orderMiniService){
+        if($this->appid ==139 || $this->appid == 208 || $this->orderType == OrderStatus::orderMiniService){
             $checkStatus = OrderRiskCheckStatus::Non;
         }
 
