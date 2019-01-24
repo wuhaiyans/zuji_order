@@ -73,7 +73,7 @@ class ImportOrderReturnAddress extends Command
                             $returnInfo['giveback_address']=$goodsArr[$v['zuji_goods_id']]['return_address_info']['return_address_value']??'';//还机回寄地址
                             $returnInfo['giveback_username']=$goodsArr[$v['zuji_goods_id']]['return_address_info']['return_name']??'';//还机回寄收货人姓名
                             $returnInfo['giveback_tel'] = $goodsArr[$v['zuji_goods_id']]['return_address_info']['return_phone']??'';//还机回寄收货人电话'
-                            if($returnInfo['giveback_address'] =='' || $returnInfo['giveback_username'] =='' || $returnInfo['giveback_tel']){
+                            if($returnInfo['giveback_address'] =='' || $returnInfo['giveback_username'] =='' || $returnInfo['giveback_tel']==''){
                                 $returnInfo = GivebackAddressStatus::getGivebackAddress($v['prod_id']);
                             }
                         }catch (\Exception $e){
