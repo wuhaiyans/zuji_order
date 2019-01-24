@@ -309,6 +309,7 @@ class OrderClearingRepository
     {
         $whereArray = array();
         $whereInArray = array();
+        $page           = 1;
         //出账状态
         //根据订单编号
         if (isset($param['order_no']) && !empty($param['order_no'])) {
@@ -358,6 +359,11 @@ class OrderClearingRepository
             $whereArray[] = ['create_time', '<', (strtotime($param['end_time'])+3600*24)];
         }
 
+        if (isset($param['page']) && !empty($param['size'])) {
+
+            $page = $param['page'];
+        }
+
         $query = DB::table('order_clearing')->where($whereArray)
             ->when(!empty($whereInArray),function($join) use ($whereInArray) {
                 return $join->whereIn('order_clearing.channel_id', $whereInArray);
@@ -369,7 +375,7 @@ class OrderClearingRepository
             $limit  =    $param['size'];
         }
         return objectToArray($query->paginate($limit,
-            ['*'], 'page', $param['page']));
+            ['*'], 'page', $page));
     }
 
 

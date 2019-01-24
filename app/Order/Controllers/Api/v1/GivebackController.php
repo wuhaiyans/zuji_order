@@ -1189,7 +1189,7 @@ class GivebackController extends Controller
 	private function __dealEvaNoWitYes( $paramsArr, OrderGiveback $orderGivebackService, &$status ) {
 
 		// 如果存在扣除押金金额  则执行 扣除押金操作
-		if($paramsArr['amount'] && $paramsArr['amount'] > 0){
+		if(isset($paramsArr['amount']) && $paramsArr['amount'] > 0){
 			$this->deductionDeposit($paramsArr);
 			// 剩余押金 等于 减去赔偿金
 			$paramsArr['surplus_yajin'] = $paramsArr['surplus_yajin'] - $paramsArr['amount'] > 0 ? $paramsArr['surplus_yajin'] - $paramsArr['amount'] : 0;

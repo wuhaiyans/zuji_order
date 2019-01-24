@@ -382,4 +382,22 @@ class OrderGoodsInstalmentRepository
 
         return true;
     }
+
+    /***
+     *
+     * @param array $params
+     */
+    public static function getFallInstalment(array $params){
+        if (empty($params)) return false;
+        $sum_amount = 0.00;
+        $instalmentList =  OrderGoodsInstalment::query()
+            ->where($params)
+            ->sum("amount");
+        LogApi::debug("[getOverdueDeductionInfo]getOverdueDeductionInfo",['result'=>$instalmentList]);
+        if( $instalmentList ){
+            $sum_amount = $instalmentList;
+        }
+        LogApi::debug("[getOverdueDeductionInfo]getOverdueDeductionInfo",['result'=>$instalmentList]);
+        return $sum_amount;
+    }
 }

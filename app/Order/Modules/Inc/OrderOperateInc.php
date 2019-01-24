@@ -22,6 +22,25 @@ class OrderOperateInc
     private static function getOrderOperate()
     {
         return array(
+            'good_status_info'=>array(
+                'unpay_giveback_status_name'     => '待用户赔付',
+                'unpay_giveback_status_info'     =>  '用户尚未赔付，需赔付后解除资金预授权',
+                'check_giveback_status_name'     =>  '待检测',
+                'check_giveback_status_info'     =>  '查看功能是否正常，是否有磨损',
+                'overdue_status_name'            =>  '已逾期',
+                'overdue_status_info'            =>  '用户已逾期',
+                'cancel_status_name'             =>  '已取消',
+                'cancel_status_info'             =>  '用户已取消订单',
+                'toshipped_status_name'          =>  '待发货',
+                'toshipped_status_info'          =>  '需要核对用户的信息,确认用户的信息无误，并上传商品细节图',
+                'rent_status_name'               =>  '租用中',
+                'rent_status_info'               =>  '用户归还需检查相关零配件是否齐全',
+                'unclean_account_status_name'    =>  '待出账',
+                'unclean_account_status_info'    =>  '需核实用户是否支付完毕，对资金预授权进行解冻',
+                'complete_status_name'           =>  '已完结',
+                'complete_status_info'           =>  '当前订单已经完结',
+
+            ),
             //客户端订单列表的可用操作
             'actState'=>array(
                 //待支付
@@ -533,7 +552,7 @@ class OrderOperateInc
                 Inc\OrderStatus::OrderWaitPaying => [
                     //支付后取消
                     'cancel_pay_btn'    => false,
-                    //'线下还机'
+                    //'确认还机'
                     'offline_giveback_btn' => false,
                     //发货
                     'deliver_btn'    => false,
@@ -543,6 +562,12 @@ class OrderOperateInc
                     'check_result_btn'    => false,
                     //出账
                     'clean_account_btn'    => false,
+                    //用户协议
+                    'user_agreement_btn'    => false,
+                    //发货详情
+                    'shipping_details_btn'    => false,
+
+
                 ],
                 //支付中
                 Inc\OrderStatus::OrderPaying => [
@@ -559,6 +584,10 @@ class OrderOperateInc
                     'check_result_btn'    => false,
                     //出账
                     'clean_account_btn'    => false,
+                    //用户协议
+                    'user_agreement_btn'    => false,
+                    //发货详情
+                    'shipping_details_btn'    => false,
 
                 ],
                 //已支付
@@ -575,6 +604,10 @@ class OrderOperateInc
                     'check_result_btn'    => false,
                     //出账
                     'clean_account_btn'    => false,
+                    //用户协议
+                    'user_agreement_btn'    => false,
+                    //发货详情
+                    'shipping_details_btn'    => false,
                 ],
                 //备货中
                 Inc\OrderStatus::OrderInStock => [
@@ -590,6 +623,10 @@ class OrderOperateInc
                     'check_result_btn'    => false,
                     //出账
                     'clean_account_btn'    => false,
+                    //用户协议
+                    'user_agreement_btn'    => false,
+                    //发货详情
+                    'shipping_details_btn'    => false,
                 ],
                 //已发货
                 Inc\OrderStatus::OrderDeliveryed => [
@@ -606,6 +643,10 @@ class OrderOperateInc
                     'check_result_btn'    => false,
                     //出账
                     'clean_account_btn'    => false,
+                    //用户协议
+                    'user_agreement_btn'    => false,
+                    //发货详情
+                    'shipping_details_btn'    => true,
                 ],
                 //租用中
                 Inc\OrderStatus::OrderInService => [
@@ -622,6 +663,10 @@ class OrderOperateInc
                     'check_result_btn'    => false,
                     //出账
                     'clean_account_btn'    => false,
+                    //用户协议
+                    'user_agreement_btn'    => true,
+                    //发货详情
+                    'shipping_details_btn'    => true,
 
                 ],
                 //已取消（未支付）
@@ -639,6 +684,11 @@ class OrderOperateInc
                     'check_result_btn'    => false,
                     //出账
                     'clean_account_btn'    => false,
+                    //用户协议
+                    'user_agreement_btn'    => false,
+                    //发货详情
+                    'shipping_details_btn'    => false,
+
 
                 ],
                 //已关闭（已退款）
@@ -656,6 +706,10 @@ class OrderOperateInc
                     'check_result_btn'    => false,
                     //出账
                     'clean_account_btn'    => false,
+                    //用户协议
+                    'user_agreement_btn'    => false,
+                    //发货详情
+                    'shipping_details_btn'    => false,
 
                 ],
                 //已完成
@@ -673,6 +727,10 @@ class OrderOperateInc
                     'check_result_btn'    => false,
                     //出账
                     'clean_account_btn'    => false,
+                    //用户协议
+                    'user_agreement_btn'    => false,
+                    //发货详情
+                    'shipping_details_btn'    => true,
 
                 ],
                 //逾期关闭
@@ -690,6 +748,10 @@ class OrderOperateInc
                     'check_result_btn'    => false,
                     //出账
                     'clean_account_btn'    => false,
+                    //用户协议
+                    'user_agreement_btn'    => true,
+                    //发货详情
+                    'shipping_details_btn'    => true,
 
                 ],
                 )

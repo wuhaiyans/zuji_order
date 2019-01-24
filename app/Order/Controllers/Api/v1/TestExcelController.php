@@ -163,6 +163,14 @@ class TestExcelController extends Controller
         $type = $_GET['type'];
         $ret = OrderBlock::orderPushBlock($order_no,$type);
         var_dump($ret);
+
+        $data = [
+            'realName'=>'',
+            'zuJin'=>'',
+            'zhifuLianjie'=>'',
+            'serviceTel'=>'',
+        ];
+        $ret = OrderBlock::orderPushBlock($order_no,OrderBlock::OrderVisit);
     }
 
 }

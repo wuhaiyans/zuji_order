@@ -397,7 +397,10 @@ class OrderController extends Controller
             $params =   $allParams['params'];
 
             $params['channel_id'] = json_decode($allParams['userinfo']['channel_id'], true);
+
             $orderData = Service\OrderOperate::getOfflineOrderList($params);
+
+
 
             if ($orderData['code']===ApiStatus::CODE_0) {
 
@@ -1064,7 +1067,6 @@ class OrderController extends Controller
 
             }
 
-
     }
 
 
@@ -1082,17 +1084,13 @@ class OrderController extends Controller
             $rule = [
                 'order_no'=> 'required'
             ];
-
             $validateParams = $this->validateParams($rule,  $params);
-
-
             if ($validateParams['code']!=0) {
 
                 return apiResponse([],$validateParams['code']);
             }
 
-
-            $orderData = Service\OrderOperate::getOrderInfo($validateParams['data']['order_no']);
+            $orderData = Service\OrderOperate::getOrderOfflineInfo($validateParams['data']['order_no']);
             if ($orderData['code']===ApiStatus::CODE_0) {
 
                 return apiResponse($orderData['data'],ApiStatus::CODE_0);

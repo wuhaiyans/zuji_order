@@ -260,7 +260,10 @@ return [
     //线下领取商品接口
     'api.order.activityReceive' => 'OrderController@activityReceive',
 
-
+	//-+------------------------------------------------------------------------
+	// | 区块链推送接口
+	//-+------------------------------------------------------------------------
+	'api.block.orderPushBlock' => 'OrderBlockController@orderPushBlock',
 	
 	//-+------------------------------------------------------------------------
 	// | 还机相关接口
@@ -374,6 +377,8 @@ return [
     //-+------------------------------------------------------------------------
 
     'api.offline.orderOfflineList'        => 'OrderController@orderOfflineList',
+    'api.offline.orderOffInfo'        => 'OrderController@orderOffInfo',
+
 
 
 

@@ -203,7 +203,10 @@ class OrderBlock {
                     ['phase','<>','electronic-contract'],
                 ];
                 $phase = $phaseModel->where($where)->orderBy("id","desc")->first();
-                $phase = $phase?json_decode($phase,true):[];
+                if($phase){
+                    $phase = $phase->toArray();
+                    $phase = json_decode($phase['content'],true);
+                }
             }
 
             //身份证照获取
@@ -237,17 +240,13 @@ class OrderBlock {
             }
 
             //入库记录-检测图片
-            $data['input_record'] = "";
-            foreach( $result['goods_info'] as $it ){
-                $checkInfo = Check::getCheckDetail($order_info['order_no'],$it['goods_no']);
-                if($checkInfo){
-                    $data['input_record'] = [
-                        'images'=>$checkInfo['imgs']?json_decode($checkInfo['imgs'],true):"",
-                        'create_time'=>date('Y-m-d H:i:s',$checkInfo['create_time']),
-                    ];
-                }
+            $data['input_record'] = isset($phase['input_record'])?$phase['input_record']:[];
+            if($orderBlockNode == OrderBlock::OrderWarehouseDetail && !empty($blockData['images'])) {
+                $data['input_record'][] = [
+                    'images' => $blockData['images'],
+                    'create_time' => date('Y-m-d H:i:s', time()),
+                ];
             }
-
             //逾期客服回访记录
             $OverdueVisit = OrderOverdueVisit::getOverdueVisitInfo($order_info['order_no']);
             $data['overdue_customer_service_record'] = "";
@@ -264,13 +263,12 @@ class OrderBlock {
             }
 
             //逾期短信通知记录
-            $data['collection_message'] = [];
+            $data['collection_message'] = isset($phase['collection_message'])?$phase['collection_message']:[];
             if($orderBlockNode == OrderBlock::OrderInstalmentSendMessage){
                 $message['text'] = "【拿趣用】尊敬的用户".$blockData['realName']."，您的本月账单应付金额为".$blockData['zuJin']."元，可以点击链接支付".$blockData['zhifuLianjie']." 。如若提前还款，您将在拿趣用享有更多福利！如您在使用中遇到问题或有其它疑问请联系客服电话：".$blockData['serviceTel']."。";
                 $message['send_time'] = date("Y-m-d H:i:s",time());
                 $data['collection_message'][] = $message;
             }
-
 
         }
 

@@ -30,4 +30,22 @@ class Check  extends \App\Lib\BaseApi
 
         return self::request(\config('app.APPID'), env('WAREHOUSE_API'),'warehouse.checkitem.getDetails','1.0', $params);
     }
+
+    /**
+     * 区块链上传检测信息
+     * @author wangjinlin
+     *
+     * @param order_no string
+     * @param type string
+     * @param imgs array 检测图片
+     *
+     */
+    public static function setBlockchainCheckItem($params){
+        $data = [
+            'order_no'=>$params['order_no'],
+            'type'=>'order_warehouse_detail',
+            'images'=>$params['imgs'],
+        ];
+        return self::request(\config('app.APPID'), env('ORDER_API'),'api.block.orderPushBlock','1.0', $data);
+    }
 }

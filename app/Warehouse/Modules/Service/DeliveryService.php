@@ -671,7 +671,7 @@ class DeliveryService
             'goods_no'      => $params['goods_no'],
             'status'        => DeliveryGoodsImei::STATUS_YES,
             'imei'          => $params['imei'],
-            'apple_serial'  => $params['apple_serial'],
+            'apple_serial'  => empty($params['apple_serial'])?0:'',
             'price'         => $params['price'],
             'create_time'   => time()
         ];

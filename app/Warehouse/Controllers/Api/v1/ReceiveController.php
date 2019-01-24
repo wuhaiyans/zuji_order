@@ -319,7 +319,7 @@ class ReceiveController extends Controller
         ];
 
         $params = $this->_dealParams($rules);
-        LogApi::info("[checkItemsFinish]检测完成接收参数",['params'=>$params]);
+        LogApi::info("[checkItemsFinish_1]检测完成接收参数",$params);
         $param = request()->input();
         $userinfo=$param['userinfo'];
 
@@ -329,13 +329,16 @@ class ReceiveController extends Controller
 
         try {
             DB::beginTransaction();
+            $params['create_time'] = time();
+
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
             $receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
+            $params['order_no'] = $receive_row['order_no'];
             //$receive_goods = ReceiveGoods::where(['receive_no','=',$params['receive_no']])->first()->toArray();
             $items[] = [
                 'goods_no'=>$params['goods_no'],
                 'evaluation_status'=>$params['check_result'],
-                'evaluation_time'=>time(),
+                'evaluation_time'=>$params['create_time'],
                 'evaluation_remark'=>$params['check_description'],
                 'compensate_amount'=>$params['compensate_amount'],
                 'business_no'=>$receive_row['business_no'],
@@ -533,6 +536,7 @@ class ReceiveController extends Controller
      * @param compensate_amount 检测赔偿价格
      * @param amount 押金之外需要赔偿金额
      * @param goods_no 商品编号
+     * @param dingsun_type 定损类型
      */
     public function xianxiaCheckItemsFinish()
     {
@@ -542,7 +546,8 @@ class ReceiveController extends Controller
             'check_result' => 'required',
             'compensate_amount' => 'required',
             'amount' => 'required',
-            'goods_no' => 'required'
+            'goods_no' => 'required',
+            'dingsun_type' => 'required',
         ];
 
         $params = $this->_dealParams($rules);
@@ -558,7 +563,8 @@ class ReceiveController extends Controller
             $params['create_time'] = time();
 
             //$items = $this->receive->checkItemsFinish($params['receive_no']);
-            $receive_obj = \App\Warehouse\Models\Receive::where($params['order_no'])->orderBy('receive_no','desc')->first();
+            //$receive_row = \App\Warehouse\Models\Receive::find($params['receive_no'])->toArray();
+            $receive_obj = \App\Warehouse\Models\Receive::where(['order_no'=>$params['order_no']])->orderBy('receive_no','desc')->first();
             if(!$receive_obj){
                 return apiResponse([], ApiStatus::CODE_60002, '检测单未查到_'.$params['order_no']);
             }

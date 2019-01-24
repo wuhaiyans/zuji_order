@@ -100,6 +100,7 @@ class AuthRefferController extends Controller{
                         'username' => $checkInfo['data'][0]['mobile'],
                         'ip'        => $params['ip'],
                         'register_time'=> isset($checkInfo['data'][0]['register_time'])?$checkInfo['data'][0]['register_time']:'',
+						'extended_data' => $checkInfo['data'][0]['extended_data'],// 用户会话扩展数据
                     ];
 
                     $list=['url'=>config('ordersystem.ORDER_API'),'data'=>$params];
