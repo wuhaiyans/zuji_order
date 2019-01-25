@@ -2334,6 +2334,7 @@ class OrderOperate
                             if ($orderCleaning['data'][0]['business_type'] == Inc\OrderCleaningStatus::businessTypeReturnGoods) {
                                 $goodsList[$keys]['act_goods_state']['check_result_btn'] = true;
                             }
+                            $goodsList[$keys]['clean_no'] = $orderCleaning['data'][0]['clean_no'];
                         }
 
                     }
@@ -2447,6 +2448,7 @@ class OrderOperate
                            if ($orderCleaning['data'][0]['business_type'] == Inc\OrderCleaningStatus::businessTypeReturnGoods) {
                                $goodsList[$keys]['act_goods_state']['check_result_btn'] = true;
                            }
+                           $goodsList[$keys]['clean_no'] = $orderCleaning['data'][0]['clean_no'];
                        }
 
                    }
