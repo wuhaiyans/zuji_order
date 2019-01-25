@@ -20,7 +20,7 @@ class Giveback extends \App\Lib\BaseApi
 	public static function confirmDelivery( $params, $userInfo=[] ) {
 		foreach ($params as $value) {
 			if( !self::request(\env('APPID',1), \config('ordersystem.ORDER_API'),'api.giveback.confirm.delivery', '1.0', $value, $userInfo) ){
-				return false;
+                throw new \Exception('订单确认收货失败confirmDelivery');
 			}
 		}
 		return true;
@@ -41,7 +41,9 @@ class Giveback extends \App\Lib\BaseApi
 	public static function confirmEvaluation( $params, $userInfo= [] ) {
 		if( self::request(\env('APPID',1), \config('ordersystem.ORDER_API'),'api.giveback.confirm.evaluation', '1.0', $params, $userInfo) ){
 			return true;
-		}
+		}else{
+            throw new \Exception('订单确认检测结果失败confirmEvaluation');
+        }
 	}
 	/**
 	 * 确认检测结果【接收二维参数】

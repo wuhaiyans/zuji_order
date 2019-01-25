@@ -598,5 +598,47 @@ class ReceiveController extends Controller
         return apiResponse();
     }
 
+    /**
+     * 线下签收
+     */
+    public function xianxiaReceived()
+    {
+        $rules = [
+            'order_no' => 'required'
+        ];
+        $params = $this->_dealParams($rules);
+        $param = request()->input();
+        $userinfo=$param['userinfo'];
+
+        if (!$params) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+
+        try {
+            DB::beginTransaction();
+            //向下兼容 receive_no
+            $receive_obj = \App\Warehouse\Models\Receive::where(['order_no'=>$params['order_no'],'type'=>\App\Warehouse\Models\Receive::TYPE_BACK,'status'=>\App\Warehouse\Models\Receive::STATUS_INIT,'order_type'=>'2'])->select('receive_no')->orderByDesc('receive_no')->first();
+            if(!$receive_obj){
+                DB::rollBack();
+                return apiResponse([], ApiStatus::CODE_40006, '待签收订单未找到:'.$params['order_no']);
+            }
+            $receive_row = $receive_obj->toArray();
+            $params['receive_no'] = $receive_row['receive_no'];
+            //记录日志
+            LogApi::info('xianxiaReceived_info_Receive',$params);
+            //修改状态
+            $this->receive->received($params['receive_no']);
+            //通知订单
+            Receive::receive($params['receive_no'],$userinfo);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            WarehouseWarning::warningWarehouse('[签收-收货]失败',[$params,$userinfo,$e]);
+            return apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+        }
+
+        return apiResponse([]);
+    }
+
 }
 
