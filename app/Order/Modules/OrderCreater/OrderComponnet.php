@@ -311,6 +311,10 @@ class OrderComponnet implements OrderCreater
             $checkStatus = OrderRiskCheckStatus::Non;
         }
 
+        if($this->orderType == OrderStatus::orderActivityService){
+            $this->orderType = OrderStatus::orderStoreService;
+        }
+
         $orderData = [
             'order_status' => OrderStatus::OrderWaitPaying,
             'order_no' => $this->orderNo,  // 编号

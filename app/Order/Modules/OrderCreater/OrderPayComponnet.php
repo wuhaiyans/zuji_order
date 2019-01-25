@@ -185,9 +185,15 @@ class OrderPayComponnet implements OrderCreater
             //发送订单消息队列
             $appid = $this->getOrderCreater()->getAppid();
             $orderType =$this->getOrderCreater()->getOrderType();
+            $schedule = new OrderScheduleOnce(['user_id'=>$this->userId,'order_no'=>$this->orderNo]);
             if($appid ==139 || $appid == 208 || $orderType == OrderStatus::orderMiniService){
-                $schedule = new OrderScheduleOnce(['user_id'=>$this->userId,'order_no'=>$this->orderNo]);
                 $schedule->OrderRisk();
+            }
+
+            //如果是线下门店 或者领取订单 直接生成 发货单
+            if($orderType == OrderStatus::orderStoreService || $orderType == OrderStatus::orderActivityService){
+                //发送申请发货队列
+                $schedule->DeliveryApply();
             }
             return true;
         }
