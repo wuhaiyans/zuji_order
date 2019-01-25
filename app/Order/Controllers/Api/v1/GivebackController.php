@@ -1,6 +1,7 @@
 <?php
 namespace App\Order\Controllers\Api\v1;
 
+use App\Lib\Common\LogApi;
 use App\Order\Modules\Inc\GivebackAddressStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -374,12 +375,15 @@ class GivebackController extends Controller
 		$orderGivebackInfo = $orderGivebackService->getInfoByGoodsNo($goodsNo);
 		//还机单状态必须为待收货
 		if( !$orderGivebackInfo ){
+			LogApi::error("[givebackConfirmDelivery]还机收货信息错误",['goods_no'=>$goodsNo]);
 			return apiResponse([], get_code(), get_msg());
 		}
 		if( $orderGivebackInfo['status'] == OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK ){
+			LogApi::error("[givebackConfirmDelivery]还机收货状态错误",['status'=>$orderGivebackInfo['status']]);
 			return apiResponse([],ApiStatus::CODE_92500,'当前还机单已经收货');
 		}
 		if( $orderGivebackInfo['status'] != OrderGivebackStatus::STATUS_DEAL_WAIT_DELIVERY ) {
+			LogApi::error("[givebackConfirmDelivery]还机收货状态错误",['status'=>$orderGivebackInfo['status']]);
 			return apiResponse([],ApiStatus::CODE_92500,'当前还机单不处于待收货状态，不能进行收货操作');
 		}
 		if(redisIncr($orderGivebackInfo['giveback_no'], 60)>1){
@@ -425,6 +429,10 @@ class GivebackController extends Controller
 			if( !$orderGivebackResult ){
 				//事务回滚
 				DB::rollBack();
+				LogApi::error("[givebackConfirmDelivery]还机收货更新还机单错误",[
+					'status' => OrderGivebackStatus::STATUS_DEAL_WAIT_CHECK,
+					'withhold_status' => $withhold_status,
+				]);
 				return apiResponse([],ApiStatus::CODE_92701);
 			}
 			//记录日志
@@ -440,6 +448,17 @@ class GivebackController extends Controller
 				'msg'=>'还机单确认收货操作',
 			]);
 			if( !$goodsLog ){
+				LogApi::error("[givebackConfirmDelivery]还机收货记录日志",[
+					'order_no'=>$orderGivebackInfo['order_no'],
+					'action'=>'还机单收货',
+					'business_key'=> \App\Order\Modules\Inc\OrderStatus::BUSINESS_GIVEBACK,//此处用常量
+					'business_no'=>$orderGivebackInfo['giveback_no'],
+					'goods_no'=>$orderGivebackInfo['goods_no'],
+					'operator_id'=>$operateUserInfo['uid'],
+					'operator_name'=>$operateUserInfo['username'],
+					'operator_type'=>$operateUserInfo['type']==1?\App\Lib\PublicInc::Type_Admin:\App\Lib\PublicInc::Type_User,//此处用常量
+					'msg'=>'还机单确认收货操作',
+				]);
 				return apiResponse([],ApiStatus::CODE_92700,'设备日志生成失败！');
 			}
 
