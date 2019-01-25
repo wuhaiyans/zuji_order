@@ -426,7 +426,7 @@ class DeliveryRepository
      */
     public static function xianxiaDetail($order_no)
     {
-        $model = Delivery::where(['order_no'=>$order_no])->orderBy('desc')->first();
+        $model = Delivery::where(['order_no'=>$order_no])->orderByDesc('delivery_no')->first();
 
         if (!$model) {
             throw new NotFoundResourceException('发货单中的订单编号:' . $order_no . '未找到');
