@@ -750,7 +750,6 @@ class DeliveryController extends Controller
      */
     public function xianxiaDelivery(){
         $rules = [
-            'delivery_no' => 'required',//发货单号必填
             'imei' => 'required',//IMEI必填
             'imei_id' => 'required',//必填
             'order_no' => 'required',//订单编号必填
@@ -761,7 +760,7 @@ class DeliveryController extends Controller
         ];
         $params = $this->_dealParams($rules);
 
-        if (count($params)<5) {
+        if (count($params)<7) {
             return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
         LogApi::info('delivery_send_info_channelSend',$params);
@@ -776,6 +775,14 @@ class DeliveryController extends Controller
 
         try {
             DB::beginTransaction();
+            //向下兼容 delivery_no
+            $delivery_obj = \App\Warehouse\Models\Delivery::where(['order_no'=>$params['order_no'],'status'=>\App\Warehouse\Models\Delivery::STATUS_INIT,'order_type'=>'2'])->select('delivery_no')->orderByDesc('delivery_no')->first();
+            if(!$delivery_obj){
+                DB::rollBack();
+                return apiResponse([], ApiStatus::CODE_40006, '待发货订单未找到:'.$params['order_no']);
+            }
+            $delivery_row = $delivery_obj->toArray();
+            $params['delivery_no'] = $delivery_row['delivery_no'];
             //修改发货信息
             DeliveryService::xianxiaSend($params);
             //通知订单接口
