@@ -30,6 +30,8 @@ $api->version('v1', [
 
         $method = request()->input('method');
         if (isset($apiMap[$method])) {
+			\App\Lib\Common\LogApi::setSource( str_replace('.', '_', $method) );
+			\App\Lib\Common\LogApi::debug( $method.':params',request()->all());
             $api->post('/',  $apiMap[$method]);
         }
 

@@ -75,7 +75,7 @@ class ImeiRepository
      *
      * 列表
      */
-    public static function list($params,$logic_params, $limit, $page=null,$whereIn=null)
+    public static function list($params,$logic_params, $limit, $page=null)
     {
 
         $query = \App\Warehouse\Models\Imei::whereIn('status', [Imei::STATUS_OUT, Imei::STATUS_IN]);

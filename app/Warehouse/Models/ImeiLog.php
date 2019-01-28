@@ -94,7 +94,12 @@ class ImeiLog extends Warehouse
      */
     public static function in($imei,$order_no=0,$zuqi=0,$zuqi_type=0)
     {
-        $imei_row = Imei::where(['imei'=>$imei])->first()->toArray();
+        $imei_row = Imei::where(['imei'=>$imei])->first();
+        if($imei_row){
+            $imei_row=$imei_row->toArray();
+        }else{
+            return false;
+        }
         $data = [
             'imei'=>$imei,
             'type'=>self::STATUS_IN,
@@ -119,7 +124,12 @@ class ImeiLog extends Warehouse
      */
     public static function out($imei,$order_no=0,$zuqi=0,$zuqi_type=0)
     {
-        $imei_row = Imei::where(['imei'=>$imei])->first()->toArray();
+        $imei_row = Imei::where(['imei'=>$imei])->first();
+        if($imei_row){
+            $imei_row=$imei_row->toArray();
+        }else{
+            return false;
+        }
         $data = [
             'imei'=>$imei,
             'type'=>self::STATUS_OUT,
