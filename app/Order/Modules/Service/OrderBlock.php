@@ -50,7 +50,6 @@ class OrderBlock {
      * @return int  0：成功；1：订单错误；2：未实名；3：用户错误；4：支付问题；100：存证失败
      */
     public static function orderPushBlock( string $order_no, string $orderBlockNode ,$blockData=[]): int{
-
         // 订单编号
         $data = [];
 
@@ -212,8 +211,8 @@ class OrderBlock {
                 return 1;
             }
             $str = "/^[\S]*:\/\/(\S)+?(\/)/";
-            $front_files = preg_replace($str,"/".env("CDN_FILES"),$cardInfo['card']['front']);
-            $back_files = preg_replace($str,"/".env("CDN_FILES"),$cardInfo['card']['back']);
+            $front_files = preg_replace($str,env("CDN_FILES")."/",$cardInfo['card']['front']);
+            $back_files = preg_replace($str,env("CDN_FILES")."/",$cardInfo['card']['back']);
             $front_flow = file_get_contents($front_files,0);
             $back_flow = file_get_contents($back_files,0);
             $data['identity_card'] = [
@@ -247,15 +246,14 @@ class OrderBlock {
             if($orderBlockNode == OrderBlock::OrderWarehouseDetail && !empty($blockData['images'])) {
                 $imagesList = [];
                 foreach($blockData['images'] as $key=>$item){
-                    $item_files = preg_replace($str,env("CDN_FILES"),$item);
-                    $img_flow['images'] = $item;
-                    $img_flow['hash'] = file_get_contents($item_files,0);
-                    $imagesList[] = $img_flow;
+                    $item_files = preg_replace($str,env("CDN_FILES")."/",$item);
+                    $img['images'] = $item;
+                    $img_flow = file_get_contents($item_files,0);
+                    $img['hash'] = $img_flow?hash('sha256', $img_flow):$item_files;
+                    $img['create_time'] = date('Y-m-d H:i:s', time());
+                    $imagesList[] = $img;
                 }
-                $data['input_record'][] = [
-                    'images' => $imagesList,
-                    'create_time' => date('Y-m-d H:i:s', time()),
-                ];
+                $data['input_record'][] = $imagesList;
             }
             //逾期客服回访记录
             /*$OverdueVisit = OrderOverdueVisit::getOverdueVisitInfo($order_info['order_no']);
