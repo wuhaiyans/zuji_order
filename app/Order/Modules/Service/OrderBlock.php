@@ -209,7 +209,6 @@ class OrderBlock {
             $cardInfo = Risk::getIdentityCard($order_info['user_id']);
             //无身份证照无需上链
             if($cardInfo['flag']!="YES"){
-                var_dump($cardInfo);die;
                 return 1;
             }
             $str = "/^[\S]*:\/\/(\S)+?(\/)/";
@@ -248,7 +247,7 @@ class OrderBlock {
             if($orderBlockNode == OrderBlock::OrderWarehouseDetail && !empty($blockData['images'])) {
                 $imagesList = [];
                 foreach($blockData['images'] as $key=>$item){
-                    $item_files = preg_replace($str,"/".env("CDN_FILES"),$item);
+                    $item_files = preg_replace($str,env("CDN_FILES"),$item);
                     $img_flow['images'] = $item;
                     $img_flow['hash'] = file_get_contents($item_files,0);
                     $imagesList[] = $img_flow;
