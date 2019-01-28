@@ -2286,6 +2286,17 @@ class OrderOperate
                 //获取订单信息
                 $orderData = OrderRepository::getInfoById($orderNo);
                 if ($orderData) {
+
+                    //待支付数据
+                    if ($orderData['order_status']==Inc\OrderStatus::OrderWaitPaying || $orderData['order_status']==Inc\OrderStatus::OrderPaying)
+                    {
+                        $goodsList[$keys]['good_statu_info'] = array(
+                            'status_name' => Inc\OrderOperateInc::orderInc('unpay_status_name', 'good_status_info'),
+                            'status_info' => Inc\OrderOperateInc::orderInc('unpay_status_info', 'good_status_info'),
+                            'status_time' => date("Y-m-d H:i",$orderData['create_time']),
+                        );
+                    }
+
                     //已取消订单数据显示
                     if ($orderData['order_status']==Inc\OrderStatus::OrderCancel || $orderData['order_status']==Inc\OrderStatus::OrderClosedRefunded)
                     {
@@ -2453,6 +2464,9 @@ class OrderOperate
 
                    }
 
+                if ($values['goods_status'] == Inc\OrderGoodStatus::INIT) {
+                    $orderListArray['data'][$values['order_no']]['order_status_name'] = '待支付';
+                }
 
                 //创建服务层对象
                 $orderGivebackService = new OrderGiveback();
