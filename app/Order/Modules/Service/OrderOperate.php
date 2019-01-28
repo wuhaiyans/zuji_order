@@ -1799,6 +1799,11 @@ class OrderOperate
 
                 //订单状态名称
                 $orderListArray['data'][$keys]['order_status_name'] = Inc\OrderStatus::getStatusName($values['order_status']);
+                //
+                if ($values['order_status'] == Inc\OrderStatus::OrderWaitPaying || $values['order_status'] == Inc\OrderStatus::OrderPaying) {
+                    $orderListArray['data'][$keys]['order_status_name'] = '待支付';
+                }
+
                 //支付方式名称
                 $orderListArray['data'][$keys]['pay_type_name'] = Inc\PayInc::getPayName($values['pay_type']);
                 //应用来源
@@ -2464,9 +2469,7 @@ class OrderOperate
 
                    }
 
-                if ($values['goods_status'] == Inc\OrderGoodStatus::INIT) {
-                    $orderListArray['data'][$values['order_no']]['order_status_name'] = '待支付';
-                }
+
 
                 //创建服务层对象
                 $orderGivebackService = new OrderGiveback();
