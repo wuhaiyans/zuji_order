@@ -11,11 +11,6 @@ class Controller extends BaseController
     use Helpers;
 
     public function __construct() {
-		$params = request()->all();
-		if( isset($params['method']) ){
-			\App\Lib\Common\LogApi::setSource($params['method']);
-			\App\Lib\Common\LogApi::debug( $params['method'].':params',$params);
-		}
 	}
 
     /**
