@@ -209,6 +209,7 @@ class OrderBlock {
             $cardInfo = Risk::getIdentityCard($order_info['user_id']);
             //无身份证照无需上链
             if($cardInfo['flag']!="YES"){
+                var_dump($cardInfo);die;
                 return 1;
             }
             $str = "/^[\S]*:\/\/(\S)+?(\/)/";
@@ -219,8 +220,8 @@ class OrderBlock {
             $data['identity_card'] = [
                 'front'=>$cardInfo['card']['front'],
                 'back'=>$cardInfo['card']['back'],
-                'front_hash'=>$front_flow?hash('sha256', $front_flow):"false",
-                'back_hash'=>$back_flow?hash('sha256', $back_flow):"false",
+                'front_hash'=>$front_flow?hash('sha256', $front_flow):$front_files,
+                'back_hash'=>$back_flow?hash('sha256', $back_flow):$back_files,
             ];
             //初次从风控获取人脸信息，后续从历史数据里获取
             if($orderBlockNode == self::OrderUnPay){
