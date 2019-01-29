@@ -2,6 +2,7 @@
 namespace App\Order\Modules\Service;
 use App\Lib\Alipay\Notary\DataModel\NotaryPhase;
 use App\Lib\Alipay\Notary\DataModel\NotaryTransaction;
+use App\Lib\Common\JobQueueApi;
 use App\Lib\Risk\Risk;
 use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc\OrderStatus;
@@ -43,13 +44,24 @@ class OrderBlock {
     //检测入库记录
     const OrderWarehouseDetail = 'order_warehouse_detail';
 
+    //区块链推送队列
+    public static function orderPushBlock( string $order_no, string $orderBlockNode ,$blockData=[]): int{
+
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."-OrderBlock",config("ordersystem.ORDER_API")."/OrderPushBlock", [
+            'order_no'=>$order_no,
+            'order_block_node'=>$orderBlockNode,
+            'block_data'=>$blockData,
+        ],time()+30,"");
+        return 0;
+    }
+
     /**
      * 创建
      * @param type $order_no
      * @param string $orderBlockNode 区块节点
      * @return int  0：成功；1：订单错误；2：未实名；3：用户错误；4：支付问题；100：存证失败
      */
-    public static function orderPushBlock( string $order_no, string $orderBlockNode ,$blockData=[]): int{
+    public static function main(string $order_no, string $orderBlockNode ,$blockData=[]):int{
         // 订单编号
         $data = [];
 
@@ -314,31 +326,31 @@ class OrderBlock {
         //-+--------------------------------------------------------------------
 
         try{
-        // 开启存证事务
-        if( !$notaryApp->startTransactionByBusiness($order_no, '') ){
-            // 用户实名身份信息
-            $customer = new \App\Lib\Alipay\Notary\CustomerIdentity();
-            $customer->setCertNo($data['order_info']['cret_no']);
-            $customer->setCertName($data['order_info']['realname']);
-            $customer->setMobileNo($data['order_info']['mobile']);
-            // 注册事务
-            if( !$notaryApp->registerTransaction($order_no, '', $customer) ){
-                return 100;
+            // 开启存证事务
+            if( !$notaryApp->startTransactionByBusiness($order_no, '') ){
+                // 用户实名身份信息
+                $customer = new \App\Lib\Alipay\Notary\CustomerIdentity();
+                $customer->setCertNo($data['order_info']['cret_no']);
+                $customer->setCertName($data['order_info']['realname']);
+                $customer->setMobileNo($data['order_info']['mobile']);
+                // 注册事务
+                if( !$notaryApp->registerTransaction($order_no, '', $customer) ){
+                    return 100;
+                }
             }
-        }
 
             // 创建 文本存证
             $notary = $notaryApp->createTextNotary( $notary_content, $orderBlockNode );
 //			var_dump( $notary );
 //			// 上传 文本存证
-			$b = $notaryApp->uploadNotary( $notary );
+            $b = $notaryApp->uploadNotary( $notary );
 //			var_dump( '文本存证：'.$notary->getTxHash(), $b );
             if( isset($data['contract_info']['hash']) ){
                 // 创建 电子合同文本存证
                 $notary = $notaryApp->createTextNotary( $data['contract_info']['hash'], 'electronic-contract' );
 //				var_dump( $notary );
 //				// 上传 文本存证
-				$b = $notaryApp->uploadNotary( $notary );
+                $b = $notaryApp->uploadNotary( $notary );
 //				var_dump( '电子合同文本存证：'.$notary->getTxHash(), $b );
             }
 
@@ -349,7 +361,6 @@ class OrderBlock {
 
         return 0;
     }
-
 
     /**
      * 支付信息

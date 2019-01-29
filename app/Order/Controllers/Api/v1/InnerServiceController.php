@@ -10,6 +10,7 @@ namespace App\Order\Controllers\Api\v1;
 use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\PublicInc;
+use App\Order\Modules\Service\OrderBlock;
 use App\Order\Modules\Service\OrderBuyout;
 use App\Order\Modules\Service\OrderOperate;
 use Illuminate\Http\Request;
@@ -338,6 +339,27 @@ class InnerServiceController extends Controller
 
         if(!$ret){
             return $this->innerErrMsg("取消买断单失败");
+        }
+        return $this->innerOkMsg();
+    }
+    /*
+     * 区块链推送
+     * @param array $params 【必选】
+     * [
+     *      "user_id"=>"", 用户id
+     *      "buyout_no"=>"",买断业务号
+     * ]
+     * @return json
+     */
+    public function orderPushBlock(){
+        $input = file_get_contents("php://input");
+        $params = json_decode($input,true);
+
+        $ret = OrderBlock::orderPushBlock($params['order_no'],$params['order_block_node'],$params['block_data']);
+
+        if($ret!=0){
+            $params['code'] = $ret;
+            LogApi::info(__METHOD__.'() '.microtime(true).'OrderBlock区块链推送失败:'.json_encode($params));
         }
         return $this->innerOkMsg();
     }
