@@ -354,6 +354,7 @@ class GivebackController extends Controller
 		// | 获取参数并验证
 		//-+--------------------------------------------------------------------
 		$params = $request->input();
+		LogApi::info("[givebackConfirmDelivery]还机收货信息",['params'=>$params]);
 		$operateUserInfo = isset($params['userinfo'])? $params['userinfo'] :[];
 		if( empty($operateUserInfo['uid']) || empty($operateUserInfo['username']) || empty($operateUserInfo['type']) ) {
 			return apiResponse([],ApiStatus::CODE_20001,'用户信息有误');
@@ -466,6 +467,11 @@ class GivebackController extends Controller
 
 
 		} catch (\Exception $ex) {
+			LogApi::error("[givebackConfirmDelivery]还机收货更新还机单错误",[
+				'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
+				'tip'=>'还机单收货异常',//错误信息提示
+				'data'=>['$ex'=>$ex],//错误数据提示
+			]);
 			\App\Lib\Common\LogApi::alert('giveback-create:exception-error', [
 					'pos'=>implode('|', [__FILE__,__METHOD__,__LINE__]),//位置
 					'tip'=>'还机单收货异常',//错误信息提示
