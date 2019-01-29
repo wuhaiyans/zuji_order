@@ -334,6 +334,7 @@ class Receive
             ];
         }
 
+        LogApi::info('order_receive_info_send',['result'=>$result,'userinfo'=>$userinfo,'refund_no'=>$refund_no]);
         if($receive->business_key == OrderStatus::BUSINESS_GIVEBACK){
             Giveback::confirmDelivery($result,$userinfo);
         }elseif ($receive->business_key == OrderStatus::BUSINESS_RETURN || $receive->business_key == OrderStatus::BUSINESS_BARTER){
