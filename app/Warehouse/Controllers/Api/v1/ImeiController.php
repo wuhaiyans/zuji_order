@@ -7,6 +7,7 @@
 
 namespace App\Warehouse\Controllers\Api\v1;
 
+use App\Lib\Common\LogApi;
 use App\Warehouse\Models\Imei;
 use App\Warehouse\Modules\Func\Excel;
 use App\Warehouse\Modules\Repository\ImeiRepository;
@@ -257,7 +258,7 @@ class ImeiController extends Controller
             }
 
             if (!$result)
-                return \apiResponse([], ApiStatus::CODE_20001, '没有需要导入的数据,可能是数据已经导入过');
+                return \apiResponse([], ApiStatus::CODE_42001, '没有需要导入的数据,可能是数据已经导入过');
 
             $this->imei->import($result);
             DB::commit();
@@ -265,10 +266,45 @@ class ImeiController extends Controller
             Log::error('imei数据导入出错');
             DB::rollBack();
 
-            return \apiResponse([], ApiStatus::CODE_60002, $e->getMessage());
+            return \apiResponse([], ApiStatus::CODE_42001, $e->getMessage());
         }
 
         return \apiResponse();
+    }
+
+    /**
+     * 线下门店添加IMEI
+     */
+    public function xianxiaAddImei()
+    {
+        $rules = [
+            'imei' => 'required',//IMEI必填
+            'name' => 'required',//名称
+            'apple_serial' => 'required',//设备序列号选填
+            'price' => 'required',//采购价选填
+        ];
+        $params = $this->_dealParams($rules);
+
+        if (count($params) < 4) {
+            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+        }
+        LogApi::info('Imei_xianxiaAddImei_params', $params);
+
+        //插入IMEI
+        $imei_id = Imei::insertGetId([
+            'imei'=>$params['imei'],
+            'name'=>$params['name'],
+            'apple_serial'=>isset($params['apple_serial'])??'0',
+            'price'=>isset($params['price'])??0,
+            'status'=>'2',
+            'create_time'=>time(),
+            'update_time'=>time()
+        ]);
+
+        if (!$imei_id) {
+            return \apiResponse([], ApiStatus::CODE_42003, '线下门店插入IMEI失败');
+        }
+        return apiResponse(['imei_id'=>$imei_id]);
     }
 
     /**
