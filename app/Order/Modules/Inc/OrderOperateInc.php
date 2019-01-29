@@ -40,7 +40,7 @@ class OrderOperateInc
                 'complete_status_name'           =>  '已完结',
                 'complete_status_info'           =>  '当前订单已经完结',
                 'unpay_status_name'              =>  '待支付',
-                'unpay_status_info'              =>  '待用户支付押金以及租金，支持完成后方可发货',
+                'unpay_status_info'              =>  '待用户支付押金以及租金，支付完成后方可发货',
 
             ),
             //客户端订单列表的可用操作

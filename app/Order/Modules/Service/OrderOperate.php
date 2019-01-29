@@ -2308,7 +2308,7 @@ class OrderOperate
                         $goodsList[$keys]['good_statu_info'] = array(
                             'status_name' => Inc\OrderOperateInc::orderInc('cancel_status_name', 'good_status_info'),
                             'status_info' => Inc\OrderOperateInc::orderInc('cancel_status_info', 'good_status_info'),
-                            'status_time' => date("Y-m-d H:i",$orderData['complete_time']),
+                            'status_time' => date("Y-m-d H:i",$orderData['update_time']),
                         );
                     }
                     //备货中数据显示
