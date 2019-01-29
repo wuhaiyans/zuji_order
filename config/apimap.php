@@ -3,26 +3,6 @@
 //路由映射
 return [
     
-    'api.tool.coupon.detail'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@detail',
-    'api.tool.coupon.create'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@create',
-    'api.tool.coupon.publish'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@publish',
-    'api.tool.coupon.unPublish'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@unPublish',
-    'api.tool.coupon.remove'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@remove',
-    'api.tool.coupon.greyTest'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@greyTest',
-    'api.tool.coupon.list'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@list',
-    'api.tool.coupon.getCode'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@getCode',
-    'api.tool.coupon.importUser'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@importUser',
-    
-    'api.tool.coupon.couponUserList'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserList',
-    'api.tool.coupon.spuCouponList'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@spuCouponList',
-    'api.tool.coupon.couponListWhenOrder'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponListWhenOrder',
-    'api.tool.coupon.couponListWhenPay'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponListWhenPay',
-    'api.tool.coupon.couponUserExchange'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserExchange',
-    'api.tool.coupon.couponUserReceive'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserReceive',
-    'api.tool.coupon.couponUserWriteOff'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserWriteOff',
-    'api.tool.coupon.couponUserCancel'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserCancel',
-    'api.tool.coupon.couponUserDetail'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserDetail',
-    
     //订单相关
     'api.order.buyout' => 'TestController@test',
     //线上下单接口
