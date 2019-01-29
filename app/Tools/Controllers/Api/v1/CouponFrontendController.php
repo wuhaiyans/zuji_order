@@ -22,8 +22,9 @@ use App\Tools\Modules\Func\Func;
     class CouponFrontendController extends Controller
     {
         protected $couponModelStatus = CouponStatus::CouponTypeStatusIssue;
-        public function __construct(GreyTestGetByMobile $GreyTestGetByMobile)
+        public function __construct(Request $request , GreyTestGetByMobile $GreyTestGetByMobile)
         {
+            print_r($request = $request->all());exit;
             parent::__construct();
             //获取用户是否是灰度测试用户
             if($this->userInfo['mobile']){
