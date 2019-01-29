@@ -28,7 +28,7 @@ class GreyTestGetByModelNo
     
     public function execute(string $modelNo)
     {
-        $greyTest = $this->GreyTestRepository->getOne(['modelNo'=>$modelNo,'status'=>1]);
+        $greyTest = $this->GreyTestRepository->getOne(['model_no'=>$modelNo,'status'=>1]);
         set_apistatus(ApiStatus::CODE_0, '');
         if(!$greyTest->toArray()){
             set_apistatus(ApiStatus::CODE_50000, '无此数据');
