@@ -21,8 +21,8 @@ class Tool extends \App\Lib\BaseApi{
         
     }
     
-    public static function getChannel($where,$field="name"){
-        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.tool.getChannel', '1.0', ['where'=>$where,'field'=>$field]);
+    public static function getChannel($where){
+        return self::request(\config('app.APPID'), \config('goodssystem.GOODS_API'),'zuji.tool.getChannel', '1.0', ['where'=>$where]);
         
     }
     

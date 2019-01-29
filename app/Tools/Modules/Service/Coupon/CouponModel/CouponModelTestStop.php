@@ -50,15 +50,18 @@ class CouponModelTestStop
             //停止灰度测试信息
             $ret = $this->GreyTestStop->execute($modelNo);
             if(!$ret){
+                DB::rollBack();
                 set_apistatus(ApiStatus::CODE_50000, '优惠券停止灰度发布失败');
                 return [];
             }
             set_apistatus(ApiStatus::CODE_0, '');
             //保存优惠券模型状态
             if(!$couponModel->save()){
+                DB::rollBack();
                 set_apistatus(ApiStatus::CODE_50000, '优惠券保存失败');
                 return [];
             }
+            DB::commit();
             return [];
         }
         set_apistatus(ApiStatus::CODE_50000, '优惠券状态错误');
