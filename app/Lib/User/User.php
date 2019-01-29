@@ -216,7 +216,6 @@ class User extends \App\Lib\BaseApi{
         $header = ['Content-Type: application/json'];
         $list=['url'=>config('tripartite.Interior_Goods_Url'),"data"=>$data];
         LogApi::info("checkToken获取用户信息".$data['method'],$list);
-        print_r($data);exit;
         $info = Curl::post(config('tripartite.Interior_Goods_Url'), json_encode($data),$header);//通过token获取用户信息
         LogApi::info("checkToken返回结果".$info);
         $info = str_replace("\r\n","",$info);

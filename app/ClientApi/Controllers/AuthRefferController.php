@@ -74,7 +74,6 @@ class AuthRefferController extends Controller{
                 return response()->json($info);
             }elseif(isset($params['auth_token']) && !in_array($params['method'], config('clientAuth.exceptAuth'))) {
                 $token     = $params['auth_token'];
-                print_r($params);
                 $checkInfo = User::checkToken($token);//获取用户信息
                  LogApi::debug("【header】验证token调用第三方User::checkToken的值".$params['auth_token']);
                 LogApi::debug("【header】验证token调用第三方User::checkToken返回的结果".$params['method'],$checkInfo);
