@@ -12,20 +12,21 @@ use App\Tools\Modules\Service\Coupon\CouponUser\{
 use App\Tools\Modules\Inc\CouponStatus;
 use App\Tools\Modules\Service\GreyTest\GreyTestGetByMobile;
 use App\Tools\Modules\Func\Func;
-                                                                    
+use App\Lib\Tool\Tool;
+                                                                                    
     /**
      * 优惠券后台控制器
      * 各action方法中注入相关服务service
      * 后期优化路线:注册服务容器，绑定interface，功能替换时可直接切换实现接口的新service
      * @author gaobo
      */
-    class CouponFrontendController extends Controller
+    class CouponFrontendController
     {
         protected $couponModelStatus = CouponStatus::CouponTypeStatusIssue;
-        public function __construct(Request $request , GreyTestGetByMobile $GreyTestGetByMobile)
+        public function __construct(GreyTestGetByMobile $GreyTestGetByMobile)
         {
-            print_r($request = $request->all());exit;
-            parent::__construct();
+            $channel = Tool::getChannel(['status'=>1]);
+            print_r($channel);exit;
             //获取用户是否是灰度测试用户
             if($this->userInfo['mobile']){
                 $testMobile = $GreyTestGetByMobile->execute($this->userInfo['mobile']);

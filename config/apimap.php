@@ -2,26 +2,57 @@
 
 //路由映射
 return [
-    //营销工具相关接口 
-    'api.tool.coupon.detail'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@detail',
-    'api.tool.coupon.create'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@create',
-    'api.tool.coupon.publish'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@publish',
-    'api.tool.coupon.unPublish'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@unPublish',
-    'api.tool.coupon.remove'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@remove',
-    'api.tool.coupon.greyTest'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@greyTest',
-    'api.tool.coupon.list'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@list',
-    'api.tool.coupon.getCode'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@getCode',
-    'api.tool.coupon.importUser'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@importUser',
     
+    //****************************************营销工具相关接口 **********************************************//
+    //zuji.couponnew.unclaimed 暂无
+    /**
+     * 优惠券后台接口
+     */
+    //新
+    'api.tool.coupon.detail'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@detail',
+    //zuji.couponadmin.addtype 生成卡券类型
+    'api.tool.coupon.create'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@create',
+    //zuji.couponadmin.issuestart 卡卷发发布
+    'api.tool.coupon.publish'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@publish',
+    //zuji.couponadmin.reissue 补发 FIXME
+    //zuji.couponadmin.issuestop 卡卷停止发布
+    'api.tool.coupon.unPublish'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@unPublish',
+    //zuji.couponadmin.delcoupon 优惠券删除
+    'api.tool.coupon.remove'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@remove',
+    //zuji.couponadmin.testcoupon 灰度发布
+    'api.tool.coupon.greyTest'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@greyTest',
+    //zuji.couponadmin.stoptestcoupon 取消灰度发布 FIXME
+    //zuji.couponadmin.typelist 卡券类型列表
+    'api.tool.coupon.list'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@list',
+    //zuji.couponadmin.codelist 获取优惠券兑换码
+    'api.tool.coupon.getCode'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@getCode',
+    //导入用户
+    'api.tool.coupon.importUser'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@importUser',
+    //zuji.couponadmin.typelistpublic 卡券类型公共参数 FIXME
+    
+    /**
+     * 优惠券客户端
+     */
+    //zuji.couponnew.received 获取用户已领取优惠券列表
     'api.tool.coupon.couponUserList'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserList',
+    //zuji.couponnew.spulist 获取SPU商品详情优惠券列表
     'api.tool.coupon.spuCouponList'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@spuCouponList',
+    //zuji.couponnew.checked 优惠券商品可用列表查询接口 gaobo
     'api.tool.coupon.couponListWhenOrder'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponListWhenOrder',
+    //zuji.coupon.voucher.get根据用户ID获取优惠券信息(租金抵用券)
     'api.tool.coupon.couponListWhenPay'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponListWhenPay',
+    //zuji.couponnew.useCode 用户使用兑换码
     'api.tool.coupon.couponUserExchange'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserExchange',
+    //zuji.couponnew.receive 领取优惠券 用户主动领取优惠券
     'api.tool.coupon.couponUserReceive'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserReceive',
+    //zuji.goods.coupon.status1.set 根据优惠券id设置该优惠券已使用
     'api.tool.coupon.couponUserWriteOff'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserWriteOff',
+    //zuji.goods.coupon.status0.set 根据优惠券id恢复优惠券使用状态
     'api.tool.coupon.couponUserCancel'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserCancel',
+    //zuji.couponnew.detail 优惠券详情
     'api.tool.coupon.couponUserDetail'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserDetail',
+    
+    
     
     //订单相关
     'api.order.buyout' => 'TestController@test',
