@@ -626,10 +626,10 @@ class ReceiveController extends Controller
             $params['receive_no'] = $receive_row['receive_no'];
             //记录日志
             LogApi::info('xianxiaReceived_info_Receive',$params);
-            //修改状态
-            $this->receive->received($params['receive_no']);
             //通知订单
             Receive::receive($params['receive_no'],$userinfo);
+            //修改状态
+            $this->receive->received($params['receive_no']);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

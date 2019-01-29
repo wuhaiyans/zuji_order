@@ -296,7 +296,7 @@ class ImeiController extends Controller
             'name'=>$params['name'],
             'apple_serial'=>isset($params['apple_serial'])??'0',
             'price'=>isset($params['price'])??0,
-            'status'=>'2',
+            'status'=>'1',
             'create_time'=>time(),
             'update_time'=>time()
         ]);

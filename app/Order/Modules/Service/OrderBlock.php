@@ -75,6 +75,11 @@ class OrderBlock {
         // 订单基本信息
         $order_info = $result['order_info'];
 
+        //非区块链渠道场景无需推送
+        if(in_array($orderBlockNode,[self::OrderVisit,self::OrderOverdue,self::OrderInstalmentSendMessage,self::OrderWarehouseDetail]) && $order_info['appid']!=208){
+            return 0;
+        }
+
         // 没有实名数据时无法存证
         if( !$order_info['realname'] || !$order_info['cret_no'] ){
             return 2;
@@ -238,7 +243,7 @@ class OrderBlock {
                 $data['face_record'] = $cardInfo['zhima'];
             }
             else{
-                $data['face_record'] = $phase['face_record'];
+                $data['face_record'] = isset($phase['face_record'])?$phase['face_record']:[];
             }
 
             //客服回访
@@ -255,7 +260,7 @@ class OrderBlock {
 
             //入库记录-检测图片
             $data['input_record'] = isset($phase['input_record'])?$phase['input_record']:[];
-            if($orderBlockNode == OrderBlock::OrderWarehouseDetail && !empty($blockData['images'])) {
+            if($orderBlockNode == OrderBlock::OrderWarehouseDetail && isset($blockData['images'])) {
                 $imagesList = [];
                 foreach($blockData['images'] as $key=>$item){
                     $item_files = preg_replace($str,env("CDN_FILES")."/",$item);

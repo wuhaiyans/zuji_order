@@ -2,6 +2,8 @@
 namespace App\Lib;
 
 use \App\Lib\AlipaySdk\sdk\aop\AopClient;
+use App\Lib\Common\LogApi;
+
 /**
  * 接口基类
  * 定义了 系统之间交互接口基本方式
@@ -47,15 +49,10 @@ class BaseApi {
 		//-+--------------------------------------------------------------------
 		// | 返回值处理
 		//-+--------------------------------------------------------------------
+        LogApi::info('app_Lib_BaseApi_request',$response->toArray());
 		if( $response->isSuccessed() ){ // 判断执行是否成功，成功时返回业务返回值
 			return $response->getData();
 		}
-		//
-		Common\LogApi::type('api-error')::error('接口请求失败',[
-			'url' => $url,
-			'request' => $request->toArray(),
-			'response' => $response->getOriginalValue(),
-		]);
 		//-+--------------------------------------------------------------------
 		// | 失败处理
 		//-+--------------------------------------------------------------------
