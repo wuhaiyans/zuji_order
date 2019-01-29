@@ -158,11 +158,11 @@ return [
         
         'tool' => [
             'driver' => 'mysql',
-            'host' => env('DB_TOOL_HOST', '127.0.0.1'),
+            'host' => env('DB_TOOL_HOST', '47.106.114.108'),
             'port' => env('DB_TOOL_PORT', '3306'),
             'database' => env('DB_TOOL_DATABASE', 'zuji_tool'),
             'username' => env('DB_TOOL_USERNAME', 'root'),
-            'password' => env('DB_TOOL_PASSWORD', 'd^GHL,Oc@De3jW'),
+            'password' => env('DB_TOOL_PASSWORD', 'nqyMysqlDB745'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8',
             'collation' => 'utf8_unicode_ci',
