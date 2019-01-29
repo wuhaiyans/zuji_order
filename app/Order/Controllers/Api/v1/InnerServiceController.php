@@ -355,7 +355,7 @@ class InnerServiceController extends Controller
         $input = file_get_contents("php://input");
         $params = json_decode($input,true);
 
-        $ret = OrderBlock::orderPushBlock($params['order_no'],$params['order_block_node'],$params['block_data']);
+        $ret = OrderBlock::main($params['order_no'],$params['order_block_node'],$params['block_data']);
 
         if($ret!=0){
             $params['code'] = $ret;

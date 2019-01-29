@@ -10,6 +10,7 @@ use App\Tools\Modules\Service\Coupon\CouponModel\{
     , CouponModelTestStop , CouponModelList , CouponModelRemove
     , CouponModelPublish , CouponModelUnPublish };
 use App\Tools\Modules\Service\Coupon\CouponUser\{CouponUserGetCode , CouponUserImport};
+use App\Lib\Tool\Tool;
 
 /**
  * 优惠券后台控制器
@@ -19,7 +20,8 @@ use App\Tools\Modules\Service\Coupon\CouponUser\{CouponUserGetCode , CouponUserI
  */
 class CouponBackendController
 {
-    public function __construct(){}
+    public function __construct(){
+    }
 
     /**
      * 创建优惠券模板
@@ -121,7 +123,7 @@ class CouponBackendController
      * @param Request $request
      * @param CouponModelTestStop $CouponModelTestStop
      * @return \Illuminate\Http\JsonResponse
-     * @localtest OK
+     * @localtest ?
      * @devtest ?
      */
     public function cancelGreyTest(Request $request , CouponModelTestStop $CouponModelTestStop)
