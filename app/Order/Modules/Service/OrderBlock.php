@@ -2,13 +2,10 @@
 namespace App\Order\Modules\Service;
 use App\Lib\Alipay\Notary\DataModel\NotaryPhase;
 use App\Lib\Alipay\Notary\DataModel\NotaryTransaction;
+use App\Lib\Common\JobQueueApi;
 use App\Lib\Risk\Risk;
-use App\Lib\Warehouse\Check;
-use App\Order\Models\OrderSmsLog;
 use App\Order\Models\OrderVisit;
 use App\Order\Modules\Inc\OrderStatus;
-use App\Order\Modules\Repository\ShortMessage\Config;
-use App\Order\Modules\Repository\ShortMessage\SceneConfig;
 
 /**
  * 支付宝区块链推送服务
@@ -47,14 +44,24 @@ class OrderBlock {
     //检测入库记录
     const OrderWarehouseDetail = 'order_warehouse_detail';
 
+    //区块链推送队列
+    public static function orderPushBlock( string $order_no, string $orderBlockNode ,$blockData=[]): int{
+
+        $b =JobQueueApi::addScheduleOnce(config('app.env')."-OrderBlock",config("ordersystem.ORDER_API")."/OrderPushBlock", [
+            'order_no'=>$order_no,
+            'order_block_node'=>$orderBlockNode,
+            'block_data'=>$blockData,
+        ],time()+30,"");
+        return 0;
+    }
+
     /**
      * 创建
      * @param type $order_no
      * @param string $orderBlockNode 区块节点
      * @return int  0：成功；1：订单错误；2：未实名；3：用户错误；4：支付问题；100：存证失败
      */
-    public static function orderPushBlock( string $order_no, string $orderBlockNode ,$blockData=[]): int{
-
+    public static function main(string $order_no, string $orderBlockNode ,$blockData=[]):int{
         // 订单编号
         $data = [];
 
@@ -190,7 +197,7 @@ class OrderBlock {
         $notaryApp = new \App\Lib\Alipay\Notary\NotaryApp($accountId);
 
         //区块链渠道扩展
-        if($order_info['appid'] == 144){
+        if($order_info['appid'] == 208){
 
             //获取历史区块链推送数据
             $transactionModel = new NotaryTransaction();
@@ -215,9 +222,16 @@ class OrderBlock {
             if($cardInfo['flag']!="YES"){
                 return 1;
             }
+            $str = "/^[\S]*:\/\/(\S)+?(\/)/";
+            $front_files = preg_replace($str,env("CDN_FILES")."/",$cardInfo['card']['front']);
+            $back_files = preg_replace($str,env("CDN_FILES")."/",$cardInfo['card']['back']);
+            $front_flow = file_get_contents($front_files,0);
+            $back_flow = file_get_contents($back_files,0);
             $data['identity_card'] = [
                 'front'=>$cardInfo['card']['front'],
                 'back'=>$cardInfo['card']['back'],
+                'front_hash'=>$front_flow?hash('sha256', $front_flow):$front_files,
+                'back_hash'=>$back_flow?hash('sha256', $back_flow):$back_files,
             ];
             //初次从风控获取人脸信息，后续从历史数据里获取
             if($orderBlockNode == self::OrderUnPay){
@@ -242,13 +256,19 @@ class OrderBlock {
             //入库记录-检测图片
             $data['input_record'] = isset($phase['input_record'])?$phase['input_record']:[];
             if($orderBlockNode == OrderBlock::OrderWarehouseDetail && !empty($blockData['images'])) {
-                $data['input_record'][] = [
-                    'images' => $blockData['images'],
-                    'create_time' => date('Y-m-d H:i:s', time()),
-                ];
+                $imagesList = [];
+                foreach($blockData['images'] as $key=>$item){
+                    $item_files = preg_replace($str,env("CDN_FILES")."/",$item);
+                    $img['images'] = $item;
+                    $img_flow = file_get_contents($item_files,0);
+                    $img['hash'] = $img_flow?hash('sha256', $img_flow):$item_files;
+                    $img['create_time'] = date('Y-m-d H:i:s', time());
+                    $imagesList[] = $img;
+                }
+                $data['input_record'][] = $imagesList;
             }
             //逾期客服回访记录
-            $OverdueVisit = OrderOverdueVisit::getOverdueVisitInfo($order_info['order_no']);
+            /*$OverdueVisit = OrderOverdueVisit::getOverdueVisitInfo($order_info['order_no']);
             $data['overdue_customer_service_record'] = "";
             if($OverdueVisit){
                 $record = [];
@@ -260,7 +280,7 @@ class OrderBlock {
                     ];
                 }
                 $data['overdue_customer_service_record'] = $record;
-            }
+            }*/
 
             //逾期短信通知记录
             $data['collection_message'] = isset($phase['collection_message'])?$phase['collection_message']:[];
@@ -306,31 +326,31 @@ class OrderBlock {
         //-+--------------------------------------------------------------------
 
         try{
-        // 开启存证事务
-        if( !$notaryApp->startTransactionByBusiness($order_no, '') ){
-            // 用户实名身份信息
-            $customer = new \App\Lib\Alipay\Notary\CustomerIdentity();
-            $customer->setCertNo($data['order_info']['cret_no']);
-            $customer->setCertName($data['order_info']['realname']);
-            $customer->setMobileNo($data['order_info']['mobile']);
-            // 注册事务
-            if( !$notaryApp->registerTransaction($order_no, '', $customer) ){
-                return 100;
+            // 开启存证事务
+            if( !$notaryApp->startTransactionByBusiness($order_no, '') ){
+                // 用户实名身份信息
+                $customer = new \App\Lib\Alipay\Notary\CustomerIdentity();
+                $customer->setCertNo($data['order_info']['cret_no']);
+                $customer->setCertName($data['order_info']['realname']);
+                $customer->setMobileNo($data['order_info']['mobile']);
+                // 注册事务
+                if( !$notaryApp->registerTransaction($order_no, '', $customer) ){
+                    return 100;
+                }
             }
-        }
 
             // 创建 文本存证
             $notary = $notaryApp->createTextNotary( $notary_content, $orderBlockNode );
 //			var_dump( $notary );
 //			// 上传 文本存证
-			$b = $notaryApp->uploadNotary( $notary );
+            $b = $notaryApp->uploadNotary( $notary );
 //			var_dump( '文本存证：'.$notary->getTxHash(), $b );
             if( isset($data['contract_info']['hash']) ){
                 // 创建 电子合同文本存证
                 $notary = $notaryApp->createTextNotary( $data['contract_info']['hash'], 'electronic-contract' );
 //				var_dump( $notary );
 //				// 上传 文本存证
-				$b = $notaryApp->uploadNotary( $notary );
+                $b = $notaryApp->uploadNotary( $notary );
 //				var_dump( '电子合同文本存证：'.$notary->getTxHash(), $b );
             }
 
@@ -341,7 +361,6 @@ class OrderBlock {
 
         return 0;
     }
-
 
     /**
      * 支付信息
