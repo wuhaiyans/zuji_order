@@ -298,10 +298,10 @@ class OrderReturnRepository
             $page = 1;
         }
         //第三方渠道类型
-      /*  if (isset($param['channel_id']) && !empty($param['channel_id'])) {
+        if (isset($param['channel_id']) && !empty($param['channel_id'])) {
 
             $whereInArray = $param['channel_id'];
-        }*/
+        }
 
         $whereArray[] = ['order_goods.end_time', '>', 0];
         $whereArray[] = ['order_goods.end_time','<=',time()];
@@ -323,13 +323,13 @@ class OrderReturnRepository
             ->join('order_delivery',function($join){
                 $join->on('order_info.order_no', '=', 'order_delivery.order_no');
             }, null,null,'left')
-          /*  ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+            ->when(!empty($whereInArray),function($join) use ($whereInArray) {
                 return $join->whereIn('order_info.channel_id', $whereInArray);
             })
             ->when(!empty($whereArray),function($join) use ($whereArray) {
                 return $join->where($whereArray);
-            })*/
-            ->where($whereArray)
+            })
+           // ->where($whereArray)
             ->first();
 
 
@@ -352,13 +352,13 @@ class OrderReturnRepository
                 ->join('order_delivery',function($join){
                     $join->on('order_info.order_no', '=', 'order_delivery.order_no');
                 }, null,null,'left')
-             /*   ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                ->when(!empty($whereInArray),function($join) use ($whereInArray) {
                     return $join->whereIn('order_info.channel_id', $whereInArray);
                 })
                 ->when(!empty($whereArray),function($join) use ($whereArray) {
                     return $join->where($whereArray);
-                })*/
-                ->where($whereArray)
+                })
+               // ->where($whereArray)
                 ->orderBy('order_goods.end_time', 'ASC')
                 ->skip(($page - 1) * $pagesize)->take($pagesize)
                 ->get();
