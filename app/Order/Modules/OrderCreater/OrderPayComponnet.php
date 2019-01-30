@@ -168,36 +168,6 @@ class OrderPayComponnet implements OrderCreater
         if( !$b ){
             return false;
         }
-
-        //判断是否需要支付 如果需要支付则更新订单状态
-        if(!$this->isPay){
-            $data['order_status']=OrderStatus::OrderPayed;
-            $data['pay_time']= time();
-            $b =Order::where('order_no', '=', $this->orderNo)->update($data);
-            if(!$b){
-                LogApi::alert("OrderCreate:更新订单已支付状态失败",$data,[config('web.order_warning_user')]);
-                LogApi::error(config('app.env')."OrderCreate-Update-OrderStatus-error",$data);
-                $this->getOrderCreater()->setError("OrderCreate-Update-OrderStatus-error");
-                return false;
-            }
-            //不需要支付则不生成支付单，退出
-            //已支付的 调用风控看板
-            //发送订单消息队列
-            $appid = $this->getOrderCreater()->getAppid();
-            $orderType =$this->getOrderCreater()->getOrderType();
-            $schedule = new OrderScheduleOnce(['user_id'=>$this->userId,'order_no'=>$this->orderNo]);
-            if($appid ==139 || $appid == 208 || $orderType == OrderStatus::orderMiniService){
-                $schedule->OrderRisk();
-            }
-
-            //如果是线下门店 或者领取订单 直接生成 发货单
-            if($orderType == OrderStatus::orderStoreService || $orderType == OrderStatus::orderActivityService){
-                //发送申请发货队列
-                $schedule->DeliveryApply();
-            }
-            return true;
-        }
-
         $orderInsurance =$this->getOrderCreater()->getSkuComponnet()->getOrderInsurance();
         $zuqiType = $this->getOrderCreater()->getSkuComponnet()->getZuqiType();
         if($zuqiType ==1){
@@ -283,6 +253,35 @@ class OrderPayComponnet implements OrderCreater
             LogApi::error("OrderCreate-Add-OrderPay-error:".$e->getMessage());
             $this->getOrderCreater()->setError($e->getMessage());
             return false;
+        }
+
+        //判断是否需要支付 如果需要支付则更新订单状态
+        if(!$this->isPay){
+            $data['order_status']=OrderStatus::OrderPayed;
+            $data['pay_time']= time();
+            $b =Order::where('order_no', '=', $this->orderNo)->update($data);
+            if(!$b){
+                LogApi::alert("OrderCreate:更新订单已支付状态失败",$data,[config('web.order_warning_user')]);
+                LogApi::error(config('app.env')."OrderCreate-Update-OrderStatus-error",$data);
+                $this->getOrderCreater()->setError("OrderCreate-Update-OrderStatus-error");
+                return false;
+            }
+            //不需要支付则不生成支付单，退出
+            //已支付的 调用风控看板
+            //发送订单消息队列
+            $appid = $this->getOrderCreater()->getAppid();
+            $orderType =$this->getOrderCreater()->getOrderType();
+            $schedule = new OrderScheduleOnce(['user_id'=>$this->userId,'order_no'=>$this->orderNo]);
+            if($appid ==139 || $appid == 208 || $orderType == OrderStatus::orderMiniService){
+                $schedule->OrderRisk();
+            }
+
+            //如果是线下门店 或者领取订单 直接生成 发货单
+            if($orderType == OrderStatus::orderStoreService || $orderType == OrderStatus::orderActivityService){
+                //发送申请发货队列
+                $schedule->DeliveryApply();
+            }
+            return true;
         }
 
         return true;
