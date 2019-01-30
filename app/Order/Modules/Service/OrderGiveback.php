@@ -195,6 +195,11 @@ class OrderGiveback
 	 */
 	public function getList( $where = [], $additional = [] ,$status = []) {
 		$this->__parseWhereIn( $status );
+
+		$appid = isset($where['appid']) ? [$where['appid']] : [];
+		$channel_id = !empty($where['channel_id']) ? $where['channel_id'] : [];
+		$channel_ids = array_keys(array_flip($appid)+array_flip($channel_id));
+
 		$this->__parseWhere( $where );
 		$this->__parseAddition( $additional );
         $orderList = DB::table('order_giveback')
@@ -202,6 +207,9 @@ class OrderGiveback
             ->leftJoin('order_info','order_info.order_no', '=', 'order_goods.order_no')
             ->where($where)
 			->whereIn('order_giveback.status',$status)
+			->when(!empty($channel_ids),function($join) use ($channel_ids) {
+				return $join->whereIn('order_info.channel_id', $channel_ids);
+			})
 			->orderBy('order_giveback.create_time', 'desc')
             ->select('order_giveback.*','order_goods.goods_name','order_goods.amount_after_discount','order_goods.zuqi_type','order_goods.zuqi','order_goods.surplus_yajin','order_info.mobile','order_goods.zujin','order_goods.specs','order_goods.goods_thumb')
 //			paginate: 参数
@@ -211,6 +219,7 @@ class OrderGiveback
 //			page:表示查询第几页及查询页码
             ->paginate($additional['size'],['*'], 'p', $additional['page']);
 		$orderList = json_decode(json_encode($orderList),true);
+		p($orderList);
 		if( $orderList ){
 			foreach ($orderList['data'] as  &$value) {
 				$value['username'] = $value['mobile'];
@@ -621,10 +630,10 @@ class OrderGiveback
             $whereArray[] = ['order_giveback.payment_status', '=', $where['payment_status']];
         }
 
-        //应用来源ID(前端的渠道id用appid传入后端)
-        if (isset($where['appid']) && !empty($where['appid'])) {
-            $whereArray[] = ['order_info.channel_id', '=', $where['appid']];
-        }
+//        //应用来源ID(前端的渠道id用appid传入后端)
+//        if (isset($where['appid']) && !empty($where['appid'])) {
+//            $whereArray[] = ['order_info.channel_id', '=', $where['appid']];
+//        }
         //还机单创建开始时间
         if ( isset($where['begin_time']) && !empty($where['begin_time']) ) {
             $whereArray[] = ['order_giveback.create_time', '>=', strtotime($where['begin_time'])];
