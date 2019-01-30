@@ -1,17 +1,7 @@
 <?php
 namespace App\Tools\Modules\Service\Coupon\CouponUser;
-use App\Lib\ApiStatus;
-use App\Lib\Common\LogApi;
-use App\Lib\Common\SmsApi;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Tools\Models\CouponModel;
-use App\Tools\Modules\Repository\GreyTest\GreyTest;
 use App\Tools\Modules\Func\Func;
-use App\Tools\Modules\Inc\CouponStatus;
 use App\Tools\Modules\Repository\Coupon\CouponUserRepository;
-use App\Lib\Tool\Tool;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CouponUserCreate
 {
@@ -48,7 +38,7 @@ class CouponUserCreate
                     $start_time = $modelData['user_start_time'];
                     $end_time = $modelData['user_end_time'];
                 }
-                $mod = 100;
+                $mod = 500;
                 foreach($couponCodeArr as $key => $code){
                     //组合values一次性插入多条数据
                     $data[] = [
@@ -61,6 +51,7 @@ class CouponUserCreate
                     if(($key-1) >= $mod){
                         if($key%$mod == 0){
                             $this->CouponUserRepository->addAll($data);
+                            usleep(50000);
                             $data = [];
                         }
                     }

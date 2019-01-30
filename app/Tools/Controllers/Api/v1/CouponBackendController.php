@@ -7,6 +7,8 @@ use App\Tools\Modules\Service\Coupon\CouponModel\{
     , CouponModelTestStop , CouponModelList , CouponModelRemove
     , CouponModelPublish , CouponModelUnPublish };
 use App\Tools\Modules\Service\Coupon\CouponUser\{CouponUserGetCode , CouponUserImport};
+use App\Tools\Modules\Service\Coupon\CouponModel\CouponModelRePublish;
+use App\Tools\Modules\Service\Coupon\CouponModel\CouponModelSearchCondition;
 
 /**
  * 优惠券后台控制器
@@ -65,6 +67,20 @@ class CouponBackendController
         $params  = $this->request['params'];
         $CouponModelPublish = $CouponModelPublish->execute($params['model_no']);
         return apiResponse($CouponModelPublish,get_code(),get_msg());
+    }
+    
+    /**
+     * 优惠券模型补发
+     * @param CouponModelRePublish $CouponModelRePublish
+     * @return \Illuminate\Http\JsonResponse
+     * @localtest ?
+     * @devtest ?
+     */
+    public function rePublish(CouponModelRePublish $CouponModelRePublish)
+    {
+        $params  = $this->request['params'];
+        $CouponModelRePublish = $CouponModelRePublish->execute($params['model_no'] , $params['num']);
+        return apiResponse($CouponModelRePublish,get_code(),get_msg());
     }
     
     /**
@@ -165,6 +181,17 @@ class CouponBackendController
         $params  = $this->request['params'];
         $model = $CouponUserImport->execute($params['model_no'] , $tempFile);
         return apiResponse($model,get_code(),get_msg());
+    }
+    
+    /**
+     * 卡券模型列表搜索条件
+     * @param CouponModelSearchCondition $CouponModelSearchCondition
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function searchCondition(CouponModelSearchCondition $CouponModelSearchCondition)
+    {
+        $channels = $CouponModelSearchCondition->execute();
+        return apiResponse($channels,get_code(),get_msg());
     }
 
 }
