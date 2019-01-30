@@ -219,7 +219,6 @@ class OrderGiveback
 //			page:表示查询第几页及查询页码
             ->paginate($additional['size'],['*'], 'p', $additional['page']);
 		$orderList = json_decode(json_encode($orderList),true);
-		p($orderList);
 		if( $orderList ){
 			foreach ($orderList['data'] as  &$value) {
 				$value['username'] = $value['mobile'];
