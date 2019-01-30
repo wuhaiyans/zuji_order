@@ -484,8 +484,9 @@ class GivebackController extends Controller
 		//提交事务
 		DB::commit();
 
-//		$return  = $this->givebackReturn(['status'=>"B","status_text"=>"还机确认收货"]);
-		return apiResponse([], ApiStatus::CODE_0, '确认收货成功');
+		$return  = $this->givebackReturn(['status'=>"B","status_text"=>"还机确认收货"]);
+		LogApi::info("[givebackConfirmDelivery]还机收货信息",['returnData'=>[ApiStatus::CODE_0, '确认收货成功']]);
+		return apiResponse($return, ApiStatus::CODE_0, '确认收货成功');
 
 	}
 
@@ -670,8 +671,8 @@ class GivebackController extends Controller
 		//提交事务
 		DB::commit();
 
-//		$return  = $this->givebackReturn(['status'=>"D","status_text"=>"完成"]);
-		return apiResponse([], ApiStatus::CODE_0, '检测结果同步成功');
+		$return  = $this->givebackReturn(['status'=>"D","status_text"=>"完成"]);
+		return apiResponse($return, ApiStatus::CODE_0, '检测结果同步成功');
 	}
 
 	/**
@@ -1511,6 +1512,7 @@ class GivebackController extends Controller
 	public function UnderLineGetList( Request $request ) {
 		$params = $request->input();
 		$whereArr = $additionArr = isset($params['params'])? $params['params'] :[];
+		$whereArr['channel_id'] = isset($params['userinfo']['channel_id']) ? $params['userinfo']['channel_id'] : [] ;
 
 		if( isset($whereArr['end_time']) ){
 			$whereArr['end_time'] = date('Y-m-d 23:59:59', strtotime($whereArr['end_time']));

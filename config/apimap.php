@@ -3,7 +3,7 @@
 //路由映射
 return [
     
-    //****************************************营销工具相关接口 **********************************************//
+//**************************************************营销工具相关接口 **********************************************//
     //zuji.couponnew.unclaimed 暂无
     /**
      * 优惠券后台接口
@@ -14,14 +14,16 @@ return [
     'api.tool.coupon.create'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@create',
     //zuji.couponadmin.issuestart 卡卷发发布
     'api.tool.coupon.publish'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@publish',
-    //zuji.couponadmin.reissue 补发 FIXME
+    //zuji.couponadmin.reissue 补发 
+    'api.tool.coupon.rePublish'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@rePublish',
     //zuji.couponadmin.issuestop 卡卷停止发布
     'api.tool.coupon.unPublish'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@unPublish',
     //zuji.couponadmin.delcoupon 优惠券删除
     'api.tool.coupon.remove'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@remove',
     //zuji.couponadmin.testcoupon 灰度发布
     'api.tool.coupon.greyTest'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@greyTest',
-    //zuji.couponadmin.stoptestcoupon 取消灰度发布 FIXME
+    //zuji.couponadmin.stoptestcoupon 取消灰度发布 
+    'api.tool.coupon.cancelGreyTest'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@cancelGreyTest',
     //zuji.couponadmin.typelist 卡券类型列表
     'api.tool.coupon.list'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@list',
     //zuji.couponadmin.codelist 获取优惠券兑换码
@@ -52,7 +54,7 @@ return [
     //zuji.couponnew.detail 优惠券详情
     'api.tool.coupon.couponUserDetail'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserDetail',
     
-    
+//*********************************************************************************************************************//
     
     //订单相关
     'api.order.buyout' => 'TestController@test',

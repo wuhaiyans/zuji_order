@@ -124,7 +124,7 @@ $api->version('v1', [
         $api->any('YajinReduce', 'InnerServiceController@YajinReduce');
         //隊列取消买断支付单
         $api->any('CancelOrderBuyout', 'InnerServiceController@cancelOrderBuyout');
-        //隊列取消买断支付单
+        //区块链推送队列
         $api->any('OrderPushBlock', 'InnerServiceController@orderPushBlock');
         //隊列确认收货订单
         $api->any('DeliveryReceive', 'InnerServiceController@deliveryReceive');
