@@ -23,7 +23,7 @@ use App\Tool\Models\GreyTestModel;
  * @author Gaobo
  *
  */
-class CouponModelPublish
+class CouponModelRePublish
 {
     protected $CouponModelDetail = [];
     protected $CouponUserCreate  = [];
@@ -44,17 +44,20 @@ class CouponModelPublish
      * @param string $modelNo
      * @return array
      */
-    public function execute(string $modelNo) : array 
+    public function execute(string $modelNo , int $num) : array 
     {
         $couponModel = $this->CouponModelDetail->execute($modelNo);
         if(!$couponModel){
             return [];
         }
-        if($couponModel->status == CouponStatus::CouponTypeStatusTest || $couponModel->status == CouponStatus::CouponTypeStatusRough){
-            $couponModel->status  = CouponStatus::CouponTypeStatusIssue;
+        if($couponModel->status == CouponStatus::CouponTypeStatusIssue){
+            if($num > 0){
+                $num = $num > 10000 ? 10000 : $num;
+            }
+            $data = $couponModel->toArray();
+            $this->CouponUserCreate->execute($data,$num);
+            $couponModel->issue_num = $couponModel->issue_num + $num;
             if($couponModel->save()){
-                $data = $couponModel->toArray();
-                $this->CouponUserCreate->execute($data,$data['issue_num']);
                 set_apistatus(ApiStatus::CODE_0, '');
             }else{
                 set_apistatus(ApiStatus::CODE_50000, '保存失败');
