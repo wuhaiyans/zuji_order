@@ -125,29 +125,25 @@ class CouponStatus {
     //--+ 优惠码状态 ------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------
     /**
-     * @var int 1全体
+     * @var int 1新人(已注册 未超过24小时之内)
      */
-    const RangeUserAll = 1;
+    const RangeUserNew = 1;
     /**
-     * @var int 2未注册用户
+     * @var int 2老用户(已注册  超过24小时)
      */
-    const RangeUserWei = 2;
+    const RangeUserOld = 2;
     /**
-     * @var int 3已注册用户
+     * @var int 1全部用户
      */
-    const RangeUserRegister = 1;
+    const RangeUserScope = 3;
     /**
-     * @var int 4已下单用户
+     * @var int 8指定用户
      */
-    const RangeUserHaveOrder = 4;
+    const DesignatedUser = 8;
     /**
-     * @var int 5已支付用户
+     * @var int 9游客
      */
-    const RangeUserPay = 5;
-    /**
-     * @var int 6指定用户
-     */
-    const DesignatedUser = 3;
+    const RangeUserVisitor = 9;
     
     //--------------------------------------------------------------------------------------------
     //--+ 选择商品关键字搜索条件 --------------------------------------------------------------------

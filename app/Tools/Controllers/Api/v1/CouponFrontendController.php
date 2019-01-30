@@ -20,6 +20,8 @@ class CouponFrontendController
     protected $couponModelStatus = CouponStatus::CouponTypeStatusIssue;
     protected $request = [];
     protected $mobile = null;
+    //用户类型-针对营销工具系统
+    protected $userType = CouponStatus::RangeUserScope;//全体
     public function __construct(Request $request , GreyTestGetByMobile $GreyTestGetByMobile)
     {
         //获取用户是否是灰度测试用户
@@ -30,6 +32,13 @@ class CouponFrontendController
             if($testMobile){
                 $this->couponModelStatus = CouponStatus::CouponTypeStatusTest;
             }
+        }else{
+            $this->userType = CouponStatus::RangeUserVisitor; //游客
+        }
+        //定义当前用户的类型
+        if(($this->request['userinfo']['register_time'])){
+            //超过24小时为老用户,否则为新人
+            $this->userType = ((time() - $this->request['userinfo']['register_time']) > 86400) ? CouponStatus::RangeUserOld : CouponStatus::RangeUserNew;
         }
     }
    
@@ -56,8 +65,10 @@ class CouponFrontendController
      * @localtest OK
      * @devtest ?
      */
-    public function spuCouponList(CouponList $CouponList){
+    public function spuCouponList(CouponList $CouponList)
+    {
         $params  = $this->request['params'];
+        $params['range_user'] = $this->userType;
         $CouponList = $CouponList->execute($params , $this->couponModelStatus);
         return apiResponse($CouponList,get_code(),get_msg());
     }
