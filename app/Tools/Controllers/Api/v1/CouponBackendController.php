@@ -116,7 +116,7 @@ class CouponBackendController
      * @param CouponModelTestStart $CouponModelTestStart
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function greyTest(CouponModelTestStart $CouponModelTestStart)
     {
@@ -130,7 +130,7 @@ class CouponBackendController
      * @param CouponModelTestStop $CouponModelTestStop
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function cancelGreyTest(CouponModelTestStop $CouponModelTestStop)
     {

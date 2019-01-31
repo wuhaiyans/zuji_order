@@ -248,12 +248,10 @@ class CouponStatus {
      */
     public static function get_coupon_range_name( $num=null ) {
         $name_arr = [
-            self::RangeUserWei=>'未注册用户',
-            //            self::RangeUserAll=>'全体用户',
-            self::RangeUserRegister=>'已注册用户',
-            //            self::RangeUserHaveOrder=>'已下单用户',
-        //            self::RangeUserPay=>'已支付用户',
-            self::DesignatedUser=>'指定用户',
+            self::RangeUserScope => '全体用户',
+            self::RangeUserNew   => '新注册用户(24小时内未下单)',
+            self::RangeUserOld   => '老用户(注册24小时以上)',
+            self::DesignatedUser => '指定用户',
         ];
         if($num===null){
             return $name_arr;
