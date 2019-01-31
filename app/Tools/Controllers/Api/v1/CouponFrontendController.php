@@ -139,7 +139,7 @@ class CouponFrontendController
      * @param CouponUserWriteOff $CouponUserWriteOff
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function couponUserWriteOff(CouponUserWriteOff $CouponUserWriteOff)
     {
@@ -154,7 +154,7 @@ class CouponFrontendController
      * @param CouponUserCancel $CouponUserCancel
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function couponUserCancel(CouponUserCancel $CouponUserCancel)
     {
@@ -169,7 +169,7 @@ class CouponFrontendController
      * @param CouponUserDetail $CouponUserDetail
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function couponUserDetail(CouponUserDetail $CouponUserDetail)
     {
