@@ -64,5 +64,30 @@ class OrderLogRepository
         return $orderLogData ?? false;
     }
 
+    /**
+     * heaven
+     * 获取订单日志
+     * @param $orderNo 订单号
+     * @return array|bool
+     */
+    public static function getOrderPayCancelReasonLog($orderNo)
+    {
+        if (empty($orderNo)) return false;
+        $orderLogData = OrderLog::query()->where([
+            ['order_no', '=', $orderNo],['action','=' ,'退款']
+        ])->select('msg')->get()->toArray();
+        $cacelStr = '';
+        if ($orderLogData) {
+            foreach ($orderLogData as $values) {
+
+                if (strpos($values['msg'],'备注')!==false) {
+
+                    $cacelStr = $values['msg'];
+                }
+            }
+
+        }
+        return $cacelStr;
+    }
 
 }
