@@ -85,6 +85,7 @@ class CouponUserList
         }
         $fields = array_merge(self::$couponModelFields,self::$couponUserFields);
         //3.获取数据
+        set_apistatus(ApiStatus::CODE_0, '');
         return $this->CouponUserRepository->getUserCoupons($where,$leftJoin,$orderBy,$fields)->toArray();
     }
 }
