@@ -32,7 +32,7 @@ class CouponBackendController
      * @param CouponModelCreate $CouponModelCreate
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function create(CouponModelCreate $CouponModelCreate)
     {
@@ -60,7 +60,7 @@ class CouponBackendController
      * @param CouponModelPublish $CouponModelPublish
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function publish(CouponModelPublish $CouponModelPublish)
     {

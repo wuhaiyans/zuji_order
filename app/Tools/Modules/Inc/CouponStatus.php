@@ -133,7 +133,7 @@ class CouponStatus {
      */
     const RangeUserOld = 2;
     /**
-     * @var int 1全部用户
+     * @var int 3全部用户
      */
     const RangeUserScope = 3;
     /**

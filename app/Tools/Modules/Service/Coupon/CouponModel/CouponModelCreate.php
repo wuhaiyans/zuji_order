@@ -51,7 +51,6 @@ class CouponModelCreate
                 'coupon_type'      => $params['coupon_type'],
                 'coupon_value'     => $params['coupon_value'],
                 'use_restrictions' => $params['use_restrictions'],
-                'range_user'       => $params['range_user'],
                 'start_time'       => $params['start_time'],
                 'end_time'         => $params['end_time'],
                 'user_start_time'  => $params['user_start_time'],
@@ -63,8 +62,12 @@ class CouponModelCreate
                 'issue_num'        => $params['issue_num'],
                 'create_time'      => time(),
             ];
+            if($params['range_user_scope'] == CouponStatus::RangeUserScope){
+                $modelData['range_user_scope'] = CouponStatus::RangeUserScope;
+            }elseif($params['range_user'] > 0){
+                $modelData['range_user'] = $params['range_user'];
+            }
             
-            DB::beginTransaction();
             if(is_array($params['scope'])){ //如果指定渠道全场
                 $addData = [];
                 foreach($params['scope'] as $key=>$val){
@@ -75,7 +78,6 @@ class CouponModelCreate
                 }
                 $result = $this->CouponModelRepository->add($addData);
                 if(!$result){
-                    DB::rollBack();
                     set_apistatus(ApiStatus::CODE_50000, '模型保存失败');
                     return [];
                 }
@@ -93,7 +95,6 @@ class CouponModelCreate
                     }
                     $result = $this->CouponSpuCreate->execute($couponSpuData);
                     if(!$result){
-                        DB::rollBack();
                         set_apistatus(ApiStatus::CODE_50000, '模型商品信息保存失败');
                         return [];
                     }
@@ -105,7 +106,6 @@ class CouponModelCreate
                 $modelData['model_no'] = $modelNo;
                 $result = $this->CouponModelRepository->add($modelData);
             }
-            DB::commit();
             set_apistatus(ApiStatus::CODE_0, '');
             return [];
         }
