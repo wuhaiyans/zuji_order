@@ -172,7 +172,7 @@ class CouponBackendController
      * @param CouponUserImport $CouponUserImport
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function importUser(CouponUserImport $CouponUserImport)
     {
@@ -187,6 +187,8 @@ class CouponBackendController
      * 卡券模型列表搜索条件
      * @param CouponModelSearchCondition $CouponModelSearchCondition
      * @return \Illuminate\Http\JsonResponse
+     * @localtest OK
+     * @devtest OK
      */
     public function searchCondition(CouponModelSearchCondition $CouponModelSearchCondition)
     {
