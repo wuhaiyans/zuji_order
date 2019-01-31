@@ -48,7 +48,7 @@ class CouponFrontendController
      * @param CouponUserList $CouponUserList
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function couponUserList(CouponUserList $CouponUserList)
     {
@@ -63,7 +63,7 @@ class CouponFrontendController
      * @param CouponList $CouponList
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function spuCouponList(CouponList $CouponList)
     {

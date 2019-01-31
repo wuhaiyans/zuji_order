@@ -6,6 +6,7 @@ use App\Tools\Modules\Repository\Coupon\Coupon;
 use App\Tools\Models\CouponModel;
 use App\Tools\Modules\Repository\Coupon\CouponUserRepository;
 use App\Tools\Modules\Service\Coupon\CouponCalculation;
+use App\Lib\ApiStatus;
 
 class CouponModelCalculation
 {
@@ -38,6 +39,7 @@ class CouponModelCalculation
         //最优优惠券算法
         asort($tempk);
         $coupons = array_merge(array_replace($tempk,$coupons),[]);
+        set_apistatus(ApiStatus::CODE_0, '');
         return $coupons;
     }
 }
