@@ -144,7 +144,7 @@ class CouponBackendController
      * @param CouponModelList $CouponModelList
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function list(CouponModelList $CouponModelList)
     {
@@ -158,7 +158,7 @@ class CouponBackendController
      * @param CouponUserGetCode $CouponUserGetCode
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function getCode(CouponUserGetCode $CouponUserGetCode)
     {
