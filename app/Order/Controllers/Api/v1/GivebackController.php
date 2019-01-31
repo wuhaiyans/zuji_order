@@ -1512,6 +1512,7 @@ class GivebackController extends Controller
 	public function UnderLineGetList( Request $request ) {
 		$params = $request->input();
 		$whereArr = $additionArr = isset($params['params'])? $params['params'] :[];
+		$whereArr['channel_id']  = isset($params['userinfo']['channel_id']) ? json_decode($params['userinfo']['channel_id'],true) : [] ;
 
 		if( isset($whereArr['end_time']) ){
 			$whereArr['end_time'] = date('Y-m-d 23:59:59', strtotime($whereArr['end_time']));

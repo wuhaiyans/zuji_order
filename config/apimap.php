@@ -10,7 +10,7 @@ return [
      */
     //新
     'api.tool.coupon.detail'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@detail',
-    //zuji.couponadmin.addtype 生成卡券类型
+    //zuji.couponadmin.addtype 生成卡券类型  需对接
     'api.tool.coupon.create'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@create',
     //zuji.couponadmin.issuestart 卡卷发发布
     'api.tool.coupon.publish'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@publish',
@@ -24,13 +24,15 @@ return [
     'api.tool.coupon.greyTest'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@greyTest',
     //zuji.couponadmin.stoptestcoupon 取消灰度发布 
     'api.tool.coupon.cancelGreyTest'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@cancelGreyTest',
-    //zuji.couponadmin.typelist 卡券类型列表
+    //zuji.couponadmin.typelist 卡券类型列表 需对接
     'api.tool.coupon.list'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@list',
     //zuji.couponadmin.codelist 获取优惠券兑换码
     'api.tool.coupon.getCode'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@getCode',
     //导入用户
     'api.tool.coupon.importUser'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@importUser',
-    //zuji.couponadmin.typelistpublic 卡券类型公共参数 FIXME
+    //zuji.couponadmin.typelistpublic 卡券类型公共参数
+    'api.tool.coupon.searchCondition'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@searchCondition',
+    
     
     /**
      * 优惠券客户端
@@ -39,7 +41,7 @@ return [
     'api.tool.coupon.couponUserList'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserList',
     //zuji.couponnew.spulist 获取SPU商品详情优惠券列表
     'api.tool.coupon.spuCouponList'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@spuCouponList',
-    //zuji.couponnew.checked 优惠券商品可用列表查询接口 gaobo
+    //zuji.couponnew.checked 优惠券商品可用列表查询接口 
     'api.tool.coupon.couponListWhenOrder'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponListWhenOrder',
     //zuji.coupon.voucher.get根据用户ID获取优惠券信息(租金抵用券)
     'api.tool.coupon.couponListWhenPay'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponListWhenPay',

@@ -286,9 +286,14 @@ class ImeiController extends Controller
         $params = $this->_dealParams($rules);
 
         if (count($params) < 4) {
-            return \apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
+            return apiResponse([], ApiStatus::CODE_10104, session()->get(self::SESSION_ERR_KEY));
         }
         LogApi::info('Imei_xianxiaAddImei_params', $params);
+
+        $imei_obj = Imei::where(['imei'=>$params['imei']])->first();
+        if($imei_obj){
+            return apiResponse([], ApiStatus::CODE_42003, '已存在的IMEI');
+        }
 
         //插入IMEI
         $imei_id = Imei::insertGetId([
@@ -302,7 +307,7 @@ class ImeiController extends Controller
         ]);
 
         if (!$imei_id) {
-            return \apiResponse([], ApiStatus::CODE_42003, '线下门店插入IMEI失败');
+            return apiResponse([], ApiStatus::CODE_42003, '线下门店插入IMEI失败');
         }
         return apiResponse(['imei_id'=>$imei_id]);
     }

@@ -125,29 +125,25 @@ class CouponStatus {
     //--+ 优惠码状态 ------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------
     /**
-     * @var int 1全体
+     * @var int 1新人(已注册 未超过24小时之内)
      */
-    const RangeUserAll = 1;
+    const RangeUserNew = 1;
     /**
-     * @var int 2未注册用户
+     * @var int 2老用户(已注册  超过24小时)
      */
-    const RangeUserWei = 2;
+    const RangeUserOld = 2;
     /**
-     * @var int 3已注册用户
+     * @var int 3全部用户
      */
-    const RangeUserRegister = 1;
+    const RangeUserScope = 3;
     /**
-     * @var int 4已下单用户
+     * @var int 8指定用户
      */
-    const RangeUserHaveOrder = 4;
+    const DesignatedUser = 8;
     /**
-     * @var int 5已支付用户
+     * @var int 9游客
      */
-    const RangeUserPay = 5;
-    /**
-     * @var int 6指定用户
-     */
-    const DesignatedUser = 3;
+    const RangeUserVisitor = 9;
     
     //--------------------------------------------------------------------------------------------
     //--+ 选择商品关键字搜索条件 --------------------------------------------------------------------
@@ -252,12 +248,22 @@ class CouponStatus {
      */
     public static function get_coupon_range_name( $num=null ) {
         $name_arr = [
-            self::RangeUserWei=>'未注册用户',
-            //            self::RangeUserAll=>'全体用户',
-            self::RangeUserRegister=>'已注册用户',
-            //            self::RangeUserHaveOrder=>'已下单用户',
-        //            self::RangeUserPay=>'已支付用户',
-            self::DesignatedUser=>'指定用户',
+            self::RangeUserNew   => '新注册用户(24小时内未下单)',
+            self::RangeUserOld   => '老用户(注册24小时以上)',
+            self::DesignatedUser => '指定用户',
+        ];
+        if($num===null){
+            return $name_arr;
+        }else{
+            $name = $name_arr[$num]?$name_arr[$num]:'无';
+            return $name;
+        }
+    }
+    
+    public static function getCouponRangeScope($num=null)
+    {
+        $name_arr = [
+            self::RangeUserScope => '全体用户',
         ];
         if($num===null){
             return $name_arr;

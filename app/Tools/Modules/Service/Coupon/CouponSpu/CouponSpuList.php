@@ -57,6 +57,26 @@ class CouponSpuList
             ,['tool_coupon_model.status','=',$status]
             ,['tool_coupon_model.range_user','<',CouponStatus::DesignatedUser]
         ];
+        
+        if(isset($params['range_user'])){
+            switch ($params['range_user']){
+                case CouponStatus::RangeUserNew :
+                    $where[] = ['tool_coupon_model.range_user','=',CouponStatus::RangeUserNew];
+                    $where[] = ['tool_coupon_model.range_user_scope','=',CouponStatus::RangeUserScope];
+                    break;
+                case CouponStatus::RangeUserOld :
+                    $where[] = ['tool_coupon_model.range_user','=',CouponStatus::RangeUserOld];
+                    $where[] = ['tool_coupon_model.range_user_scope','=',CouponStatus::RangeUserScope];
+                    break;
+                case CouponStatus::RangeUserVisitor :
+                    $where[] = ['tool_coupon_model.range_user','<',CouponStatus::DesignatedUser];
+                    $where[] = ['tool_coupon_model.range_user_scope','=',CouponStatus::RangeUserScope];
+                    break;
+                default:
+                    break;
+            }
+        }
+        
         $orderBy = [['end_time'=>'DESC']];
         $fields = self::$couponModelFields;
         $spuCoupons = $this->CouponSpuRepository->getSpuCoupons($where,$leftJoin,$orderBy,$fields)->toArray();

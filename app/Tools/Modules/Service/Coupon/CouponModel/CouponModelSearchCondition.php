@@ -35,9 +35,9 @@ class CouponModelSearchCondition
             'type_status' => CouponStatus::get_coupon_type_status(),
             'range_name'  => CouponStatus::get_coupon_range_name()
         ];
-        $channel   = Tool::getChannel(['status'=>1] , 'id,name');
-        $channel[] = ['id'=>0,'name'=>'全渠道'];
-        $data['channel'] = $channel;
+        //$channel   = Tool::getChannel(['status'=>1] , 'id,name');
+        //$channel[] = ['id'=>0,'name'=>'全渠道'];
+        //$data['channel'] = $channel;
         set_apistatus(ApiStatus::CODE_0, '');
         return $data;
     }
