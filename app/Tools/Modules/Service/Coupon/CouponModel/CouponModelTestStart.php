@@ -48,7 +48,7 @@ class CouponModelTestStart
         }
         if($couponModel->status == CouponStatus::CouponTypeStatusRough){
             DB::beginTransaction();
-            $couponModel->status  = \App\Tool\Modules\Inc\CouponStatus::CouponTypeStatusTest;
+            $couponModel->status  = CouponStatus::CouponTypeStatusTest;
             $data = $couponModel->toArray();
             $ret = $this->CouponUserCreate->execute($data,$data['issue_num']);
             if(!$ret){

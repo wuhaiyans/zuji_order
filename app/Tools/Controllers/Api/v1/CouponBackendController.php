@@ -73,8 +73,8 @@ class CouponBackendController
      * 优惠券模型补发
      * @param CouponModelRePublish $CouponModelRePublish
      * @return \Illuminate\Http\JsonResponse
-     * @localtest ?
-     * @devtest ?
+     * @localtest OK
+     * @devtest OK
      */
     public function rePublish(CouponModelRePublish $CouponModelRePublish)
     {
@@ -88,7 +88,7 @@ class CouponBackendController
      * @param CouponModelUnPublish $CouponModelUnPublish
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function unPublish(CouponModelUnPublish $CouponModelUnPublish)
     {
@@ -102,7 +102,7 @@ class CouponBackendController
      * @param CouponModelRemove $CouponModelRemove
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function remove(CouponModelRemove $CouponModelRemove)
     {
