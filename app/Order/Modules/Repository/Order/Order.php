@@ -568,6 +568,8 @@ class Order {
     public function updateStatus($orderStatus,$freezeType):bool {
          $this->model->order_status =$orderStatus;
          $this->model->freeze_type =$freezeType;
+         $this->model->update_time =time();
+         $this->model->complete_time =time();
          return $this->model->save();
     }
 
