@@ -21,7 +21,7 @@ class CouponUserReceive
         $this->CouponUserRepository = $CouponUserRepository;
     }
     
-    public function execute(int $modelNo , string $mobile , $status = CouponStatus::CouponTypeStatusIssue)
+    public function execute(string $modelNo , string $mobile , $status = CouponStatus::CouponTypeStatusIssue)
     {
         $couponModel = $this->CouponModelDetail->execute($modelNo);
         if($couponModel){

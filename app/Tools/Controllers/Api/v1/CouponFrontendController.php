@@ -124,12 +124,12 @@ class CouponFrontendController
      * @param CouponUserReceive $CouponUserReceive
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function couponUserReceive(CouponUserReceive $CouponUserReceive)
     {
         $params  = $this->request['params'];
-        $CouponUserReceive = $CouponUserReceive->execute($params['model_no'] , $params['mobile'] , $this->couponModelStatus);
+        $CouponUserReceive = $CouponUserReceive->execute($params['model_no'] , $this->request['userinfo']['username'] , $this->couponModelStatus);
         return apiResponse($CouponUserReceive,get_code(),get_msg());
     }
     
