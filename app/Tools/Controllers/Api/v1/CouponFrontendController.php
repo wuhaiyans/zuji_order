@@ -53,6 +53,7 @@ class CouponFrontendController
     public function couponUserList(CouponUserList $CouponUserList)
     {
         $params  = $this->request['params'];
+        $params['mobile']  = $this->mobile;
         $CouponUserList = $CouponUserList->execute($params , $this->couponModelStatus);
         return apiResponse($CouponUserList,get_code(),get_msg());
     }
@@ -69,6 +70,7 @@ class CouponFrontendController
     {
         $params  = $this->request['params'];
         $params['range_user'] = $this->userType;
+        $params['mobile']  = $this->mobile;
         $CouponList = $CouponList->execute($params , $this->couponModelStatus);
         return apiResponse($CouponList,get_code(),get_msg());
     }
@@ -84,6 +86,7 @@ class CouponFrontendController
     public function couponListWhenOrder(CouponListWhenOrder $CouponListWhenOrder)
     {
         $params  = $this->request['params'];
+        $params['mobile']  = $this->mobile;
         $CouponListWhenOrder = $CouponListWhenOrder->execute($params , $this->couponModelStatus);
         return apiResponse($CouponListWhenOrder,get_code(),get_msg());
     }
@@ -99,6 +102,7 @@ class CouponFrontendController
     public function couponListWhenPay(CouponListWhenPay $CouponListWhenPay)
     {
         $params  = $this->request['params'];
+        $params['mobile']  = $this->mobile;
         $CouponListWhenPay = $CouponListWhenPay->execute($params , $this->couponModelStatus);
         return apiResponse($CouponListWhenPay,get_code(),get_msg());
     }
@@ -114,7 +118,7 @@ class CouponFrontendController
     public function couponUserExchange(CouponUserExchange $CouponUserExchange)
     {
         $params  = $this->request['params'];
-        $CouponUserExchange = $CouponUserExchange->execute($this->request['userinfo']['username'] , $params['coupon_no'] , $this->couponModelStatus);
+        $CouponUserExchange = $CouponUserExchange->execute($this->mobile , $params['coupon_no'] , $this->couponModelStatus);
         return apiResponse($CouponUserExchange,get_code(),get_msg());
     }
     
@@ -129,7 +133,7 @@ class CouponFrontendController
     public function couponUserReceive(CouponUserReceive $CouponUserReceive)
     {
         $params  = $this->request['params'];
-        $CouponUserReceive = $CouponUserReceive->execute($params['model_no'] , $this->request['userinfo']['username'] , $this->couponModelStatus);
+        $CouponUserReceive = $CouponUserReceive->execute($params['model_no'] , $this->mobile , $this->couponModelStatus);
         return apiResponse($CouponUserReceive,get_code(),get_msg());
     }
     
@@ -144,7 +148,7 @@ class CouponFrontendController
     public function couponUserWriteOff(CouponUserWriteOff $CouponUserWriteOff)
     {
         $params  = $this->request['params'];
-        $CouponUserWriteOff = $CouponUserWriteOff->execute($params['id'] , $params['mobile'] , $this->couponModelStatus);
+        $CouponUserWriteOff = $CouponUserWriteOff->execute($params['id'] , $this->mobile , $this->couponModelStatus);
         return apiResponse($CouponUserWriteOff,get_code(),get_msg());
     }
     
@@ -159,7 +163,7 @@ class CouponFrontendController
     public function couponUserCancel(CouponUserCancel $CouponUserCancel)
     {
         $params  = $this->request['params'];
-        $CouponUserCancel = $CouponUserCancel->execute($params['id'] , $params['mobile'] , $this->couponModelStatus);
+        $CouponUserCancel = $CouponUserCancel->execute($params['id'] , $this->mobile , $this->couponModelStatus);
         return apiResponse($CouponUserCancel,get_code(),get_msg());
     }
     
