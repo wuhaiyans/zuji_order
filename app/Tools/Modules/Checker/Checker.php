@@ -71,7 +71,7 @@ class Checker
         $this->code = ApiStatus::CODE_0;
         if($this->use_status != CouponStatus::CouponStatusNotUsed){
             $this->code = ApiStatus::CODE_50000;
-            $this->msg  = '工具状态错误';
+            $this->msg  = '已被使用啦';
         }
         if($this->current_time < $this->use_start_time){
             $this->code = ApiStatus::CODE_50000;
@@ -81,7 +81,7 @@ class Checker
             $this->code = ApiStatus::CODE_50000;
             $this->msg  = '已过结束时间';
         }
-        if($this->model_status != CouponStatus::CouponTypeStatusIssue || $this->model_status != CouponStatus::CouponTypeStatusTest){
+        if($this->model_status != CouponStatus::CouponTypeStatusIssue && $this->model_status != CouponStatus::CouponTypeStatusTest){
             $this->code = ApiStatus::CODE_50000;
             $this->msg  = '模型状态错误';
         }
