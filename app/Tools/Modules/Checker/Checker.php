@@ -99,7 +99,7 @@ class Checker
             $this->code = ApiStatus::CODE_50000;
             $this->msg  = '已过结束时间';
         }
-        if($this->model_status != CouponStatus::CouponTypeStatusIssue || $this->model_status != CouponStatus::CouponTypeStatusTest){
+        if($this->model_status != CouponStatus::CouponTypeStatusIssue && $this->model_status != CouponStatus::CouponTypeStatusTest){
             $this->code = ApiStatus::CODE_50000;
             $this->msg  = '模型状态错误';
         }

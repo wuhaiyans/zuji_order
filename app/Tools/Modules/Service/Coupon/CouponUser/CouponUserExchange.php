@@ -39,8 +39,12 @@ class CouponUserExchange
         }
         //根据couponNo获取couponuser
         $time = time();
-        $couponUser = $this->CouponUserRepository->getOneOnWhere(['coupon_no'=>$couponNo,'is_lock'=>CouponStatus::CouponLockWei]);
+        $couponUser = $this->CouponUserRepository->getOneOnWhere(['coupon_no'=>$couponNo]);
         if(!$couponUser->toArray()){
+            set_apistatus(ApiStatus::CODE_50000, '此码不合法');
+            return [];
+        }
+        if($couponUser->getAttribute('is_lock') == CouponStatus::CouponLockSuo){
             set_apistatus(ApiStatus::CODE_50000, '此码已兑换');
             return [];
         }
@@ -86,7 +90,7 @@ class CouponUserExchange
                 return [];
             }
         }
-        set_apistatus(ApiStatus::CODE_50000, '领取条件不符');
+        set_apistatus(ApiStatus::CODE_50000, '领取条件不符.'.$checker->getMsg());
         return [];
     }
 }

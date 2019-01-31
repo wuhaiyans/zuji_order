@@ -109,12 +109,12 @@ class CouponFrontendController
      * @param CouponUserExchange $CouponUserExchange
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function couponUserExchange(CouponUserExchange $CouponUserExchange)
     {
         $params  = $this->request['params'];
-        $CouponUserExchange = $CouponUserExchange->execute($this->userInfo['mobile'] , $params['coupon_no'] , $this->couponModelStatus);
+        $CouponUserExchange = $CouponUserExchange->execute($this->request['userinfo']['username'] , $params['coupon_no'] , $this->couponModelStatus);
         return apiResponse($CouponUserExchange,get_code(),get_msg());
     }
     
