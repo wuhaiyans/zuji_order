@@ -146,7 +146,7 @@ class CouponBackendController
      * @localtest OK
      * @devtest OK
      */
-    public function list(CouponModelList $CouponModelList)
+    public function modelList(CouponModelList $CouponModelList)
     {
         $params = $this->request['params'];
         $model = $CouponModelList->execute($params);
