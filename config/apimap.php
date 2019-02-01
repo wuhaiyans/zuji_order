@@ -25,7 +25,7 @@ return [
     //zuji.couponadmin.stoptestcoupon 取消灰度发布 
     'api.tool.coupon.cancelGreyTest'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@cancelGreyTest',
     //zuji.couponadmin.typelist 卡券类型列表 需对接
-    'api.tool.coupon.list'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@list',
+    'api.tool.coupon.modelList'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@modelList',
     //zuji.couponadmin.codelist 获取优惠券兑换码
     'api.tool.coupon.getCode'=>'\App\Tools\Controllers\Api\v1\CouponBackendController@getCode',
     //导入用户
@@ -38,7 +38,7 @@ return [
      * 优惠券客户端
      */
     //zuji.couponnew.received 获取用户已领取优惠券列表
-    'api.tool.coupon.couponUserList'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserList',
+    'api.tool.coupon.received'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserList',
     //zuji.couponnew.spulist 获取SPU商品详情优惠券列表
     'api.tool.coupon.spuCouponList'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@spuCouponList',
     //zuji.couponnew.checked 优惠券商品可用列表查询接口 
@@ -49,9 +49,9 @@ return [
     'api.tool.coupon.couponUserExchange'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserExchange',
     //zuji.couponnew.receive 领取优惠券 用户主动领取优惠券
     'api.tool.coupon.couponUserReceive'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserReceive',
-    //zuji.goods.coupon.status1.set 根据优惠券id设置该优惠券已使用
+    //zuji.goods.coupon.status1.set 根据优惠券id设置该优惠券已使用 核销
     'api.tool.coupon.couponUserWriteOff'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserWriteOff',
-    //zuji.goods.coupon.status0.set 根据优惠券id恢复优惠券使用状态
+    //zuji.goods.coupon.status0.set 根据优惠券id恢复优惠券使用状态  撤销
     'api.tool.coupon.couponUserCancel'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserCancel',
     //zuji.couponnew.detail 优惠券详情
     'api.tool.coupon.couponUserDetail'=>'\App\Tools\Controllers\Api\v1\CouponFrontendController@couponUserDetail',
