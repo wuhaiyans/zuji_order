@@ -50,7 +50,7 @@ class CouponFrontendController
      * @localtest OK
      * @devtest OK
      */
-    public function couponUserList(CouponUserList $CouponUserList)
+    public function received(CouponUserList $CouponUserList)
     {
         $params  = $this->request['params'];
         $params['mobile']  = $this->mobile;
