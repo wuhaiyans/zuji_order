@@ -486,7 +486,7 @@ class OrderController extends Controller
 
         // 租期，成色，颜色，容量，网络制式
         $headers = ['订单编号','预计发货时间', '下单时间','订单状态', '订单来源','支付方式及通道','用户名','手机号','详细地址','设备名称','租期', '商品价格属性',
-            '订单实际总租金','订单总押金','回访标识','回访内容','意外险总金额','意外险成本','身份证号','芝麻分','免押金额'];
+            '订单实际总租金','订单总押金','回访标识','回访内容','意外险总金额','意外险成本','身份证号','芝麻分','免押金额','取消原因'];
 
         $orderExcel = array();
         while(true) {
@@ -523,7 +523,8 @@ class OrderController extends Controller
                         implode(",",array_column($item['goodsInfo'],"insurance_cost")),
                         "'".$item['cret_no'],
                         $item['zhima_score'],
-                        normalizeNum($item['goods_yajin']-$item['order_yajin'])
+                        normalizeNum($item['goods_yajin']-$item['order_yajin']),
+                        $item['order_pay_cancel_reason']
 
 
 

@@ -70,9 +70,14 @@ class CouponModelList
             
             $couponModelList['data'][$key]['create_time'] = date('Y-m-d h:i:s',$value['create_time']);
             $couponModelList['data'][$key]['coupon_type'] = CouponStatus::get_coupon_type_name($value['coupon_type']);
-            $couponModelList['data'][$key]['range_user']  = CouponStatus::get_coupon_range_name($value['range_user']);
             $couponModelList['data'][$key]['site']        = CouponStatus::get_coupon_type_site($value['site']);
             $couponModelList['data'][$key]['status']      = CouponStatus::get_coupon_type_status($value['status']);
+            if($value['range_user']){
+                $couponModelList['data'][$key]['range_user']  = CouponStatus::get_coupon_range_name($value['range_user']);
+            }else{
+                $couponModelList['data'][$key]['range_user_scope']  = CouponStatus::getCouponRangeScope($value['range_user_scope']);
+            }
+            
             $spu_name_all = '';
             $channel_name_all = '';
             if($value['scope'] > 0){//全渠道

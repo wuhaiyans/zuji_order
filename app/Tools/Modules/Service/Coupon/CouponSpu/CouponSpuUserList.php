@@ -48,12 +48,13 @@ class CouponSpuUserList
         $join['innerJoin'] = [['tool_user','tool_coupon_spu.model_no','=','tool_user.model_no']];
         $join['leftJoin'] = [['tool_coupon_model','tool_coupon_spu.model_no','=','tool_coupon_model.model_no']];
         $where = [
-            ['tool_coupon_spu.spu_id','=',$params['spu_id']]
+             ['tool_coupon_spu.spu_id','=',$params['spu_id']]
             ,['tool_coupon_model.status','=',$status]
             ,['tool_user.mobile','=',$params['mobile']]
             ,['tool_user.start_time','<=',$time]
             ,['tool_user.end_time','>=',$time]
         ];
+        
         $fields = array_merge(self::$couponModelFields,[
             'tool_user.status'
             ,'tool_user.start_time as use_start_time','tool_user.end_time as use_end_time'

@@ -411,8 +411,6 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false; //创建清单失败
                     }
-                    //事务提交
-                    DB::commit();
                     //设置出账参数变量
                     $cleanAccount = [];
                     $cleanAccount['params']['clean_no'] = $create_clear;
@@ -436,6 +434,8 @@ class OrderReturnCreater
 
                         return false;
                     }
+                    //事务提交
+                    DB::commit();
 
                 }
 

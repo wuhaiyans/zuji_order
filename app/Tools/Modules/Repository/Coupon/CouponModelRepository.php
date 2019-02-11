@@ -40,7 +40,7 @@ class CouponModelRepository
      */
     public static function list(array $whereArray = ['status'=>1] , int $limit = 20 , int $page = 1 , array $columns = ['*'])
     {
-        $result = CouponModel::query()->where($whereArray)->paginate($limit,$columns,'',$page);
+        $result = CouponModel::query()->where($whereArray)->orderBy('create_time' , 'desc')->paginate($limit,$columns,'',$page);
         return $result;
     }
     
