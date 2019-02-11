@@ -32,7 +32,7 @@ class CouponBackendController
      * @param CouponModelCreate $CouponModelCreate
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function create(CouponModelCreate $CouponModelCreate)
     {
@@ -60,7 +60,7 @@ class CouponBackendController
      * @param CouponModelPublish $CouponModelPublish
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function publish(CouponModelPublish $CouponModelPublish)
     {
@@ -73,8 +73,8 @@ class CouponBackendController
      * 优惠券模型补发
      * @param CouponModelRePublish $CouponModelRePublish
      * @return \Illuminate\Http\JsonResponse
-     * @localtest ?
-     * @devtest ?
+     * @localtest OK
+     * @devtest OK
      */
     public function rePublish(CouponModelRePublish $CouponModelRePublish)
     {
@@ -88,7 +88,7 @@ class CouponBackendController
      * @param CouponModelUnPublish $CouponModelUnPublish
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function unPublish(CouponModelUnPublish $CouponModelUnPublish)
     {
@@ -102,7 +102,7 @@ class CouponBackendController
      * @param CouponModelRemove $CouponModelRemove
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function remove(CouponModelRemove $CouponModelRemove)
     {
@@ -116,7 +116,7 @@ class CouponBackendController
      * @param CouponModelTestStart $CouponModelTestStart
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function greyTest(CouponModelTestStart $CouponModelTestStart)
     {
@@ -130,7 +130,7 @@ class CouponBackendController
      * @param CouponModelTestStop $CouponModelTestStop
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function cancelGreyTest(CouponModelTestStop $CouponModelTestStop)
     {
@@ -144,9 +144,9 @@ class CouponBackendController
      * @param CouponModelList $CouponModelList
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
-    public function list(CouponModelList $CouponModelList)
+    public function modelList(CouponModelList $CouponModelList)
     {
         $params = $this->request['params'];
         $model = $CouponModelList->execute($params);
@@ -158,7 +158,7 @@ class CouponBackendController
      * @param CouponUserGetCode $CouponUserGetCode
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function getCode(CouponUserGetCode $CouponUserGetCode)
     {
@@ -172,7 +172,7 @@ class CouponBackendController
      * @param CouponUserImport $CouponUserImport
      * @return \Illuminate\Http\JsonResponse
      * @localtest OK
-     * @devtest ?
+     * @devtest OK
      */
     public function importUser(CouponUserImport $CouponUserImport)
     {
@@ -187,6 +187,8 @@ class CouponBackendController
      * 卡券模型列表搜索条件
      * @param CouponModelSearchCondition $CouponModelSearchCondition
      * @return \Illuminate\Http\JsonResponse
+     * @localtest OK
+     * @devtest OK
      */
     public function searchCondition(CouponModelSearchCondition $CouponModelSearchCondition)
     {

@@ -21,7 +21,7 @@ class CouponUserReceive
         $this->CouponUserRepository = $CouponUserRepository;
     }
     
-    public function execute(int $modelNo , string $mobile , $status = CouponStatus::CouponTypeStatusIssue)
+    public function execute(string $modelNo , string $mobile , $status = CouponStatus::CouponTypeStatusIssue)
     {
         $couponModel = $this->CouponModelDetail->execute($modelNo);
         if($couponModel){
@@ -38,8 +38,8 @@ class CouponUserReceive
                     set_apistatus(ApiStatus::CODE_50000, '已领过此优惠券');
                     return [];
                 }
-                $roundOne = $this->CouponUserRepository->getOneOnWhere(['model_no'=>$modelNo , 'is_lock'=>CouponStatus::CouponLockWei , 'status' =>CouponStatus::CouponStatusNotUsed] , true);
-                if($roundOne){
+                $roundOne = $this->CouponUserRepository->getOneOnWhere(['model_no'=>$modelNo , 'is_lock'=>CouponStatus::CouponLockWei , 'status' =>CouponStatus::CouponStatusNotUsed]);
+                if($roundOne->toArray()){
                     //锁码 领券
                     $user_day = $couponModel->getAttribute('user_day');
                     if($user_day){//天换秒

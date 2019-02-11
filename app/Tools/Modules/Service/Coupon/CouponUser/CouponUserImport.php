@@ -79,7 +79,7 @@ class CouponUserImport
             $userInfo  = Tool::getIsMember($data[$key]);//调用商品系统接口查询此手机是否注册,返回用户信息
             if(!$userInfo){
                 $retData['new_user'][] = strval($data[$key]);
-                continue;
+                //continue;
             }
             //查询该用户是否已拥有此优惠券
             $userCoupon = $this->CouponUserRepository->getCount(['mobile'=>$userInfo['mobile'] , 'model_no'=>$model_no]);
@@ -97,13 +97,13 @@ class CouponUserImport
             }
             
             //更新user_coupon
-            $couponUser->setAttribute('mobile', $userInfo['mobile']);
-            $couponUser->setAttribute('user_id',$userInfo['id']);
+            $couponUser->setAttribute('mobile', $data[$key]);
+            $couponUser->setAttribute('user_id',0);
             $couponUser->setAttribute('create_time',time());
             $couponUser->setAttribute('import',1);
             $status = $couponUser->setUserCoupon();
             if(!$status){
-                sleep(1);
+                //sleep(1);
                 $couponUser->setUserCoupon();
             }
         }

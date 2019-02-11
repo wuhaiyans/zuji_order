@@ -1,22 +1,12 @@
 <?php
 namespace App\Tools\Modules\Service\Coupon\CouponModel;
-use App\Lib\ApiStatus;
 use App\Lib\Common\LogApi;
 use App\Lib\Common\SmsApi;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Tools\Modules\Repository\Coupon\Coupon;
-use App\Tools\Modules\Service\Coupon\CouponServiceInterface;
 use App\Tools\Models\CouponModel;
-use App\Tools\Modules\Repository\Coupon\CouponUser;
-use App\Tools\Modules\Repository\GreyTest\GreyTest;
-use App\Tools\Modules\Func\Func;
-use App\Tools\Modules\Inc\CouponStatus;
-use App\Tools\Modules\Repository\Coupon\CouponModelRepository;
-use App\Lib\Tool\Tool;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Tools\Modules\Repository\Coupon\CouponUserRepository;
-use App\Tools\Modules\service\coupon\CouponCalculation;
+use App\Tools\Modules\Service\Coupon\CouponCalculation;
+use App\Lib\ApiStatus;
 
 class CouponModelCalculation
 {
@@ -49,6 +39,7 @@ class CouponModelCalculation
         //最优优惠券算法
         asort($tempk);
         $coupons = array_merge(array_replace($tempk,$coupons),[]);
+        set_apistatus(ApiStatus::CODE_0, '');
         return $coupons;
     }
 }

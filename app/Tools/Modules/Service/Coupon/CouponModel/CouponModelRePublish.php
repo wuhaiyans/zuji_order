@@ -55,8 +55,8 @@ class CouponModelRePublish
                 $num = $num > 10000 ? 10000 : $num;
             }
             $data = $couponModel->toArray();
-            $this->CouponUserCreate->execute($data,$num);
             $couponModel->issue_num = $couponModel->issue_num + $num;
+            $this->CouponUserCreate->execute($data,$couponModel->issue_num);
             if($couponModel->save()){
                 set_apistatus(ApiStatus::CODE_0, '');
             }else{

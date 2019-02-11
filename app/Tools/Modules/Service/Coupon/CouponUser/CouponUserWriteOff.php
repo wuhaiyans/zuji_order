@@ -21,6 +21,10 @@ class CouponUserWriteOff
     {
         $userCoupon = $this->CouponUserDetail->execute($id);//mobile
         if($userCoupon->toArray()){
+            if($userCoupon->getAttribute('mobile') !== $mobile){
+                set_apistatus(ApiStatus::CODE_50000 , '这可不是你的优惠券!');
+                return [];
+            }
             //获取模型详情
             $couponModel = $this->CouponModelDetail->execute($userCoupon->getAttribute('model_no'));
             $time = time();

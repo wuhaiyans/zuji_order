@@ -1946,6 +1946,15 @@ class OrderOperate
 
                $zhimaScore =  OrderOperate::getOrderRiskScore($keys);
 
+                $orderPayCancelReason= '';
+               //获取支付后的取消原因
+                if ($values['order_status']==Inc\OrderStatus::OrderClosedRefunded) {
+
+                    $orderPayCancelReason =  OrderLogRepository::getOrderPayCancelReasonLog($values['order_no']);
+
+                }
+                $orderListArray[$keys]['order_pay_cancel_reason'] = $orderPayCancelReason;
+
                $orderListArray[$keys]['zhima_score'] = $zhimaScore;
 
                 //回访标识
