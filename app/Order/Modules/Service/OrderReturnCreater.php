@@ -106,9 +106,9 @@ class OrderReturnCreater
                 }
                 //获取支付信息
                 $payInfo = OrderPayRepository::find($order_info['order_no']);
-                if(!$payInfo){
-                    return false;//支付单不存在
-                }
+//                if(!$payInfo){
+//                    return false;//支付单不存在
+//                }
                 //短租不允许退货
                 if($order_info['zuqi_type'] == OrderStatus::ZUQI_TYPE1){
                     return false;
@@ -291,7 +291,10 @@ class OrderReturnCreater
                 'userinfo'  => $userinfo
             ]);
             //如果订单已关闭，已退款，直接返回true
-            if( $order_info['order_status'] == OrderStatus::OrderClosedRefunded || $order_info['freeze_type'] != OrderFreezeStatus::Non){
+            if(
+                $order_info['order_status'] == OrderStatus::OrderClosedRefunded
+                || $order_info['freeze_type'] != OrderFreezeStatus::Non
+            ){
                 LogApi::debug("[createRefund]订单状态：",[
                         'order_status'=>$order_info['order_status'],
                         'freeze_type'=>$order_info['freeze_type']
@@ -299,7 +302,11 @@ class OrderReturnCreater
                 return true;
             }
             //订单必须是已支付，未收货
-            if( $order_info['order_status'] != OrderStatus::OrderPayed  && $order_info['order_status'] != OrderStatus::OrderPaying && $order_info['order_status'] != OrderStatus::OrderInStock){
+            if(
+                $order_info['order_status'] != OrderStatus::OrderPayed
+                && $order_info['order_status'] != OrderStatus::OrderPaying
+                && $order_info['order_status'] != OrderStatus::OrderInStock
+            ){
                 LogApi::debug("[createRefund]订单状态不符合取消订单：".$order_info['order_status']);
                 return false;
             }
@@ -404,8 +411,6 @@ class OrderReturnCreater
                         DB::rollBack();
                         return false; //创建清单失败
                     }
-                    //事务提交
-                    DB::commit();
                     //设置出账参数变量
                     $cleanAccount = [];
                     $cleanAccount['params']['clean_no'] = $create_clear;
@@ -429,6 +434,8 @@ class OrderReturnCreater
 
                         return false;
                     }
+                    //事务提交
+                    DB::commit();
 
                 }
 
@@ -960,7 +967,7 @@ class OrderReturnCreater
                 //通知收发货继续发货
                 /***********************************/
                 //插入操作日志
-                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","审核拒绝");
+                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款审核","审核拒绝");
 
             }
 
@@ -1138,7 +1145,7 @@ class OrderReturnCreater
                 return false;
             }
             //操作日志
-            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"退款","取消退款申请");
+            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$return_info['order_no'],"取消退款","取消退款申请");
 
             DB::commit();
             return true;
@@ -2580,7 +2587,7 @@ class OrderReturnCreater
                     }
 
                 //插入操作日志
-                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_info['order_no'],"退款","退款成功");
+                OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_info['order_no'],"退款成功","退款成功");
             }
 
             //获取订单用户认证信息
@@ -2875,7 +2882,7 @@ class OrderReturnCreater
                 return false;
             }
             //插入操作日志
-            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_no,"退款","退款审核拒绝");
+            OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_no,"退款审核拒绝","退款审核拒绝");
             //提交事务
             DB::commit();
             return true;
@@ -3169,7 +3176,7 @@ class OrderReturnCreater
                    }
                 }
                //插入操作日志
-               OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_no,"退款","拒签异常处理");
+               OrderLogRepository::add($userinfo['uid'],$userinfo['username'],$userinfo['type'],$order_no,"拒签退款","拒签异常处理");
                DB::commit();
              //取消任务队列
              $cancel = JobQueueApi::cancel(config('app.env')."refuseSign".$order_no);
