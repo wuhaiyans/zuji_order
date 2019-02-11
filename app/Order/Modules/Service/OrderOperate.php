@@ -2075,6 +2075,7 @@ class OrderOperate
 
                //处于租期中，获取剩余未支付租金
                if($values['goods_status']>=Inc\OrderGoodStatus::RENTING_MACHINE) {
+                   $goodsList[$keys]['act_goods_state']['cancel_pay_btn'] = false;
                    $instaulment = OrderGoodsInstalmentRepository::getSumAmount($values['goods_no']);
                    if ($instaulment){
 
