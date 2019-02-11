@@ -762,99 +762,107 @@ class OrderRepository
             $page = 1;
         }
 
-
-
        // sql_profiler();
 
-            $whereArray[] = ['order_info.create_time', '>', 0];
-            $count = DB::table('order_info')
-                ->select(DB::raw('count(order_info.order_no) as order_count'))
-                ->join('order_user_address',function($join){
-                    $join->on('order_info.order_no', '=', 'order_user_address.order_no');
-                }, null,null,'inner')
-                ->join('order_info_visit',function($join){
-                    $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
-                }, null,null,'left')
-                ->join('order_delivery',function($join){
-                    $join->on('order_info.order_no', '=', 'order_delivery.order_no');
-                }, null,null,'left')
-                ->when(!empty($whereInArray),function($join) use ($whereInArray) {
-                    return $join->whereIn('order_info.channel_id', $whereInArray);
-                })
-                ->when(!empty($whereArray),function($join) use ($whereArray) {
-                    return $join->where($whereArray);
-                })
-                ->when(!empty($isUncontact),function($join) {
-                    return $join->where(function ($join) {  //闭包返回的条件会包含在括号中
-                        $join-> whereNull('order_info_visit.visit_id')
-                            ->orWhere([
-                                ['order_info_visit.visit_id', '0']
-                            ]);
-                    });
-                })
-                ->first();
-                $count = objectToArray($count)['order_count'];
-                if (!isset($param['count'])) {
-
-//        sql_profiler();
-            $orderList = DB::table('order_info')
-                ->select('order_info.order_no')
-                ->join('order_user_address',function($join){
-                    $join->on('order_info.order_no', '=', 'order_user_address.order_no');
-                }, null,null,'inner')
-                ->join('order_info_visit',function($join){
-                    $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
-                }, null,null,'left')
-                ->join('order_delivery',function($join){
-                    $join->on('order_info.order_no', '=', 'order_delivery.order_no');
-                }, null,null,'left')
-                ->when(!empty($whereInArray),function($join) use ($whereInArray) {
-                    return $join->whereIn('order_info.channel_id', $whereInArray);
-                })
-                ->when(!empty($whereArray),function($join) use ($whereArray) {
-                    return $join->where($whereArray);
-                })
-                ->when(!empty($isUncontact),function($join) {
-                    return $join->where(function ($join) {  //闭包返回的条件会包含在括号中
-                        $join-> whereNull('order_info_visit.visit_id')
-                            ->orWhere([
-                                ['order_info_visit.visit_id', '0']
-                            ]);
-                    });
-                })
-                ->orderBy('order_info.create_time', 'DESC')
-                ->skip(($page - 1) * $pagesize)->take($pagesize)
-                ->get();
-            $orderArray = objectToArray($orderList);
-            if ($orderArray) {
-                $orderIds = array_column($orderArray,"order_no");
-                $orderList =  DB::table('order_info as o')
-                    ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','o.risk_check','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching')
-                    ->whereIn('o.order_no', $orderIds)
-                    ->join('order_user_address as d',function($join){
-                        $join->on('o.order_no', '=', 'd.order_no');
-                    }, null,null,'inner')
-                    ->join('order_info_visit as v',function($join){
-                        $join->on('o.order_no', '=', 'v.order_no');
-                    }, null,null,'left')
-                    ->join('order_delivery as l',function($join){
-                        $join->on('o.order_no', '=', 'l.order_no');
-                    }, null,null,'left')
-                    ->join('order_user_certified as c',function($join){
-                        $join->on('o.order_no', '=', 'c.order_no');
-                    }, null,null,'left')
-                    ->orderBy('o.create_time', 'DESC')
-                    ->get();
-                $orderArrays['data'] = array_column(objectToArray($orderList),NULL,'order_no');;
-                $orderArrays['orderIds'] = $orderIds;
-                $orderArrays['total'] = $count;
-                $orderArrays['is_out_channel'] = !empty($whereInArray)? true:false;
-                $orderArrays['last_page'] = ceil($count/$pagesize);
-
+            if (empty($whereArray) && empty($isUncontact) && empty($whereInArray)) {
+                $whereArray[] = ['order_info.create_time', '>', 0];
+                $count = DB::table('order_info')
+                    ->select(DB::raw('count(order_info.order_no) as order_count'))
+                    ->first();
 
             } else {
-                return false;
+
+                $whereArray[] = ['order_info.create_time', '>', 0];
+                $count = DB::table('order_info')
+                    ->select(DB::raw('count(order_info.order_no) as order_count'))
+                    ->join('order_user_address',function($join){
+                        $join->on('order_info.order_no', '=', 'order_user_address.order_no');
+                    }, null,null,'inner')
+                    ->join('order_info_visit',function($join){
+                        $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
+                    }, null,null,'left')
+                    ->join('order_delivery',function($join){
+                        $join->on('order_info.order_no', '=', 'order_delivery.order_no');
+                    }, null,null,'left')
+                    ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                        return $join->whereIn('order_info.channel_id', $whereInArray);
+                    })
+                    ->when(!empty($whereArray),function($join) use ($whereArray) {
+                        return $join->where($whereArray);
+                    })
+                    ->when(!empty($isUncontact),function($join) {
+                        return $join->where(function ($join) {  //闭包返回的条件会包含在括号中
+                            $join-> whereNull('order_info_visit.visit_id')
+                                ->orWhere([
+                                    ['order_info_visit.visit_id', '0']
+                                ]);
+                        });
+                    })
+                    ->first();
+
             }
+
+            $count = objectToArray($count)['order_count'];
+            if (!isset($param['count'])) {
+
+                    $orderList = DB::table('order_info')
+                        ->select('order_info.order_no')
+                        ->join('order_user_address',function($join){
+                            $join->on('order_info.order_no', '=', 'order_user_address.order_no');
+                        }, null,null,'inner')
+                        ->join('order_info_visit',function($join){
+                            $join->on('order_info.order_no', '=', 'order_info_visit.order_no');
+                        }, null,null,'left')
+                        ->join('order_delivery',function($join){
+                            $join->on('order_info.order_no', '=', 'order_delivery.order_no');
+                        }, null,null,'left')
+                        ->when(!empty($whereInArray),function($join) use ($whereInArray) {
+                            return $join->whereIn('order_info.channel_id', $whereInArray);
+                        })
+                        ->when(!empty($whereArray),function($join) use ($whereArray) {
+                            return $join->where($whereArray);
+                        })
+                        ->when(!empty($isUncontact),function($join) {
+                            return $join->where(function ($join) {  //闭包返回的条件会包含在括号中
+                                $join-> whereNull('order_info_visit.visit_id')
+                                    ->orWhere([
+                                        ['order_info_visit.visit_id', '0']
+                                    ]);
+                            });
+                        })
+                        ->orderBy('order_info.create_time', 'DESC')
+                        ->skip(($page - 1) * $pagesize)->take($pagesize)
+                        ->get();
+                    $orderArray = objectToArray($orderList);
+                    if ($orderArray) {
+                        $orderIds = array_column($orderArray,"order_no");
+                        $orderList =  DB::table('order_info as o')
+                            ->select('o.order_no','o.order_amount','o.order_yajin','o.order_insurance','o.create_time','o.order_status','o.freeze_type','o.appid','o.pay_type','o.zuqi_type','o.user_id','o.mobile','o.predict_delivery_time','o.risk_check','d.address_info','d.name','d.consignee_mobile','v.visit_id','v.visit_text','v.id','l.logistics_no','c.matching')
+                            ->whereIn('o.order_no', $orderIds)
+                            ->join('order_user_address as d',function($join){
+                                $join->on('o.order_no', '=', 'd.order_no');
+                            }, null,null,'inner')
+                            ->join('order_info_visit as v',function($join){
+                                $join->on('o.order_no', '=', 'v.order_no');
+                            }, null,null,'left')
+                            ->join('order_delivery as l',function($join){
+                                $join->on('o.order_no', '=', 'l.order_no');
+                            }, null,null,'left')
+                            ->join('order_user_certified as c',function($join){
+                                $join->on('o.order_no', '=', 'c.order_no');
+                            }, null,null,'left')
+                            ->orderBy('o.create_time', 'DESC')
+                            ->get();
+                        $orderArrays['data'] = array_column(objectToArray($orderList),NULL,'order_no');;
+                        $orderArrays['orderIds'] = $orderIds;
+                        $orderArrays['total'] = $count;
+                        $orderArrays['is_out_channel'] = !empty($whereInArray)? true:false;
+                        $orderArrays['last_page'] = ceil($count/$pagesize);
+
+
+                    } else {
+                        return false;
+                    }
 
 
         }else {
@@ -863,7 +871,7 @@ class OrderRepository
 
         }
         return $orderArrays;
-//
+
 
     }
 
