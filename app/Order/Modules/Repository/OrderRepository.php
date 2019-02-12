@@ -258,7 +258,23 @@ class OrderRepository
 
     }
 
+    /**
+     * 查询未完成的订单
+     * @param $certNo
+     * @return bool
+     */
+    public static function unCompledOrderByCertNo($certNo)
+    {
 
+        $sql ="select COUNT(*) AS count from (select order_no,order_status from order_info where order_status<=6) o left join  order_user_certified c on  o.order_no=c.order_no  group by c.cret_no  HAVING count(c.cret_no) >1 and c.cret_no=".$certNo;
+
+        $orderData = DB::select($sql);
+        if(!empty($orderData)){
+            return true;
+        }
+        return false;
+
+    }
 
     /**
      * heaven

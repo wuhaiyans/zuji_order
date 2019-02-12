@@ -111,6 +111,13 @@ class UserComponnet implements OrderCreater
     public function getMobile(){
         return $this->mobile ;
     }
+    /**
+     * 获取 用户身份证号码
+     * @return int
+     */
+    public function getCertNo(){
+        return $this->certNo;
+    }
 
     /**
      * 获取订单创建器
