@@ -807,9 +807,9 @@ class OrderRepository
 
             $count = objectToArray($count)['order_count'];
             if (!isset($param['count'])) {
-
+//                    sql_profiler();
                     $orderList = DB::table('order_info')
-                        ->select('order_info.order_no')
+                        ->select(DB::raw('distinct(order_info.order_no) as order_no,order_info.create_time'))
                         ->join('order_user_address',function($join){
                             $join->on('order_info.order_no', '=', 'order_user_address.order_no');
                         }, null,null,'inner')
