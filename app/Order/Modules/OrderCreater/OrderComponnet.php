@@ -182,17 +182,29 @@ class OrderComponnet implements OrderCreater
         //判断是否有其他活跃 未完成订单
         $mobile = $this->getOrderCreater()->getUserComponnet()->getMobile();
         $this->payType =$this->getOrderCreater()->getSkuComponnet()->getPayType();
+        $certNo = $this->getOrderCreater()->getUserComponnet()->getCertNo();
        // $res =Redis::set("OrderWhiteList",json_encode([$mobile]));
         $res = Redis::get("OrderWhiteList");
         $whiteList = json_decode($res,true);
 
         if(empty($res) || (is_array($whiteList) && !in_array($mobile,$whiteList))){
+            //根据用户ID判断
             $b =OrderRepository::unCompledOrder($this->userId);
             if($b) {
                 set_code(ApiStatus::CODE_30006);
                 $this->getOrderCreater()->setError('有未完成订单');
                 return false;
             }
+            //根据身份证号码进行判断
+            if($certNo !=''){
+                $b =OrderRepository::unCompledOrderByCertNo($certNo);
+                if($b) {
+                    set_code(ApiStatus::CODE_30006);
+                    $this->getOrderCreater()->setError('有未完成订单');
+                    return false;
+                }
+            }
+
         }
 
         $b = $this->userComponnet->filter();
