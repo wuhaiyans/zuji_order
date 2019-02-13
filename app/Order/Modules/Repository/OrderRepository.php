@@ -268,6 +268,7 @@ class OrderRepository
 		// 
         $sql ="select count(O.order_no) AS count from order_info O left join order_user_certified UC ON UC.order_no=O.order_no where O.order_status<=6 and UC.cret_no='".$certNo."'";
         $orderData = DB::selectOne($sql);
+        $orderData =objectToArray($orderData);
 		// count==0时，表示没有未完成订单了
 		if( isset($orderData['count']) && $orderData['count']==0){
 			return false;
